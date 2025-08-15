@@ -2,6 +2,7 @@
 using System.Numerics;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 namespace RacingwayRewrite.Race;
 
@@ -10,23 +11,32 @@ public class Player
     public uint Id { get; set; }
     public string Name { get; set; }
     public uint HomeworldRow { get; set; }
+
+    public bool Grounded { get; set; } = true;
+    public bool Mounted { get; set; } = false;
     public Vector3 Position { get; set; }
 
     public Player(IBattleChara actor)
     {
-        IPlayerCharacter? character = actor as IPlayerCharacter;
-        if (character != null)
+        if (actor is IPlayerCharacter character)
         {
             this.Id = character.EntityId;
             this.Name = character.Name.ToString();
             this.HomeworldRow = character.HomeWorld.RowId;
             this.Position = character.Position;
-            Plugin.Log.Debug($"Player {this.Name} added");
+            Plugin.Log.Verbose($"Player {this.Name} added");
         }
         else
         {
             Plugin.Log.Error($"Unable to add player {actor.EntityId}");
             throw new NullReferenceException("Player character was null");
         }
+    }
+
+    public unsafe void UpdateState(IBattleChara actor)
+    {
+        Character* character = (Character*)actor.Address;
+        Grounded = !character->IsJumping();
+        Mounted = character->IsMounted();
     }
 }

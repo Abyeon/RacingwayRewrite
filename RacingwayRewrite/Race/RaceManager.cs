@@ -23,7 +23,7 @@ public class RaceManager
         Framework.Update += Update;
     }
 
-    private IBattleChara? localPlayer = null;
+    private IBattleChara? localPlayer;
     
     private void Update(IFramework framework)
     {
@@ -45,49 +45,75 @@ public class RaceManager
             }
             
             // Cleanup old/lost players
-            if (playersToTrack.Count() + 1 != players.Count)
+            if (playersToTrack.Count() + 1 != Players.Count)
             {
-                List<uint> keysToRemove = players.Keys.Where(key => !touchedIds.Contains(key)).ToList();
+                List<uint> keysToRemove = Players.Keys.Where(key => !touchedIds.Contains(key)).ToList();
                 foreach (var key in keysToRemove)
                 {
-                    players.Remove(key);
+                    Players.Remove(key);
                 }
             }
-        } else if (players.Count > 1)
+        } else if (Players.Count > 1)
         {
             // Remove tracked players after client disabled "track others"
-            foreach (var player in players.Keys.Where(key => key != localPlayer.EntityId))
+            foreach (var player in Players.Keys.Where(key => key != localPlayer.EntityId))
             {
-                players.Remove(player);
+                Players.Remove(player);
             }
         }
     }
 
-    private Dictionary<uint, Player> players = new Dictionary<uint, Player>();
+    public Dictionary<uint, Player> Players = new Dictionary<uint, Player>();
     
     private void TrackPlayer(IBattleChara actor)
     {
-        if (!players.ContainsKey(actor.EntityId))
+        if (!Players.ContainsKey(actor.EntityId))
         {
             Player player = new Player(actor);
-            players.Add(actor.EntityId, player);
-            PlayerMoved(player, actor.Position);
+            Players.Add(actor.EntityId, player);
+            Plugin.Log.Debug(Players.Count.ToString());
+            
+            bool lastGrounded = player.Grounded;
+            bool lastMounted = player.Mounted;
+            
+            player.UpdateState(actor);
+            PlayerUpdated(player, actor, lastGrounded, lastMounted);
         }
         else
         {
-            Player player = players[actor.EntityId];
-            if (player.Position != actor.Position)
+            Player player = Players[actor.EntityId];
+            
+            bool lastGrounded = player.Grounded;
+            bool lastMounted = player.Mounted;
+            
+            player.UpdateState(actor);
+            if (player.Position != actor.Position || lastGrounded != player.Grounded || lastMounted != player.Mounted)
             {
-                // Player moved
-                PlayerMoved(player, actor.Position);
+                PlayerUpdated(player, actor, lastGrounded, lastMounted);
             }
         }
     }
 
-    private void PlayerMoved(Player player, Vector3 position)
+    private void PlayerUpdated(Player player, IBattleChara actor, bool lastGrounded, bool lastMounted)
     {
         Vector3 lastPos = player.Position;
-        player.Position = position;
-        //Plugin.Log.Debug($"{player.Name} moved from {lastPos} to {position}");
+        
+        // Moved
+        if (lastPos != actor.Position)
+        {
+            player.Position = actor.Position;
+        }
+        
+        // Jump / land
+        if (lastGrounded != player.Grounded)
+        {
+            //Plugin.Log.Verbose($"{player.Name} just jumped or landed!");
+        }
+
+        // Mount / dismount
+        if (lastMounted != player.Mounted)
+        {
+            //Plugin.Log.Verbose($"{player.Name} just mounted or dismounted!");
+        }
     }
 }
