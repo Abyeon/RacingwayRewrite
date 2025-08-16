@@ -52,6 +52,11 @@ public class Overlay : Window, IDisposable
                 drawList.AddCubeFilled(cube, 0x5500FF00);
                 drawList.AddCube(cube, 0x5500FF0F);
             }
+
+            foreach (var cube in Plugin.RaceManager.Cubes)
+            {
+                drawList.AddCubeFilled(cube, 0x5500FF00);
+            }
         }
     }
 

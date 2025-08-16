@@ -3,6 +3,7 @@ using System.Linq;
 using System.Numerics;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
+using RacingwayRewrite.Race.Collision;
 
 namespace RacingwayRewrite.Race;
 
@@ -50,7 +51,7 @@ public class RaceManager
                 List<uint> keysToRemove = Players.Keys.Where(key => !touchedIds.Contains(key)).ToList();
                 foreach (var key in keysToRemove)
                 {
-                    if (key == localPlayer.EntityId) return;
+                    if (key == localPlayer.EntityId) continue;
                     Players.Remove(key);
                 }
             }
@@ -64,7 +65,8 @@ public class RaceManager
         }
     }
 
-    public Dictionary<uint, Player> Players = new Dictionary<uint, Player>();
+    public readonly Dictionary<uint, Player> Players = new Dictionary<uint, Player>();
+    public List<Cube> Cubes = new List<Cube>();
     
     private void TrackPlayer(IBattleChara actor)
     {
@@ -104,17 +106,32 @@ public class RaceManager
         {
             player.Position = actor.Position;
         }
-        
-        // Jump / land
-        if (lastGrounded != player.Grounded)
-        {
-            //Plugin.Log.Verbose($"{player.Name} just jumped or landed!");
-        }
 
-        // Mount / dismount
-        if (lastMounted != player.Mounted)
+        foreach (Cube cube in Cubes)
         {
-            //Plugin.Log.Verbose($"{player.Name} just mounted or dismounted!");
+            if (cube.PointInside(player.Position))
+            {
+                Plugin.Log.Debug($"{player.Name} is inside of cube!");
+            }
         }
+        
+        // // Jump / land
+        // if (lastGrounded != player.Grounded)
+        // {
+        //     if (lastGrounded == true)
+        //     {
+        //         // TODO: Jump logic
+        //     }
+        //     else
+        //     {
+        //         // TODO: Landing logic
+        //     }
+        // }
+        //
+        // // Mount / dismount
+        // if (lastMounted != player.Mounted)
+        // {
+        //     // TODO: Kick player out of races
+        // }
     }
 }

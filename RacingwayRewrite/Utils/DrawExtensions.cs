@@ -26,7 +26,7 @@ public static class DrawExtensions
         };
 
         // Get transformed vertices of cube
-        Vector3[] points = cube.TransformedVerts();
+        Vector3[] points = cube.GetTransformedVerts();
 
         for (int i = 0; i < faces.GetLength(0); i++)
         {
@@ -53,7 +53,7 @@ public static class DrawExtensions
         };
 
         // Get transformed vertices of cube
-        Vector3[] points = cube.TransformedVerts();
+        Vector3[] points = cube.GetTransformedVerts();
 
         for (int i = 0; i < faces.GetLength(0); i++)
         {
