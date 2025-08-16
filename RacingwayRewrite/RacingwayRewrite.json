@@ -1,0 +1,12 @@
+{
+  "Author": "Abyeon",
+  "Name": "RacingwayRewrite",
+  "Punchline": "Track your times in jump puzzles!",
+  "Description": "A description that shows up in /xlplugins. List any major slash-command(s).",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "sample",
+    "plugin",
+    "goats"
+  ]
+}
