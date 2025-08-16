@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Dalamud.Game.ClientState.Objects.Types;
@@ -7,7 +8,7 @@ using RacingwayRewrite.Race.Collision;
 
 namespace RacingwayRewrite.Race;
 
-public class RaceManager
+public class RaceManager : IDisposable
 {
     internal readonly Plugin Plugin;
     internal readonly IFramework Framework;
@@ -114,24 +115,25 @@ public class RaceManager
                 Plugin.Log.Debug($"{player.Name} is inside of cube!");
             }
         }
+    }
+
+    private void CleanupPlayer(Player player)
+    {
+        // TODO: Remove player from all routes/triggers
+    }
+
+    public void Dispose()
+    {
+        this.Framework.Update -= Update;
+
+        foreach (var player in Players.Values)
+        {
+            CleanupPlayer(player);
+        }
         
-        // // Jump / land
-        // if (lastGrounded != player.Grounded)
-        // {
-        //     if (lastGrounded == true)
-        //     {
-        //         // TODO: Jump logic
-        //     }
-        //     else
-        //     {
-        //         // TODO: Landing logic
-        //     }
-        // }
-        //
-        // // Mount / dismount
-        // if (lastMounted != player.Mounted)
-        // {
-        //     // TODO: Kick player out of races
-        // }
+        Players.Clear();
+        Cubes.Clear();
+        
+        localPlayer = null;
     }
 }

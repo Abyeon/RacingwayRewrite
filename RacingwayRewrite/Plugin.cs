@@ -41,7 +41,7 @@ public sealed class Plugin : IDalamudPlugin
 
         // You might normally want to embed resources and load them from the manifest stream
         var goatImagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
-
+        
         PictoService.Initialize(PluginInterface);
         RaceManager = new RaceManager(this, Framework, ObjectTable, ClientState);
 
