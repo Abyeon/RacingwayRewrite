@@ -50,6 +50,7 @@ public class RaceManager
                 List<uint> keysToRemove = Players.Keys.Where(key => !touchedIds.Contains(key)).ToList();
                 foreach (var key in keysToRemove)
                 {
+                    if (key == localPlayer.EntityId) return;
                     Players.Remove(key);
                 }
             }
