@@ -3,13 +3,11 @@ using System.Collections.Generic;
 
 namespace RacingwayRewrite.Race.Collision;
 
-[Flags]
 public enum Behavior : ushort
 {
     Always = 0,
     OnlyGrounded = 1,
-    OnlyJumping = 2,
-    AllowMounts = 3
+    OnlyJumping = 2
 }
 
 public interface ITrigger
@@ -27,7 +25,6 @@ public interface ITrigger
     public void CheckCollision(Player player)
     {
         bool collides = Shape.PointInside(player.Position);
-        if (player.Mounted && !TriggerFlags.HasFlag(Behavior.AllowMounts)) return;
 
         // Player left the trigger
         if (Touchers.Contains(player.Id) && !collides)
@@ -42,41 +39,35 @@ public interface ITrigger
         // Player enters the trigger
         if (!Touchers.Contains(player.Id))
         {
-            if (TriggerFlags.HasFlag(Behavior.Always))
+            switch (TriggerFlags)
             {
-                Enter(player);
-                return;
-            }
-
-            if (TriggerFlags.HasFlag(Behavior.OnlyGrounded) && player.Grounded)
-            {
-                Enter(player);
-                return;
-            }
-
-            if (TriggerFlags.HasFlag(Behavior.OnlyJumping) && !player.Grounded)
-            {
-                Enter(player);
+                case Behavior.Always:
+                    Enter(player);
+                    return;
+                case Behavior.OnlyGrounded:
+                    if (player.Grounded) Enter(player);
+                    return;
+                case Behavior.OnlyJumping:
+                    if (!player.Grounded) Enter(player);
+                    return;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(TriggerFlags), "Invalid behavior");
             }
         }
-        else
+        
+        // Player is still in trigger
+        switch (TriggerFlags)
         {
-            if (TriggerFlags.HasFlag(Behavior.Always))
-            {
-                Exit(player);
+            case Behavior.Always:
                 return;
-            }
-            
-            if (TriggerFlags.HasFlag(Behavior.OnlyGrounded) && !player.Grounded)
-            {
-                Exit(player);
+            case Behavior.OnlyGrounded:
+                if (!player.Grounded) Exit(player);
                 return;
-            }
-
-            if (TriggerFlags.HasFlag(Behavior.OnlyJumping) && player.Grounded)
-            {
-                Exit(player);
-            }
+            case Behavior.OnlyJumping:
+                if (player.Grounded) Exit(player);
+                return;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(TriggerFlags), "Invalid behavior");
         }
     }
 
