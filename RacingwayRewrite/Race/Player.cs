@@ -16,6 +16,7 @@ public class Player
     public bool Grounded { get; set; } = true;
     public bool Mounted { get; set; } = false;
     public Vector3 Position { get; set; }
+    public Vector3 Velocity { get; set; }
 
     public Player(IBattleChara actor)
     {
@@ -25,8 +26,6 @@ public class Player
             Name = character.Name.ToString();
             HomeworldRow = character.HomeWorld.RowId;
             Position = character.Position;
-            
-            //Plugin.Log.Verbose($"Player {Name} added");
         }
         else
         {

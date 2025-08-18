@@ -68,16 +68,12 @@ public sealed class Plugin : IDalamudPlugin
         // Register plugin installer buttons
         PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigUI;
         PluginInterface.UiBuilder.OpenMainUi += ToggleMainUI;
-        
-        // Announce I exist!
-        Chat.Print("Racingway has loaded.");
-        Chat.Error("Racingway ran into a fatal error!");
-        Chat.Warning("Careful! Too many triggers may cause issues!");
     }
 
     public void Dispose()
     {
         PictoService.Dispose();
+        RaceManager.Dispose();
         
         WindowSystem.RemoveAllWindows();
 
@@ -92,11 +88,6 @@ public sealed class Plugin : IDalamudPlugin
     {
         // In response to the slash command, toggle the display status of our main ui
         ToggleMainUI();
-
-        if (ClientState.LocalPlayer != null)
-        {
-            RaceManager.Cubes.Add(new Cube(ClientState.LocalPlayer.Position, Vector3.One, Vector3.One));
-        }
     }
     
     private void DrawUI() => WindowSystem.Draw();

@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Utility;
-using Dalamud.Interface.Utility.Raii;
+using Dalamud.Interface.Colors;
 using Dalamud.Interface.Windowing;
-using Lumina.Excel.Sheets;
+using Pictomancy;
 using RacingwayRewrite.Race.Collision;
 
 namespace RacingwayRewrite.Windows;
@@ -39,7 +38,23 @@ public class MainWindow : Window, IDisposable
 
         if (ImGui.Button("Place Cube") && Plugin.ClientState.LocalPlayer != null)
         {
-            Plugin.RaceManager.Cubes.Add(new Cube(Plugin.ClientState.LocalPlayer.Position, Vector3.One, Vector3.Zero));
+            Shape shape = new Cube(Plugin.ClientState.LocalPlayer.Position - new Vector3(0, 0.01f, 0), Vector3.One, Vector3.Zero);
+            Plugin.RaceManager.Triggers.Add(new Checkpoint(shape));
         }
+
+        if (ImGui.Button("Remove All Cubes"))
+        {
+            Plugin.RaceManager.Triggers.Clear();
+        }
+        
+#if DEBUG
+        ImGui.Text("Debug Buttons");
+        if (ImGui.Button("Test chat functions"))
+        {
+            Plugin.Chat.Print("Test print");
+            Plugin.Chat.Error("Test error");
+            Plugin.Chat.Warning("Test warning");
+        }
+#endif
     }
 }

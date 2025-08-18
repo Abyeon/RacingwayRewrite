@@ -7,6 +7,7 @@ public class Transform
     private Vector3 position;
     private Vector3 scale;
     private Vector3 rotation;
+    
     private Matrix4x4 transformMatrix;
     private Matrix4x4 inverseTransformMatrix;
     

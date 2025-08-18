@@ -61,7 +61,7 @@ public class Chat
         
         SeString payload = Tag()
                            .AddPlayer(player) 
-                           .AddUiForeground(message, (ushort)Colors.Print) 
+                           .AddUiForeground(" " + message, (ushort)Colors.Print) 
                            .BuiltString;
         
         Print(payload);

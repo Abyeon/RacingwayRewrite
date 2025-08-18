@@ -26,7 +26,7 @@ public class Overlay : Window, IDisposable
                 | ImGuiWindowFlags.NoBringToFrontOnFocus
                 | ImGuiWindowFlags.NoFocusOnAppearing;
         
-        this.Plugin = plugin;
+        Plugin = plugin;
     }
     
     public override void Draw()
@@ -44,23 +44,22 @@ public class Overlay : Window, IDisposable
         {
             if (drawList == null) return;
             
-            foreach (var cube in Plugin.RaceManager.Cubes)
+            foreach (var trigger in Plugin.RaceManager.Triggers)
             {
-                //drawList.AddCubeFilled(cube, 0x5500FF00);
-                drawList.AddCube(cube, 0x5500FF0F);
+                if (trigger.Shape.GetType() == typeof(Cube))
+                    drawList.AddCubeFilled((Cube)trigger.Shape, trigger.Color);
             }
             
             foreach (var player in Plugin.RaceManager.Players.Values)
             {
-                Cube cube = new Cube(player.Position, Plugin.Configuration.Scale, Plugin.Configuration.Rotation);
-                //drawList.AddCubeFilled(cube, 0x5500FF00);
-                drawList.AddCube(cube, 0x5500FF0F);
+                drawList.AddDot(player.Position, 2f, 0xFF00FF0F);
+                drawList.AddPathLine(player.Position, player.Position + (player.Velocity * 15), 0xFFFF0000);
             }
         }
     }
 
     public void Dispose()
     {
-        //throw new NotImplementedException();
+        io = null;
     }
 }

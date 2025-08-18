@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Interface.Colors;
 using Dalamud.Plugin.Services;
+using Pictomancy;
 using RacingwayRewrite.Race.Collision;
 
 namespace RacingwayRewrite.Race;
@@ -32,7 +34,11 @@ public class RaceManager : IDisposable
         localPlayer = ClientState.LocalPlayer;
         if (localPlayer == null) return; // Return if the player is null
         if (ClientState.IsPvPExcludingDen) return; // Return if the player is in pvp
-
+        
+        // Experiments with showing confetti.
+        // TODO: Implement a VFX handler for spawning/stopping vfx
+        //PictoService.VfxRenderer.AddCommon($"{localPlayer.EntityId}", "itm_tape_01c", localPlayer);
+        
         TrackPlayer(localPlayer);
 
         if (Plugin.Configuration.TrackOthers)
@@ -67,7 +73,7 @@ public class RaceManager : IDisposable
     }
 
     public readonly Dictionary<uint, Player> Players = new();
-    public readonly List<Cube> Cubes = [];
+    public readonly List<ITrigger> Triggers = [];
     
     private void TrackPlayer(IBattleChara actor)
     {
@@ -105,15 +111,26 @@ public class RaceManager : IDisposable
         // Moved
         if (lastPos != actor.Position)
         {
+            Vector3 lastVel = player.Velocity;
+            player.Velocity = actor.Position - lastPos;
+
+            // Player jumped and their state was not changed.
+            if (!player.Grounded && lastVel.Y <= 0 && player.Velocity.Y > 0)
+            {
+                // Might seem counter-intuitive, this will resolve the logic later correctly.
+                player.Grounded = true;
+            }
+            
             player.Position = actor.Position;
         }
 
-        foreach (Cube cube in Cubes)
+        foreach (ITrigger trigger in Triggers)
         {
-            if (cube.PointInside(player.Position))
-            {
-                Plugin.Log.Debug($"{player.Name} is inside of cube!");
-            }
+            // if (trigger.Shape.PointInside(player.Position))
+            // {
+            //     Plugin.Log.Debug($"{player.Name} is inside of trigger!");
+            // }
+            trigger.CheckCollision(player);
         }
     }
 
@@ -124,7 +141,7 @@ public class RaceManager : IDisposable
 
     public void Dispose()
     {
-        this.Framework.Update -= Update;
+        Framework.Update -= Update;
 
         foreach (var player in Players.Values)
         {
@@ -132,7 +149,7 @@ public class RaceManager : IDisposable
         }
         
         Players.Clear();
-        Cubes.Clear();
+        Triggers.Clear();
         
         localPlayer = null;
     }

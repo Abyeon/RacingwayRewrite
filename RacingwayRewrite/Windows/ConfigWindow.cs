@@ -39,26 +39,27 @@ public class ConfigWindow : Window, IDisposable
         }
 
         int id = 0;
-        foreach (var cube in Plugin.RaceManager.Cubes)
+        foreach (var trigger in Plugin.RaceManager.Triggers)
         {
+            var transform = trigger.Shape.Transform;
             ImGui.PushID(id++);
             
-            Vector3 pos = cube.Transform.Position;
+            Vector3 pos = transform.Position;
             if (ImGui.DragFloat3("Position", ref pos, 0.05f))
             {
-                cube.Transform.Position = pos;
+                transform.Position = pos;
             }
             
-            Vector3 scale = cube.Transform.Scale;
+            Vector3 scale = transform.Scale;
             if (ImGui.DragFloat3("Scale", ref scale, 0.05f))
             {
-                cube.Transform.Scale = scale;
+                transform.Scale = scale;
             }
             
-            Vector3 rot = cube.Transform.Rotation * (float)(180/Math.PI);
+            Vector3 rot = transform.Rotation * (float)(180/Math.PI);
             if (ImGui.DragFloat3("Rotation", ref rot, 0.1f))
             {
-                cube.Transform.Rotation = rot * (float)(Math.PI/180);
+                transform.Rotation = rot * (float)(Math.PI/180);
             }
         }
         
