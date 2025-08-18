@@ -20,7 +20,7 @@ public interface ITrigger
     
     public Behavior TriggerFlags { get; set; }
     
-    public List<uint> Touchers { get; set; }
+    public List<uint> Touchers { get; }
 
     public void CheckCollision(Player player)
     {
@@ -66,8 +66,6 @@ public interface ITrigger
             case Behavior.OnlyJumping:
                 if (player.Grounded) Exit(player);
                 return;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(TriggerFlags), "Invalid behavior");
         }
     }
 

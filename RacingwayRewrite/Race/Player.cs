@@ -3,6 +3,7 @@ using System.Numerics;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using RacingwayRewrite.Utils;
 
 namespace RacingwayRewrite.Race;
 
@@ -20,11 +21,12 @@ public class Player
     {
         if (actor is IPlayerCharacter character)
         {
-            this.Id = character.EntityId;
-            this.Name = character.Name.ToString();
-            this.HomeworldRow = character.HomeWorld.RowId;
-            this.Position = character.Position;
-            Plugin.Log.Verbose($"Player {this.Name} added");
+            Id = character.EntityId;
+            Name = character.Name.ToString();
+            HomeworldRow = character.HomeWorld.RowId;
+            Position = character.Position;
+            
+            //Plugin.Log.Verbose($"Player {Name} added");
         }
         else
         {

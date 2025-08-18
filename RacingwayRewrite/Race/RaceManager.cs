@@ -17,10 +17,10 @@ public class RaceManager : IDisposable
     
     public RaceManager(Plugin plugin, IFramework framework, IObjectTable objectTable, IClientState clientState)
     {
-        this.Plugin = plugin;
-        this.Framework = framework;
-        this.ObjectTable = objectTable;
-        this.ClientState = clientState;
+        Plugin = plugin;
+        Framework = framework;
+        ObjectTable = objectTable;
+        ClientState = clientState;
         
         Framework.Update += Update;
     }
@@ -66,8 +66,8 @@ public class RaceManager : IDisposable
         }
     }
 
-    public readonly Dictionary<uint, Player> Players = new Dictionary<uint, Player>();
-    public List<Cube> Cubes = new List<Cube>();
+    public readonly Dictionary<uint, Player> Players = new();
+    public readonly List<Cube> Cubes = [];
     
     private void TrackPlayer(IBattleChara actor)
     {

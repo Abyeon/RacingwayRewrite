@@ -42,23 +42,38 @@ public class ConfigWindow : Window, IDisposable
         foreach (var cube in Plugin.RaceManager.Cubes)
         {
             ImGui.PushID(id++);
-            ImGui.DragFloat3("Position", ref cube.Transform.Position, 0.05f);
-            ImGui.DragFloat3("Scale", ref cube.Transform.Scale, 0.05f);
-            ImGui.DragFloat3("Rotation", ref cube.Transform.Rotation, 0.1f);
+            
+            Vector3 pos = cube.Transform.Position;
+            if (ImGui.DragFloat3("Position", ref pos, 0.05f))
+            {
+                cube.Transform.Position = pos;
+            }
+            
+            Vector3 scale = cube.Transform.Scale;
+            if (ImGui.DragFloat3("Scale", ref scale, 0.05f))
+            {
+                cube.Transform.Scale = scale;
+            }
+            
+            Vector3 rot = cube.Transform.Rotation * (float)(180/Math.PI);
+            if (ImGui.DragFloat3("Rotation", ref rot, 0.1f))
+            {
+                cube.Transform.Rotation = rot * (float)(Math.PI/180);
+            }
         }
         
-        ImGui.PushID(id++);
-        var scale = Configuration.Scale;
-        if (ImGui.DragFloat3("Scale", ref scale, 0.05f))
+        ImGui.PushID(++id);
+        var playerScale = Configuration.Scale;
+        if (ImGui.DragFloat3("Scale", ref playerScale, 0.05f))
         {
-            Configuration.Scale = scale;
+            Configuration.Scale = playerScale;
             Configuration.Save();
         }
         
-        var rotation = Configuration.Rotation;
+        var rotation = Configuration.Rotation * (float)(180/Math.PI);
         if (ImGui.DragFloat3("Rotation", ref rotation, 0.05f))
         {
-            Configuration.Rotation = rotation;
+            Configuration.Rotation = rotation * (float)(Math.PI/180);
             Configuration.Save();
         }
     }

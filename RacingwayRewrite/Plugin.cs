@@ -8,6 +8,7 @@ using Dalamud.Plugin.Services;
 using Pictomancy;
 using RacingwayRewrite.Race;
 using RacingwayRewrite.Race.Collision;
+using RacingwayRewrite.Utils;
 using RacingwayRewrite.Windows;
 
 namespace RacingwayRewrite;
@@ -20,11 +21,12 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IClientState ClientState { get; private set; } = null!;
     [PluginService] internal static IDataManager DataManager { get; private set; } = null!;
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
+    [PluginService] internal static IChatGui ChatGui { get; private set; } = null!;
     [PluginService] internal static IFramework Framework { get; private set; } = null!;
     [PluginService] internal static IObjectTable ObjectTable { get; private set; } = null!;
-    [PluginService] internal static IGameGui GameGui { get; private set; } = null!;
     
     public static RaceManager RaceManager { get; private set; } = null!;
+    public static Chat Chat { get; private set; } = null!;
 
     private const string CommandName = "/racerewrite";
 
@@ -44,6 +46,7 @@ public sealed class Plugin : IDalamudPlugin
         
         PictoService.Initialize(PluginInterface);
         RaceManager = new RaceManager(this, Framework, ObjectTable, ClientState);
+        Chat = new Chat(this, ChatGui);
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this, goatImagePath);
@@ -65,6 +68,11 @@ public sealed class Plugin : IDalamudPlugin
         // Register plugin installer buttons
         PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigUI;
         PluginInterface.UiBuilder.OpenMainUi += ToggleMainUI;
+        
+        // Announce I exist!
+        Chat.Print("Racingway has loaded.");
+        Chat.Error("Racingway ran into a fatal error!");
+        Chat.Warning("Careful! Too many triggers may cause issues!");
     }
 
     public void Dispose()

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
-using Dalamud.Utility.Numerics;
 using Pictomancy;
 using RacingwayRewrite.Race.Collision;
 using RacingwayRewrite.Utils;
@@ -46,16 +44,17 @@ public class Overlay : Window, IDisposable
         {
             if (drawList == null) return;
             
-            foreach (var player in Plugin.RaceManager.Players.Values)
-            {
-                Cube cube = new Cube(player.Position, Plugin.Configuration.Scale, Plugin.Configuration.Rotation * (float)(Math.PI/180));
-                drawList.AddCubeFilled(cube, 0x5500FF00);
-                drawList.AddCube(cube, 0x5500FF0F);
-            }
-
             foreach (var cube in Plugin.RaceManager.Cubes)
             {
-                drawList.AddCubeFilled(cube, 0x5500FF00);
+                //drawList.AddCubeFilled(cube, 0x5500FF00);
+                drawList.AddCube(cube, 0x5500FF0F);
+            }
+            
+            foreach (var player in Plugin.RaceManager.Players.Values)
+            {
+                Cube cube = new Cube(player.Position, Plugin.Configuration.Scale, Plugin.Configuration.Rotation);
+                //drawList.AddCubeFilled(cube, 0x5500FF00);
+                drawList.AddCube(cube, 0x5500FF0F);
             }
         }
     }
