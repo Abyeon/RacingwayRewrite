@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace RacingwayRewrite.Race.Collision;
+namespace RacingwayRewrite.Race.Collision.Shapes;
 
 public abstract class Shape(Vector3 position, Vector3 scale, Vector3 rotation)
 {

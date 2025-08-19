@@ -17,6 +17,7 @@ public class Player
     public bool Mounted { get; set; } = false;
     public Vector3 Position { get; set; }
     public Vector3 Velocity { get; set; }
+    public float Rotation { get; set; }
 
     public Player(IBattleChara actor)
     {
@@ -24,6 +25,7 @@ public class Player
         {
             Id = character.EntityId;
             Name = character.Name.ToString();
+            Rotation = character.Rotation;
             HomeworldRow = character.HomeWorld.RowId;
             Position = character.Position;
         }

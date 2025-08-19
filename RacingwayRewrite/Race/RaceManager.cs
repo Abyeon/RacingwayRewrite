@@ -7,6 +7,7 @@ using Dalamud.Interface.Colors;
 using Dalamud.Plugin.Services;
 using Pictomancy;
 using RacingwayRewrite.Race.Collision;
+using RacingwayRewrite.Utils;
 
 namespace RacingwayRewrite.Race;
 
@@ -16,6 +17,8 @@ public class RaceManager : IDisposable
     internal readonly IFramework Framework;
     internal readonly IObjectTable ObjectTable;
     internal readonly IClientState ClientState;
+
+    internal static TerritoryTools TerritoryTools { get; private set; } = null!;
     
     public RaceManager(Plugin plugin, IFramework framework, IObjectTable objectTable, IClientState clientState)
     {
@@ -25,6 +28,9 @@ public class RaceManager : IDisposable
         ClientState = clientState;
         
         Framework.Update += Update;
+        
+        TerritoryTools = new TerritoryTools(clientState);
+        //TerritoryChanged(ClientState.TerritoryType);
     }
 
     private IBattleChara? localPlayer;
@@ -92,6 +98,7 @@ public class RaceManager : IDisposable
         else
         {
             Player player = Players[actor.EntityId];
+            player.Rotation = actor.Rotation;
             
             bool lastGrounded = player.Grounded;
             bool lastMounted = player.Mounted;

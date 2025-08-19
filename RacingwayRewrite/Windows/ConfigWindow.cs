@@ -43,7 +43,7 @@ public class ConfigWindow : Window, IDisposable
         {
             var transform = trigger.Shape.Transform;
             ImGui.PushID(id++);
-            
+
             Vector3 pos = transform.Position;
             if (ImGui.DragFloat3("Position", ref pos, 0.05f))
             {

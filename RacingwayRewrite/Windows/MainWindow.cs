@@ -5,6 +5,7 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Windowing;
 using Pictomancy;
 using RacingwayRewrite.Race.Collision;
+using RacingwayRewrite.Race.Collision.Shapes;
 
 namespace RacingwayRewrite.Windows;
 

@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace RacingwayRewrite.Race.Collision;
+namespace RacingwayRewrite.Race.Collision.Shapes;
 
 public class Cube(Vector3 position, Vector3 scale, Vector3 rotation) : Shape(position, scale, rotation)
 {
@@ -19,7 +19,10 @@ public class Cube(Vector3 position, Vector3 scale, Vector3 rotation) : Shape(pos
     public override bool PointInside(Vector3 point)
     {
         // Get the inverse transformation of the cube
-        Matrix4x4 inverse = Transform.GetInverseTransformation();
+        if (Matrix4x4.Invert(Transform.GetTransformation(), out var inverse))
+        {
+            return false;
+        }
         
         // Transform the point
         Vector3 transformed = Vector3.Transform(point, inverse);
