@@ -1,7 +1,12 @@
 ﻿using System;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Bindings.ImGuizmo;
+using Dalamud.Interface;
+using Dalamud.Interface.Colors;
+using Dalamud.Interface.Components;
 using Dalamud.Interface.Windowing;
+using RacingwayRewrite.Utils;
 
 namespace RacingwayRewrite.Windows;
 
@@ -38,11 +43,38 @@ public class ConfigWindow : Window, IDisposable
             Configuration.Save();
         }
 
+        if (Plugin.RaceManager.SelectedTrigger != -1 && ImGui.Button("Stop Editing"))
+        {
+            Plugin.RaceManager.SelectedTrigger = -1;
+        }
+
+        if (ImGuiComponents.IconButton("RacingwayTranslate", FontAwesomeIcon.ArrowsUpDownLeftRight, ImGuiColors.DalamudGrey, ImGuiColors.ParsedBlue))
+        {
+            DrawExtensions.Operation = ImGuizmoOperation.Translate;
+        }
+        
+        ImGui.SameLine();
+        if (ImGuiComponents.IconButton("RacingwayRotate", FontAwesomeIcon.ArrowsSpin))
+        {
+            DrawExtensions.Operation = ImGuizmoOperation.Rotate;
+        }
+        
+        ImGui.SameLine();
+        if (ImGuiComponents.IconButton("RacingwayScale", FontAwesomeIcon.ExpandAlt))
+        {
+            DrawExtensions.Operation = ImGuizmoOperation.Scale;
+        }
+
         int id = 0;
         foreach (var trigger in Plugin.RaceManager.Triggers)
         {
             var transform = trigger.Shape.Transform;
             ImGui.PushID(id++);
+
+            if (Plugin.RaceManager.SelectedTrigger != id - 1 && ImGui.Button("Edit With Gizmo"))
+            {
+                Plugin.RaceManager.SelectedTrigger = id - 1;
+            }
 
             Vector3 pos = transform.Position;
             if (ImGui.DragFloat3("Position", ref pos, 0.05f))
@@ -56,26 +88,11 @@ public class ConfigWindow : Window, IDisposable
                 transform.Scale = scale;
             }
             
-            Vector3 rot = transform.Rotation * (float)(180/Math.PI);
+            Vector3 rot = transform.Rotation;
             if (ImGui.DragFloat3("Rotation", ref rot, 0.1f))
             {
-                transform.Rotation = rot * (float)(Math.PI/180);
+                transform.Rotation = rot;
             }
-        }
-        
-        ImGui.PushID(++id);
-        var playerScale = Configuration.Scale;
-        if (ImGui.DragFloat3("Scale", ref playerScale, 0.05f))
-        {
-            Configuration.Scale = playerScale;
-            Configuration.Save();
-        }
-        
-        var rotation = Configuration.Rotation * (float)(180/Math.PI);
-        if (ImGui.DragFloat3("Rotation", ref rotation, 0.05f))
-        {
-            Configuration.Rotation = rotation * (float)(Math.PI/180);
-            Configuration.Save();
         }
     }
 }

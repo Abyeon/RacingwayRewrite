@@ -80,6 +80,7 @@ public class RaceManager : IDisposable
 
     public readonly Dictionary<uint, Player> Players = new();
     public readonly List<ITrigger> Triggers = [];
+    public int SelectedTrigger = -1;
     
     private void TrackPlayer(IBattleChara actor)
     {

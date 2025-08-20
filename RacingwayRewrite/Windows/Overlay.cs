@@ -45,8 +45,20 @@ public class Overlay : Window, IDisposable
         {
             if (drawList == null) return;
             
-            foreach (var trigger in Plugin.RaceManager.Triggers)
+            for (int i = 0; i < Plugin.RaceManager.Triggers.Count; i++)
             {
+                var trigger = Plugin.RaceManager.Triggers[i];
+
+                // Manipulate selected trigger
+                if (i == Plugin.RaceManager.SelectedTrigger)
+                {
+                    Transform tmpTransform = trigger.Shape.Transform;
+                    if (DrawExtensions.Manipulate(ref tmpTransform, 0.05f, "RacingwayManipulate"))
+                    {
+                        trigger.Shape.Transform = tmpTransform;
+                    }
+                }
+                
                 if (trigger.Shape.GetType() == typeof(Cube))
                     drawList.AddCubeFilled((Cube)trigger.Shape, trigger.Color);
             }

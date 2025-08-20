@@ -19,8 +19,9 @@ public class Cube(Vector3 position, Vector3 scale, Vector3 rotation) : Shape(pos
     public override bool PointInside(Vector3 point)
     {
         // Get the inverse transformation of the cube
-        if (Matrix4x4.Invert(Transform.GetTransformation(), out var inverse))
+        if (!Matrix4x4.Invert(Transform.GetTransformation(), out var inverse))
         {
+            Plugin.Chat.Error(inverse.ToString());
             return false;
         }
         
