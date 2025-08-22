@@ -4,7 +4,6 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Pictomancy;
-using RacingwayRewrite.Race.Collision;
 using RacingwayRewrite.Race.Collision.Shapes;
 using RacingwayRewrite.Utils;
 
@@ -75,7 +74,7 @@ public class Overlay : Window, IDisposable
                 Vector3 transformed = Vector3.Transform(basePos, transform);
                 
                 drawList.AddPathLine(player.Position, transformed, 0xFF0000FF);
-                drawList.AddPathLine(player.Position, player.Position + (player.Velocity * 15), 0xFFFF0000);
+                drawList.AddPathLine(player.Position, player.Position + (player.Velocity / 4f), 0xFFFF0000);
             }
 #endif
         }

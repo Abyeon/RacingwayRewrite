@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Interface.Colors;
 using Dalamud.Plugin.Services;
-using Pictomancy;
 using RacingwayRewrite.Race.Collision;
 using RacingwayRewrite.Utils;
+using ZLinq;
 
 namespace RacingwayRewrite.Race;
 
@@ -45,11 +45,9 @@ public class RaceManager : IDisposable
         // TODO: Implement a VFX handler for spawning/stopping vfx
         //PictoService.VfxRenderer.AddCommon($"{localPlayer.EntityId}", "itm_tape_01c", localPlayer);
         
-        TrackPlayer(localPlayer);
-
         if (Plugin.Configuration.TrackOthers)
         {
-            IEnumerable<IBattleChara> playersToTrack = ObjectTable.PlayerObjects.Where(x => x.EntityId != localPlayer.EntityId);
+            IEnumerable<IBattleChara> playersToTrack = ObjectTable.PlayerObjects;
             List<uint> touchedIds = new List<uint>();
             
             foreach (var player in ObjectTable.PlayerObjects)
@@ -59,21 +57,31 @@ public class RaceManager : IDisposable
             }
             
             // Cleanup old/lost players
-            if (playersToTrack.Count() + 1 != Players.Count)
+            if (playersToTrack.Count() != Players.Count)
             {
-                List<uint> keysToRemove = Players.Keys.Where(key => !touchedIds.Contains(key)).ToList();
-                foreach (var key in keysToRemove)
+                // Run off the main thread
+                Task.Run(() =>
                 {
-                    if (key == localPlayer.EntityId) continue;
-                    Players.Remove(key);
-                }
+                    List<uint> keysToRemove = Players.Keys.AsValueEnumerable().Where(key => !touchedIds.Contains(key)).ToList();
+                    foreach (var key in keysToRemove)
+                    {
+                        if (key == localPlayer.EntityId) continue;
+                        Players.Remove(key);
+                    }
+                });
             }
-        } else if (Players.Count > 1)
+        }
+        else
         {
+            TrackPlayer(localPlayer);
+            
             // Remove tracked players after client disabled "track others"
-            foreach (var player in Players.Keys.Where(key => key != localPlayer.EntityId))
+            if (Players.Count > 1)
             {
-                Players.Remove(player);
+                foreach (var player in Players.Keys.Where(key => key != localPlayer.EntityId))
+                {
+                    Players.Remove(player);
+                }
             }
         }
     }
@@ -94,7 +102,7 @@ public class RaceManager : IDisposable
             bool lastMounted = player.Mounted;
             
             player.UpdateState(actor);
-            PlayerUpdated(player, actor, lastGrounded, lastMounted);
+            PlayerUpdated(player, actor);
         }
         else
         {
@@ -107,12 +115,12 @@ public class RaceManager : IDisposable
             player.UpdateState(actor);
             if (player.Position != actor.Position || lastGrounded != player.Grounded || lastMounted != player.Mounted)
             {
-                PlayerUpdated(player, actor, lastGrounded, lastMounted);
+                PlayerUpdated(player, actor);
             }
         }
     }
 
-    private void PlayerUpdated(Player player, IBattleChara actor, bool lastGrounded, bool lastMounted)
+    private void PlayerUpdated(Player player, IBattleChara actor)
     {
         Vector3 lastPos = player.Position;
         
@@ -120,7 +128,7 @@ public class RaceManager : IDisposable
         if (lastPos != actor.Position)
         {
             Vector3 lastVel = player.Velocity;
-            player.Velocity = actor.Position - lastPos;
+            player.Velocity = (actor.Position - lastPos) / (float)Framework.UpdateDelta.TotalSeconds;
 
             // Player jumped and their state was not changed.
             if (!player.Grounded && lastVel.Y <= 0 && player.Velocity.Y > 0)
@@ -132,14 +140,10 @@ public class RaceManager : IDisposable
             player.Position = actor.Position;
         }
 
-        foreach (ITrigger trigger in Triggers)
+        Parallel.ForEach(Triggers, trigger =>
         {
-            // if (trigger.Shape.PointInside(player.Position))
-            // {
-            //     Plugin.Log.Debug($"{player.Name} is inside of trigger!");
-            // }
             trigger.CheckCollision(player);
-        }
+        });
     }
 
     private void CleanupPlayer(Player player)

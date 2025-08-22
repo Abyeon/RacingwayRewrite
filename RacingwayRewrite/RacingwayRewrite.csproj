@@ -9,5 +9,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Pictomancy" Version="0.0.1" />
+    <PackageReference Include="ZLinq" Version="1.5.2" />
   </ItemGroup>
 </Project>
