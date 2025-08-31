@@ -146,6 +146,7 @@ public class RaceManager : IDisposable
     public void Dispose()
     {
         Framework.Update -= Update;
+        TerritoryTools.OnAddressChanged -= AddressChanged;
         
         Players.Clear();
         Triggers.Clear();
