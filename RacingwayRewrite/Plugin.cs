@@ -1,13 +1,12 @@
-﻿using Dalamud.Game.Command;
+﻿using System;
+using Dalamud.Game.Command;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using System.IO;
-using System.Numerics;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using Pictomancy;
 using RacingwayRewrite.Race;
-using RacingwayRewrite.Race.Collision;
 using RacingwayRewrite.Utils;
 using RacingwayRewrite.Windows;
 
@@ -26,6 +25,7 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IObjectTable ObjectTable { get; private set; } = null!;
     
     public static RaceManager RaceManager { get; private set; } = null!;
+    public static VfxManager VfxManager { get; private set; } = null!;
     public static Chat Chat { get; private set; } = null!;
 
     private const string CommandName = "/racerewrite";
@@ -40,14 +40,15 @@ public sealed class Plugin : IDalamudPlugin
     public Plugin()
     {
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+        Chat = new Chat(this, ChatGui);
 
         // You might normally want to embed resources and load them from the manifest stream
         var goatImagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
         
         PictoService.Initialize(PluginInterface);
         RaceManager = new RaceManager(this, Framework, ObjectTable, ClientState);
-        Chat = new Chat(this, ChatGui);
-
+        VfxManager = new VfxManager(Framework);
+        
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this, goatImagePath);
         Overlay = new Overlay(this);
@@ -63,6 +64,12 @@ public sealed class Plugin : IDalamudPlugin
             HelpMessage = "A useful message to display in /xlhelp"
         });
 
+        CommandManager.AddHandler("/racewin", new CommandInfo(OnFX)
+        {
+            HelpMessage = "Spawns the win FX at the player's feet"
+        });
+        
+
         PluginInterface.UiBuilder.Draw += DrawUI;
         
         // Register plugin installer buttons
@@ -74,6 +81,7 @@ public sealed class Plugin : IDalamudPlugin
     {
         PictoService.Dispose();
         RaceManager.Dispose();
+        VfxManager.Dispose();
         
         WindowSystem.RemoveAllWindows();
 
@@ -88,6 +96,20 @@ public sealed class Plugin : IDalamudPlugin
     {
         // In response to the slash command, toggle the display status of our main ui
         ToggleMainUI();
+    }
+
+    private void OnFX(string command, string args)
+    {
+        // Framework.RunForLength(() =>
+        // {
+        //     if (ClientState.LocalPlayer != null)
+        //         PictoService.VfxRenderer.AddCommon($"{ClientState.LocalPlayer.EntityId}", "itm_tape_01c", ClientState.LocalPlayer);
+        // }, 1000);
+
+        Guid guid = Guid.NewGuid();
+        
+        if (ClientState.LocalPlayer != null)
+            VfxManager.AddVfx(new Vfx(guid.ToString(),  "itm_tape_01c", ClientState.LocalPlayer), 3000);
     }
     
     private void DrawUI() => WindowSystem.Draw();

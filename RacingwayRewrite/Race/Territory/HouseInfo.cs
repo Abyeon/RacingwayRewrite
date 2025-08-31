@@ -1,4 +1,4 @@
-﻿namespace RacingwayRewrite.Utils;
+﻿namespace RacingwayRewrite.Race.Territory;
 
 public class HouseInfo(sbyte ward, sbyte plot, short room)
 {

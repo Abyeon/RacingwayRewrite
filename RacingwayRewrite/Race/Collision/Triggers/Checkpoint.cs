@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using RacingwayRewrite.Race.Collision.Shapes;
 
 namespace RacingwayRewrite.Race.Collision;
@@ -14,6 +15,9 @@ public class Checkpoint(Shape shape) : ITrigger
 
     public void OnEnter(Player player)
     {
+        Guid guid = Guid.NewGuid();
+        Plugin.VfxManager.AddVfx(new Vfx(guid.ToString(), "itm_tape_01c", player.Character), 3000);
+        
         Plugin.Log.Debug("Checkpoint entered");
     }
 

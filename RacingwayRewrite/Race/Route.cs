@@ -17,7 +17,7 @@ public class Route
         Name = name;
     }
 
-    public void CheckCollision(Player player)
+    public void CheckCollision(Player player, bool jumped)
     {
         // TODO: Add behaviour settings to routes, and move this to there
         if (player.Mounted)

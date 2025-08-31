@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using RacingwayRewrite.Race.Collision;
-using RacingwayRewrite.Utils;
+using RacingwayRewrite.Race.Territory;
 using ZLinq;
 
 namespace RacingwayRewrite.Race;
@@ -29,8 +28,13 @@ public class RaceManager : IDisposable
         
         Framework.Update += Update;
         
-        TerritoryTools = new TerritoryTools(clientState);
-        //TerritoryChanged(ClientState.TerritoryType);
+        TerritoryTools = new TerritoryTools(plugin, clientState);
+        TerritoryTools.OnAddressChanged += AddressChanged;
+    }
+
+    private void AddressChanged(object? sender, Address e)
+    {
+        Plugin.Chat.Print(TerritoryTools.GetAreaFromId(e.TerritoryId));
     }
 
     private IBattleChara? localPlayer;
@@ -98,10 +102,7 @@ public class RaceManager : IDisposable
             Players.Add(actor.EntityId, player);
             Plugin.Log.Debug(Players.Count.ToString());
             
-            bool lastGrounded = player.Grounded;
-            bool lastMounted = player.Mounted;
-            
-            player.UpdateState(actor);
+            player.UpdateState(actor, (float)Framework.UpdateDelta.TotalSeconds);
             PlayerUpdated(player, actor);
         }
         else
@@ -112,53 +113,39 @@ public class RaceManager : IDisposable
             bool lastGrounded = player.Grounded;
             bool lastMounted = player.Mounted;
             
-            player.UpdateState(actor);
+            player.UpdateState(actor, (float)Framework.UpdateDelta.TotalSeconds);
             if (player.Position != actor.Position || lastGrounded != player.Grounded || lastMounted != player.Mounted)
             {
                 PlayerUpdated(player, actor);
             }
         }
     }
-
+    
     private void PlayerUpdated(Player player, IBattleChara actor)
     {
-        Vector3 lastPos = player.Position;
+        player.LastPosition = player.Position;
         
         // Moved
-        if (lastPos != actor.Position)
+        if (player.LastPosition != actor.Position)
         {
-            Vector3 lastVel = player.Velocity;
-            player.Velocity = (actor.Position - lastPos) / (float)Framework.UpdateDelta.TotalSeconds;
-
             // Player jumped and their state was not changed.
-            if (!player.Grounded && lastVel.Y <= 0 && player.Velocity.Y > 0)
+            if (player is { Grounded: false, LastVelocity.Y: < 0, Velocity.Y: > 0 })
             {
-                // Might seem counter-intuitive, this will resolve the logic later correctly.
                 player.Grounded = true;
             }
             
             player.Position = actor.Position;
         }
-
+        
         Parallel.ForEach(Triggers, trigger =>
         {
             trigger.CheckCollision(player);
         });
     }
 
-    private void CleanupPlayer(Player player)
-    {
-        // TODO: Remove player from all routes/triggers
-    }
-
     public void Dispose()
     {
         Framework.Update -= Update;
-
-        foreach (var player in Players.Values)
-        {
-            CleanupPlayer(player);
-        }
         
         Players.Clear();
         Triggers.Clear();

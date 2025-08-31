@@ -30,4 +30,21 @@ public static class FrameworkExtensions
         // Timeout, return default;
         return default(T);
     }
+
+    public static async void RunForLength(this IFramework framework, Action action, int timeoutMs)
+    {
+        try
+        {
+            DateTime startTime = DateTime.Now;
+
+            while ((DateTime.Now - startTime).TotalMilliseconds < timeoutMs)
+            {
+                await framework.RunOnFrameworkThread(action);
+            }
+        }
+        catch (Exception e)
+        {
+            Plugin.Log.Error(e.ToString());
+        }
+    }
 }

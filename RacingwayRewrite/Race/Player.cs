@@ -12,10 +12,14 @@ public class Player
     public uint Id { get; set; }
     public string Name { get; set; }
     public uint HomeworldRow { get; set; }
+    
+    public IPlayerCharacter? Character { get; set; }
 
     public bool Grounded { get; set; } = true;
     public bool Mounted { get; set; } = false;
+    public Vector3 LastPosition { get; set; }
     public Vector3 Position { get; set; }
+    public Vector3 LastVelocity { get; set; }
     public Vector3 Velocity { get; set; }
     public float Rotation { get; set; }
 
@@ -25,6 +29,9 @@ public class Player
         {
             Id = character.EntityId;
             Name = character.Name.ToString();
+            
+            Character = character;
+            
             Rotation = character.Rotation;
             HomeworldRow = character.HomeWorld.RowId;
             Position = character.Position;
@@ -36,10 +43,13 @@ public class Player
         }
     }
 
-    public unsafe void UpdateState(IBattleChara actor)
+    public unsafe void UpdateState(IBattleChara actor, float deltaTime)
     {
         Character* character = (Character*)actor.Address;
         Grounded = !character->IsJumping();
         Mounted = character->IsMounted();
+        
+        LastVelocity = Velocity;
+        Velocity = (actor.Position - LastPosition) / deltaTime;
     }
 }
