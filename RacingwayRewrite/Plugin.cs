@@ -30,7 +30,7 @@ public sealed class Plugin : IDalamudPlugin
 
     private const string CommandName = "/racerewrite";
 
-    public Configuration Configuration { get; init; }
+    public static Configuration Configuration { get; set; } = null!;
 
     public readonly WindowSystem WindowSystem = new("RacingwayRewrite");
     private ConfigWindow ConfigWindow { get; init; }

@@ -57,7 +57,6 @@ public class Chat
     public void PrintPlayer(Player player, string message)
     {
         if (Plugin.ClientState.LocalPlayer == null) return; 
-        if (player.Id == Plugin.ClientState.LocalPlayer.EntityId) return;
         
         SeString payload = Tag()
                            .AddPlayer(player) 

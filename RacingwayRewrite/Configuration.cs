@@ -11,6 +11,7 @@ public class Configuration : IPluginConfiguration
 
     public bool TrackOthers { get; set; } = false;
     public bool ShowDebug { get; set; } = false;
+    public bool AllowChat { get; set; } = true;
 
     public Vector3 Scale { get; set; } = Vector3.One;
     public Vector3 Rotation { get; set; } = Vector3.Zero;

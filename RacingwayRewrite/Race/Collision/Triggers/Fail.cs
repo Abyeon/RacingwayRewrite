@@ -22,6 +22,11 @@ public class Fail(Shape shape) : ITrigger
         }
         else
         {
+            // X marker over player
+            // vfx/monster/gimmick2/eff/e3d2_b2_g05t0x.avfx
+            // Check mark over player
+            // vfx/monster/gimmick2/eff/e3d2_b2_g04t0x.avfx
+            
             Plugin.VfxManager.AddVfx(new Vfx(guid.ToString(), "dk05th_stdn0t", player.Character), 2000);
         }
         

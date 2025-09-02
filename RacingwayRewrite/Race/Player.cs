@@ -14,7 +14,9 @@ public class Player
     public uint HomeworldRow { get; set; }
     
     public IPlayerCharacter? Character { get; set; }
-
+    public bool IsClient { get; set; } = false;
+    public RaceState State { get; set; }
+    
     public bool Grounded { get; set; } = true;
     public bool Mounted { get; set; } = false;
     public Vector3 LastPosition { get; set; }
@@ -27,6 +29,9 @@ public class Player
     {
         if (actor is IPlayerCharacter character)
         {
+            if (actor == Plugin.ClientState.LocalPlayer)
+                IsClient = true;
+            
             Id = character.EntityId;
             Name = character.Name.ToString();
             
@@ -35,6 +40,8 @@ public class Player
             Rotation = character.Rotation;
             HomeworldRow = character.HomeWorld.RowId;
             Position = character.Position;
+
+            State = new RaceState(this);
         }
         else
         {
