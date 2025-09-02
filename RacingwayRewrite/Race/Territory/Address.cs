@@ -17,13 +17,15 @@ public readonly record struct Address(uint WorldId, uint TerritoryId, uint MapId
         {
             if (Plot != null && Room != null && Ward != null)
             {
+                // World, District, Ward, Apartment Wing / Plot, Room
                 return Plugin.DataManager.GetExcelSheet<Sheet.World>().GetRow(WorldId).Name.ExtractText() + " " +
                        TerritoryTools.HousingDistricts[TerritoryTools.GetAreaRowId(TerritoryId)] +
                        $" w{Ward+1}" +
-                       $" p{Plot+1}" +
+                       (TerritoryTools.AptWings.ContainsKey((sbyte)Plot) ? $" {TerritoryTools.AptWings[(sbyte)Plot]}" : $" p{Plot+1}") +
                        (Room == 0 ? "" : $" room {Room}");
             }
         
+            // Just return the area name if not in a room/plot
             return TerritoryTools.GetAreaFromId(TerritoryId);
         }
     }

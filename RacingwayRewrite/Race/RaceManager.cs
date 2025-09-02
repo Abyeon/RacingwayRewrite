@@ -35,6 +35,8 @@ public class RaceManager : IDisposable
     private void AddressChanged(object? sender, Address e)
     {
         Plugin.Chat.Print(e.ReadableName);
+        
+        // Stick some logic for loading/unloading routes here
     }
 
     private IBattleChara? localPlayer;
@@ -91,6 +93,7 @@ public class RaceManager : IDisposable
     }
 
     public readonly Dictionary<uint, Player> Players = new();
+    public readonly List<Route> Routes = [];
     public readonly List<ITrigger> Triggers = [];
     public int SelectedTrigger = -1;
     

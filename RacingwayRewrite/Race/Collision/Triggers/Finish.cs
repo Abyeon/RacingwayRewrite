@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using RacingwayRewrite.Race.Collision.Shapes;
 
 namespace RacingwayRewrite.Race.Collision;
 
-public class Start(Shape shape) : ITrigger
+public class Finish(Shape shape) : ITrigger
 {
     public Shape Shape { get; set; } = shape;
     public uint Color { get; set; } = 0x5500FF0F;
@@ -15,12 +14,13 @@ public class Start(Shape shape) : ITrigger
 
     public void OnEnter(Player player)
     {
-        Plugin.Log.Debug("Start entered");
+        player.State.Finish();
+        Plugin.Log.Debug("Finish entered");
     }
 
     public void OnExit(Player player)
     {
-        //player.State.Start();
-        Plugin.Log.Debug("Start exited");
+        Plugin.Log.Debug("Finish exited");
     }
 }
+
