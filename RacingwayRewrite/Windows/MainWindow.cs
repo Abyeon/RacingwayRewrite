@@ -37,10 +37,16 @@ public class MainWindow : Window, IDisposable
             Plugin.ToggleConfigUI();
         }
 
-        if (ImGui.Button("Place Cube") && Plugin.ClientState.LocalPlayer != null)
+        if (ImGui.Button("Place Checkpoint") && Plugin.ClientState.LocalPlayer != null)
         {
             Shape shape = new Cube(Plugin.ClientState.LocalPlayer.Position - new Vector3(0, 0.01f, 0), Vector3.One, Vector3.Zero);
             Plugin.RaceManager.Triggers.Add(new Checkpoint(shape));
+        }
+        
+        if (ImGui.Button("Place Fail") && Plugin.ClientState.LocalPlayer != null)
+        {
+            Shape shape = new Cube(Plugin.ClientState.LocalPlayer.Position - new Vector3(0, 0.01f, 0), Vector3.One, Vector3.Zero);
+            Plugin.RaceManager.Triggers.Add(new Fail(shape));
         }
 
         if (ImGui.Button("Remove All Cubes"))

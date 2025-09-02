@@ -74,7 +74,21 @@ public class Overlay : Window, IDisposable
                 Vector3 transformed = Vector3.Transform(basePos, transform);
                 
                 drawList.AddPathLine(player.Position, transformed, 0xFF0000FF);
-                drawList.AddPathLine(player.Position, player.Position + (player.Velocity / 4f), 0xFFFF0000);
+                
+                Vector3 velocity = Vector3.Normalize(player.Velocity);
+                
+                drawList.AddPathLine(player.Position, player.Position + velocity, 0xFFFF0000);
+                // Attempts at predicting player jump arcs:
+                // transformed -= player.Position;
+                // transformed /= 10;
+                // transformed += new Vector3(0, 0.3f, 0);
+                // Vector3 lastPos = player.Position;
+                // for (int i = 0; i <= 50; i++)
+                // {
+                //     transformed -= new Vector3(0, 0.02f, 0);
+                //     drawList.AddPathLine(lastPos, lastPos + transformed, 0xCC0000FF);
+                //     lastPos += transformed;
+                // }
             }
 #endif
         }
