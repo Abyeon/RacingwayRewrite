@@ -32,6 +32,15 @@ public class TerritoryTools
         CheckLocation();
     }
     
+    public static readonly Dictionary<uint, string> HousingDistricts = new Dictionary<uint, string>
+    {
+        {502, "Mist"},
+        {505, "Goblet"},
+        {507, "Lavender Beds"},
+        {512, "Empyreum"},
+        {513, "Shirogane"}
+    };
+    
     public static readonly Dictionary<sbyte, string> AptWings = new Dictionary<sbyte, string>
     {
         {-128, "wing 1" },
@@ -58,7 +67,7 @@ public class TerritoryTools
     
     public string AreaName => GetAreaFromId(CorrectedTerritoryTypeId);
 
-    public string GetAreaFromId(uint id)
+    public static string GetAreaFromId(uint id)
     {
         try
         {
@@ -71,6 +80,21 @@ public class TerritoryTools
         }
 
         return "UNKNOWN";
+    }
+
+    public static uint GetAreaRowId(uint id)
+    {
+        try
+        {
+            return Plugin.DataManager.GetExcelSheet<Sheet.TerritoryType>().GetRow(id).PlaceNameZone.RowId;
+        }
+        catch (Exception e)
+        {
+            Plugin.Chat.Error(e.Message);
+            if (e.StackTrace != null) Plugin.Log.Error(e.StackTrace);
+        }
+
+        return 0;
     }
     
     // Thanks to ICritical

@@ -34,7 +34,7 @@ public class RaceManager : IDisposable
 
     private void AddressChanged(object? sender, Address e)
     {
-        Plugin.Chat.Print(TerritoryTools.GetAreaFromId(e.TerritoryId));
+        Plugin.Chat.Print(e.ReadableName);
     }
 
     private IBattleChara? localPlayer;

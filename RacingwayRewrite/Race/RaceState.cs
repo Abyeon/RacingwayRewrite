@@ -10,9 +10,9 @@ namespace RacingwayRewrite.Race;
 public class RaceState(Player player)
 {
     public Route? CurrentRoute { get; set; }
-    public bool InRace { get; set; } = false;
-    public uint Checkpoint { get; set; } = 0;
-    public uint Lap { get; set; } = 0;
+    public bool InRace { get; set; }
+    public uint Checkpoint { get; set; }
+    public uint Lap { get; set; }
     public Stopwatch Timer { get; set; } = new Stopwatch();
 
     /// <summary>

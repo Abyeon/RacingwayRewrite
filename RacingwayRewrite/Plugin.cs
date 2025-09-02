@@ -35,6 +35,7 @@ public sealed class Plugin : IDalamudPlugin
     public readonly WindowSystem WindowSystem = new("RacingwayRewrite");
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
+    private EditWindow EditWindow { get; init; }
     private Overlay Overlay { get; init; } 
 
     public Plugin()
@@ -50,7 +51,8 @@ public sealed class Plugin : IDalamudPlugin
         VfxManager = new VfxManager(Framework);
         
         ConfigWindow = new ConfigWindow(this);
-        MainWindow = new MainWindow(this, goatImagePath);
+        MainWindow = new MainWindow(this);
+        EditWindow = new EditWindow(this);
         Overlay = new Overlay(this);
 
         WindowSystem.AddWindow(ConfigWindow);
