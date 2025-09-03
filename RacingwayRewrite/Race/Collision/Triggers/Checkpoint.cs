@@ -12,6 +12,7 @@ public class Checkpoint(Shape shape) : ITrigger
     public uint TriggeredColor { get; set; } = 0x55FF0000;
     public Behavior TriggerFlags { get; set; } = Behavior.OnlyGrounded;
     public List<uint> Touchers { get; } = [];
+    public uint Position { get; set; } = 1;
 
     public void OnEnter(Player player)
     {

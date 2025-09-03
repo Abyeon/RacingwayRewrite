@@ -33,6 +33,11 @@ public class MainWindow : Window, IDisposable
         {
             Plugin.ToggleConfigUI();
         }
+        
+        if (ImGui.Button("Show Edit Window"))
+        {
+            Plugin.ToggleEditUI();
+        }
 
         if (ImGui.Button("Place Checkpoint") && Plugin.ClientState.LocalPlayer != null)
         {

@@ -57,6 +57,7 @@ public sealed class Plugin : IDalamudPlugin
 
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
+        WindowSystem.AddWindow(EditWindow);
         WindowSystem.AddWindow(Overlay);
         
         Overlay.IsOpen = true;
@@ -118,4 +119,5 @@ public sealed class Plugin : IDalamudPlugin
 
     public void ToggleConfigUI() => ConfigWindow.Toggle();
     public void ToggleMainUI() => MainWindow.Toggle();
+    public void ToggleEditUI() => EditWindow.Toggle();
 }

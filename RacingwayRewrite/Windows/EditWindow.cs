@@ -25,6 +25,29 @@ public class EditWindow : Window, IDisposable
 
     public override void Draw()
     {
-        ImGui.Text("EDITING!");
+        ImGui.Text("Route Name Here");
+        ImGui.Text("Route Description Here");
+
+        if (ImGui.CollapsingHeader("Behavior Settings"))
+        {
+            ImGui.Indent();
+            DrawBehaviorSettings();
+            ImGui.Unindent();
+        }
+    }
+
+    public void DrawBehaviorSettings()
+    {
+        bool allowMounts = false;
+        if (ImGui.Checkbox("Allow Mounts", ref allowMounts))
+        {
+            // Handle this later
+        }
+
+        int laps = 1;
+        if (ImGui.InputInt("Required Laps", ref laps, 1, 2) && laps > 0)
+        {
+            // Handle this later
+        }
     }
 }

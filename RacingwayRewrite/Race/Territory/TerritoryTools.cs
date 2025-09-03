@@ -32,7 +32,7 @@ public class TerritoryTools
         CheckLocation();
     }
     
-    public static readonly Dictionary<uint, string> HousingDistricts = new Dictionary<uint, string>
+    public static readonly Dictionary<uint, string> HousingDistricts = new()
     {
         {502, "Mist"},
         {505, "Goblet"},
@@ -41,7 +41,7 @@ public class TerritoryTools
         {513, "Shirogane"}
     };
     
-    public static readonly Dictionary<sbyte, string> AptWings = new Dictionary<sbyte, string>
+    public static readonly Dictionary<sbyte, string> AptWings = new()
     {
         {-128, "wing 1" },
         {-127, "wing 2" }

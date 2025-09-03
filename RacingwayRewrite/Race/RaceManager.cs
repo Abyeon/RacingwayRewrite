@@ -63,19 +63,15 @@ public class RaceManager : IDisposable
             }
             
             // Cleanup old/lost players
-            if (playersToTrack.Count() != Players.Count)
+            Task.Run(() =>
             {
-                // Run off the main thread
-                Task.Run(() =>
+                List<uint> keysToRemove = Players.Keys.AsValueEnumerable().Where(key => !touchedIds.Contains(key)).ToList();
+                foreach (var key in keysToRemove)
                 {
-                    List<uint> keysToRemove = Players.Keys.AsValueEnumerable().Where(key => !touchedIds.Contains(key)).ToList();
-                    foreach (var key in keysToRemove)
-                    {
-                        if (key == localPlayer.EntityId) continue;
-                        Players.Remove(key);
-                    }
-                });
-            }
+                    if (key == localPlayer.EntityId) continue;
+                    Players.Remove(key);
+                }
+            });
         }
         else
         {
@@ -97,30 +93,39 @@ public class RaceManager : IDisposable
     public readonly List<ITrigger> Triggers = [];
     public int SelectedTrigger = -1;
     
-    private void TrackPlayer(IBattleChara actor)
+    private void TrackPlayer(IBattleChara? actor)
     {
-        if (!Players.ContainsKey(actor.EntityId))
+        try
         {
-            Player player = new Player(actor);
-            Players.Add(actor.EntityId, player);
-            Plugin.Log.Debug(Players.Count.ToString());
-            
-            player.UpdateState(actor, (float)Framework.UpdateDelta.TotalSeconds);
-            PlayerUpdated(player, actor);
-        }
-        else
-        {
-            Player player = Players[actor.EntityId];
-            player.Rotation = actor.Rotation;
-            
-            bool lastGrounded = player.Grounded;
-            bool lastMounted = player.Mounted;
-            
-            player.UpdateState(actor, (float)Framework.UpdateDelta.TotalSeconds);
-            if (player.Position != actor.Position || lastGrounded != player.Grounded || lastMounted != player.Mounted)
+            if (actor == null) return;
+
+            if (!Players.ContainsKey(actor.EntityId))
             {
+                Player player = new Player(actor);
+                Players.Add(actor.EntityId, player);
+
+                player.UpdateState(actor, (float)Framework.UpdateDelta.TotalSeconds);
                 PlayerUpdated(player, actor);
             }
+            else
+            {
+                Player player = Players[actor.EntityId];
+                player.Rotation = actor.Rotation;
+
+                bool lastGrounded = player.Grounded;
+                bool lastMounted = player.Mounted;
+
+                player.UpdateState(actor, (float)Framework.UpdateDelta.TotalSeconds);
+                if (player.Position != actor.Position || lastGrounded != player.Grounded ||
+                    lastMounted != player.Mounted)
+                {
+                    PlayerUpdated(player, actor);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Plugin.Log.Error(e.ToString());
         }
     }
     
