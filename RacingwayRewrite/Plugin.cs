@@ -85,6 +85,7 @@ public sealed class Plugin : IDalamudPlugin
         PictoService.Dispose();
         RaceManager.Dispose();
         VfxManager.Dispose();
+        Chat.Dispose();
         
         WindowSystem.RemoveAllWindows();
 

@@ -1,15 +1,21 @@
-﻿using Dalamud.Game.Text.SeStringHandling;
+﻿using System;
+using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin.Services;
 using RacingwayRewrite.Race;
 
 namespace RacingwayRewrite.Utils;
 
-public class Chat
+public class Chat : IDisposable
 {
     internal readonly Plugin Plugin;
     internal readonly IChatGui ChatGui;
     
     private const string tag = "[RACE] ";
+    
+    public const uint OpenRacingwayId = 0;
+    
+    private DalamudLinkPayload OpenRacingway { get; set;}
     
     public enum Colors : ushort
     {
@@ -18,23 +24,34 @@ public class Chat
         Error = 16,
         Warning = 71
     }
-
+    
     public Chat(Plugin plugin, IChatGui chatGui)
     {
         Plugin = plugin;
         ChatGui = chatGui;
+        
+        OpenRacingway = Plugin.ChatGui.AddChatLinkHandler(OpenRacingwayId, OnOpenRacingway);
     }
 
-    public static SeStringBuilder Tag()
+    private void OnOpenRacingway(uint id, SeString message)
+    {
+        Plugin.Log.Verbose($"OpenRacingway payload clicked: {id}, {message}");
+        Plugin.ToggleMainUI();
+    }
+
+    public SeStringBuilder Tag()
     {
         return new SeStringBuilder()
-            .AddUiForeground(tag, (ushort)Colors.Tag);
+               .AddUiForeground((ushort)Colors.Tag)
+               .Add(OpenRacingway)
+               .AddText(tag)
+               .Add(RawPayload.LinkTerminator)
+               .AddUiForegroundOff();
     }
     
-    public static SeString ColorMessage(string message, Colors color)
+    public SeString ColorMessage(string message, Colors color)
     {
-        return new SeStringBuilder()
-                .AddUiForeground(tag, (ushort)Colors.Tag)
+        return Tag()
                 .AddUiForeground(message, (ushort)color)
                 .BuiltString;
     }
@@ -69,5 +86,10 @@ public class Chat
     public void Print(SeString message)
     {
         ChatGui.Print(message);
+    }
+
+    public void Dispose()
+    {
+        Plugin.ChatGui.RemoveChatLinkHandler(OpenRacingwayId);
     }
 }
