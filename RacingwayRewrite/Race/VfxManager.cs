@@ -9,6 +9,7 @@ using Pictomancy;
 
 namespace RacingwayRewrite.Race;
 
+// Eventually want to move from Pictomancy to something more custom for this. For now works fine though.
 public class VfxManager : IDisposable
 {
     internal readonly IFramework Framework;

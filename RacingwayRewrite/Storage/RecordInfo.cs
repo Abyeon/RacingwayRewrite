@@ -5,9 +5,9 @@ namespace RacingwayRewrite.Storage;
 
 public class RecordInfo
 {
-    public ObjectId Id { get; set; }
-    public string Name { get; set; }
-    public string World { get; set; }
-    public TimeSpan Time { get; set; }
-    public byte[] PackedRecord { get; set; }
+    public required ObjectId Id { get; set; }
+    public required string Name { get; set; }
+    public required string World { get; set; }
+    public required TimeSpan Time { get; set; }
+    public required byte[] PackedRecord { get; set; }
 }
