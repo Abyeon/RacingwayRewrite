@@ -63,6 +63,7 @@ public class MainWindow : Window, IDisposable
             Plugin.Chat.Print("Test print");
             Plugin.Chat.Error("Test error");
             Plugin.Chat.Warning("Test warning");
+            //Plugin.Chat.TestPrintIcons();
         }
 #endif
     }

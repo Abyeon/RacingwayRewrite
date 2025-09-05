@@ -11,11 +11,13 @@ public class Chat : IDisposable
     internal readonly Plugin Plugin;
     internal readonly IChatGui ChatGui;
     
-    private const string tag = "[RACE] ";
+    private const string tag = "RACE";
     
     public const uint OpenRacingwayId = 0;
+    public const uint OpenLogId = 1;
     
     private DalamudLinkPayload OpenRacingway { get; set;}
+    private DalamudLinkPayload OpenLog { get; set;}
     
     public enum Colors : ushort
     {
@@ -31,6 +33,7 @@ public class Chat : IDisposable
         ChatGui = chatGui;
         
         OpenRacingway = Plugin.ChatGui.AddChatLinkHandler(OpenRacingwayId, OnOpenRacingway);
+        OpenLog = Plugin.ChatGui.AddChatLinkHandler(OpenLogId, OnOpenLog);
     }
 
     private void OnOpenRacingway(uint id, SeString message)
@@ -39,36 +42,73 @@ public class Chat : IDisposable
         Plugin.ToggleMainUI();
     }
 
+    private void OnOpenLog(uint id, SeString message)
+    {
+        Plugin.Log.Verbose($"OpenLog payload clicked: {id}, {message}");
+        Plugin.CommandManager.ProcessCommand("/xllog");
+    }
+
     public SeStringBuilder Tag()
     {
         return new SeStringBuilder()
                .AddUiForeground((ushort)Colors.Tag)
                .Add(OpenRacingway)
-               .AddText(tag)
+               .AddText($"[{tag}]")
                .Add(RawPayload.LinkTerminator)
+               .AddText(" ")
                .AddUiForegroundOff();
     }
-    
-    public SeString ColorMessage(string message, Colors color)
+
+    public SeStringBuilder Tag(BitmapFontIcon icon)
     {
-        return Tag()
-                .AddUiForeground(message, (ushort)color)
-                .BuiltString;
+        return new SeStringBuilder()
+               .AddIcon(icon)
+               .AddUiForeground((ushort)Colors.Tag)
+               .Add(OpenRacingway)
+               .AddText($"[{tag}]")
+               .Add(RawPayload.LinkTerminator)
+               .AddText(" ")
+               .AddUiForegroundOff();
+    }
+
+    public void TestPrintIcons()
+    {
+        uint[] iconValues = (uint[])Enum.GetValues(typeof(BitmapFontIcon));
+        string[] iconNames = Enum.GetNames(typeof(BitmapFontIcon));
+        for (int i = 0; i < iconValues.Length; i++)
+        {
+            if (Enum.IsDefined(typeof(BitmapFontIcon), iconValues[i]))
+            {
+                SeString message = new SeStringBuilder()
+                    .AddIcon((BitmapFontIcon)iconValues[i])
+                    .AddText(iconNames[i]).BuiltString;
+                
+                ChatGui.Print(message);
+            }
+        }
     }
 
     public void Print(string message)
     {
-        ChatGui.Print(ColorMessage(message, Colors.Print));
+        SeString msg = Tag().AddUiForeground(message, (ushort)Colors.Print).BuiltString;
+        ChatGui.Print(msg);
     }
     
     public void Error(string message)
     {
-        ChatGui.Print(ColorMessage(message, Colors.Error));
+        SeString msg = Tag(BitmapFontIcon.Warning)
+                       .AddUiForeground(message + " ", (ushort)Colors.Error)
+                       .Add(OpenLog)
+                       .AddUiForeground("(/xllog)", (ushort)Colors.Tag)
+                       .Add(RawPayload.LinkTerminator).BuiltString;
+        
+        ChatGui.Print(msg);
     }
     
     public void Warning(string message)
     {
-        ChatGui.Print(ColorMessage(message, Colors.Warning));
+        SeString msg = Tag(BitmapFontIcon.Warning).AddUiForeground(message, (ushort)Colors.Warning).BuiltString;
+        ChatGui.Print(msg);
     }
 
     public void PrintPlayer(Player player, string message)
@@ -80,16 +120,12 @@ public class Chat : IDisposable
                            .AddUiForeground(" " + message, (ushort)Colors.Print) 
                            .BuiltString;
         
-        Print(payload);
-    }
-
-    public void Print(SeString message)
-    {
-        ChatGui.Print(message);
+        ChatGui.Print(payload);
     }
 
     public void Dispose()
     {
         Plugin.ChatGui.RemoveChatLinkHandler(OpenRacingwayId);
+        Plugin.ChatGui.RemoveChatLinkHandler(OpenLogId);
     }
 }
