@@ -8,6 +8,8 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="LiteDB" Version="5.0.21" />
+    <PackageReference Include="MessagePack" Version="3.1.4" />
     <PackageReference Include="Pictomancy" Version="0.0.1" />
     <PackageReference Include="ZLinq" Version="1.5.2" />
   </ItemGroup>

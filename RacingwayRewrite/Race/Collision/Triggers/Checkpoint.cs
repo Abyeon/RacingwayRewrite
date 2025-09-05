@@ -1,18 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
+using MessagePack;
 using RacingwayRewrite.Race.Collision.Shapes;
 
 namespace RacingwayRewrite.Race.Collision;
 
-public class Checkpoint(Shape shape) : ITrigger
+[MessagePackObject]
+public class Checkpoint : ITrigger
 {
-    public Shape Shape { get; set; } = shape;
-    public uint Color { get; set; } = 0x5500FF0F;
-    public uint DefaultColor { get; set; } = 0x5500FF0F;
-    public uint TriggeredColor { get; set; } = 0x55FF0000;
-    public Behavior TriggerFlags { get; set; } = Behavior.OnlyGrounded;
-    public List<uint> Touchers { get; } = [];
-    public uint Position { get; set; } = 1;
+    [Key(0)] public Shape Shape { get; set; } 
+    [Key(1)] public Behavior TriggerFlags { get; set; } = Behavior.OnlyGrounded;
+    [Key(2)] public uint Position { get; set; } = 1;
+    [IgnoreMember] public uint Color { get; set; } = 0x5500FF0F;
+    [IgnoreMember] public uint DefaultColor { get; set; } = 0x5500FF0F;
+    [IgnoreMember] public uint TriggeredColor { get; set; } = 0x55FF0000;
+    [IgnoreMember] public List<uint> Touchers { get; } = [];
+
+    public Checkpoint(Shape shape)
+    {
+        Shape = shape;
+    }
+    
+    public Checkpoint(Shape shape, Behavior triggerFlags, uint position)
+    {
+        Shape = shape;
+        TriggerFlags = triggerFlags;
+        Position = position;
+    }
 
     public void OnEnter(Player player)
     {

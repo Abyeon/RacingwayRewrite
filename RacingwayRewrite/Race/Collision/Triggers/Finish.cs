@@ -1,17 +1,30 @@
 ﻿using System.Collections.Generic;
+using MessagePack;
 using RacingwayRewrite.Race.Collision.Shapes;
 
 namespace RacingwayRewrite.Race.Collision;
 
-public class Finish(Shape shape) : ITrigger
+[MessagePackObject]
+public class Finish : ITrigger
 {
-    public Shape Shape { get; set; } = shape;
-    public uint Color { get; set; } = 0x5500FF0F;
-    public uint DefaultColor { get; set; } = 0x5500FF0F;
-    public uint TriggeredColor { get; set; } = 0x55FF0000;
-    public Behavior TriggerFlags { get; set; } = Behavior.OnlyGrounded;
-    public List<uint> Touchers { get; } = [];
-
+    [Key(0)] public Shape Shape { get; set; } 
+    [Key(1)] public Behavior TriggerFlags { get; set; } = Behavior.OnlyGrounded;
+    [IgnoreMember] public uint Color { get; set; } = 0x5500FF0F;
+    [IgnoreMember] public uint DefaultColor { get; set; } = 0x5500FF0F;
+    [IgnoreMember] public uint TriggeredColor { get; set; } = 0x55FF0000;
+    [IgnoreMember] public List<uint> Touchers { get; } = [];
+    
+    public Finish(Shape shape)
+    {
+        Shape = shape;
+    }
+    
+    public Finish(Shape shape, Behavior triggerFlags)
+    {
+        Shape = shape;
+        TriggerFlags = triggerFlags;
+    }
+    
     public void OnEnter(Player player)
     {
         player.State.Finish();

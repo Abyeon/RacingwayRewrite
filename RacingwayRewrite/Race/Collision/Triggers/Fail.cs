@@ -1,17 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using MessagePack;
 using RacingwayRewrite.Race.Collision.Shapes;
 
 namespace RacingwayRewrite.Race.Collision;
 
-public class Fail(Shape shape) : ITrigger
+[MessagePackObject]
+public class Fail: ITrigger
 {
-    public Shape Shape { get; set; } = shape;
-    public uint Color { get; set; } = 0x5500FF0F;
-    public uint DefaultColor { get; set; } = 0x551111FF;
-    public uint TriggeredColor { get; set; } = 0x55FF0000;
-    public Behavior TriggerFlags { get; set; } = Behavior.Always;
-    public List<uint> Touchers { get; } = [];
+    [Key(0)] public Shape Shape { get; set; } 
+    [Key(1)] public Behavior TriggerFlags { get; set; } = Behavior.Always;
+    [IgnoreMember] public uint Color { get; set; } = 0x5500FF0F;
+    [IgnoreMember] public uint DefaultColor { get; set; } = 0x551111FF;
+    [IgnoreMember] public uint TriggeredColor { get; set; } = 0x55FF0000;
+    [IgnoreMember] public List<uint> Touchers { get; } = [];
+
+    public Fail(Shape shape)
+    {
+        Shape = shape;
+    }
+    
+    public Fail(Shape shape, Behavior triggerFlags)
+    {
+        Shape = shape;
+        TriggerFlags = triggerFlags;
+    }
 
     public void OnEnter(Player player)
     {

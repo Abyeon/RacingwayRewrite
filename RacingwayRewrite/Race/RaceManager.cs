@@ -5,19 +5,19 @@ using System.Threading.Tasks;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using RacingwayRewrite.Race.Collision;
-using RacingwayRewrite.Race.Territory;
 using ZLinq;
 
 namespace RacingwayRewrite.Race;
 
 public class RaceManager : IDisposable
 {
+    public RouteManager RouteManager { get; private set; }
+    
     internal readonly Plugin Plugin;
     internal readonly IFramework Framework;
     internal readonly IObjectTable ObjectTable;
     internal readonly IClientState ClientState;
 
-    internal static TerritoryTools TerritoryTools { get; private set; } = null!;
     
     public RaceManager(Plugin plugin, IFramework framework, IObjectTable objectTable, IClientState clientState)
     {
@@ -27,16 +27,7 @@ public class RaceManager : IDisposable
         ClientState = clientState;
         
         Framework.Update += Update;
-        
-        TerritoryTools = new TerritoryTools(plugin, clientState);
-        TerritoryTools.OnAddressChanged += AddressChanged;
-    }
-
-    private void AddressChanged(object? sender, Address e)
-    {
-        Plugin.Chat.Print(e.ReadableName);
-        
-        // Stick some logic for loading/unloading routes here
+        RouteManager = new RouteManager(plugin, clientState);
     }
 
     private IBattleChara? localPlayer;
@@ -154,10 +145,11 @@ public class RaceManager : IDisposable
     public void Dispose()
     {
         Framework.Update -= Update;
-        TerritoryTools.OnAddressChanged -= AddressChanged;
         
         Players.Clear();
         Triggers.Clear();
+        
+        RouteManager.Dispose();
         
         localPlayer = null;
     }

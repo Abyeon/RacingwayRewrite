@@ -1,11 +1,24 @@
 ﻿using System.Numerics;
+using MessagePack;
 
 namespace RacingwayRewrite.Race.Collision.Shapes;
 
-public abstract class Shape(Vector3 position, Vector3 scale, Vector3 rotation)
+[MessagePackObject]
+[Union(0, typeof(Cube))]
+public abstract class Shape
 {
-    public Transform Transform { get; set; } = new(position, scale, rotation);
+    [Key(0)] public Transform Transform { get; set; }
     protected abstract Vector3[] Vertices { get; }
+
+    public Shape(Vector3 position, Vector3 scale, Vector3 rotation)
+    {
+        Transform = new(position, scale, rotation);
+    }
+
+    public Shape(Transform transform)
+    {
+        Transform = transform;
+    }
     
     public Vector3[] GetTransformedVerts()
     {

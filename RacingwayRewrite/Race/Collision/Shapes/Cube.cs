@@ -1,8 +1,10 @@
 ﻿using System.Numerics;
+using MessagePack;
 
 namespace RacingwayRewrite.Race.Collision.Shapes;
 
-public class Cube(Vector3 position, Vector3 scale, Vector3 rotation) : Shape(position, scale, rotation)
+[MessagePackObject]
+public class Cube : Shape
 {
     protected override Vector3[] Vertices { get; } =
     [
@@ -15,6 +17,16 @@ public class Cube(Vector3 position, Vector3 scale, Vector3 rotation) : Shape(pos
         new (1, 1, 1),
         new (1, 1, -1)
     ];
+    
+    public Cube(Vector3 position, Vector3 scale, Vector3 rotation) : base(position, scale, rotation)
+    {
+        Transform = new(position, scale, rotation);
+    }
+
+    public Cube(Transform transform) : base(transform)
+    {
+        Transform = transform;
+    }
 
     public override bool PointInside(Vector3 point)
     {

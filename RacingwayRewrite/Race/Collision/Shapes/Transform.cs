@@ -1,13 +1,15 @@
 ﻿using System.Numerics;
 using Dalamud.Bindings.ImGuizmo;
+using MessagePack;
 
 namespace RacingwayRewrite.Race.Collision.Shapes;
 
+[MessagePackObject]
 public class Transform(Vector3 position, Vector3 scale, Vector3 rotation)
 {
-    public Vector3 Position = position;
-    public Vector3 Scale = scale;
-    public Vector3 Rotation = rotation;
+    [Key(0)] public Vector3 Position = position;
+    [Key(1)] public Vector3 Scale = scale;
+    [Key(2)] public Vector3 Rotation = rotation;
     
     public Matrix4x4 GetTransformation()
     {        

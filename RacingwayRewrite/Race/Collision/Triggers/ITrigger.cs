@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using MessagePack;
 using RacingwayRewrite.Race.Collision.Shapes;
 
 namespace RacingwayRewrite.Race.Collision;
@@ -11,19 +12,22 @@ public enum Behavior : ushort
     OnlyJumping = 2
 }
 
+[Union(0, typeof(Start))]
+[Union(1, typeof(Checkpoint))]
+[Union(2, typeof(Fail))]
+[Union(3, typeof(Finish))]
 public interface ITrigger
 {
-    public Shape Shape { get; set; }
-    
-    public uint Color { get; set; }
-    public uint DefaultColor { get; set; }
-    public uint TriggeredColor { get; set; }
-    
-    public Behavior TriggerFlags { get; set; }
-    
-    public List<uint> Touchers { get; }
+    Shape Shape { get; set; }
 
-    public void CheckCollision(Player player)
+    uint Color { get; set; }
+    uint DefaultColor { get; set; }
+    uint TriggeredColor { get; set; }
+
+    Behavior TriggerFlags { get; set; }
+    List<uint> Touchers { get; }
+
+    void CheckCollision(Player player)
     {
         bool collides = Shape.PointInside(player.Position);
 
@@ -82,13 +86,13 @@ public interface ITrigger
         UpdateColor();
     }
 
-    public void Exit(Player player)
+    void Exit(Player player)
     {
         OnExit(player);
         Touchers.Remove(player.Id);
         UpdateColor();
     }
-    
-    public void OnEnter(Player player);
-    public void OnExit(Player player);
+
+    void OnEnter(Player player);
+    void OnExit(Player player);
 }
