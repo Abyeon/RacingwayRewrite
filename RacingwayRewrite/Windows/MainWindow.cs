@@ -60,9 +60,9 @@ public class MainWindow : Window, IDisposable
         ImGui.Text("Debug Buttons");
         if (ImGui.Button("Test chat functions"))
         {
-            Plugin.Chat.Print("Test print");
-            Plugin.Chat.Error("Test error");
-            Plugin.Chat.Warning("Test warning");
+            Plugin.Chat.Print("Printing example chats:");
+            Plugin.Chat.Error("Error! Too many triggers on screen. Please check");
+            Plugin.Chat.Warning("Warning, your route lacks a proper description. Consider adding one!");
             //Plugin.Chat.TestPrintIcons();
         }
 #endif

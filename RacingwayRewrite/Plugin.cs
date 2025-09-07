@@ -7,6 +7,7 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using Pictomancy;
 using RacingwayRewrite.Race;
+using RacingwayRewrite.Storage;
 using RacingwayRewrite.Utils;
 using RacingwayRewrite.Windows;
 
@@ -24,9 +25,10 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IFramework Framework { get; private set; } = null!;
     [PluginService] internal static IObjectTable ObjectTable { get; private set; } = null!;
     
-    public static RaceManager RaceManager { get; private set; } = null!;
-    public static VfxManager VfxManager { get; private set; } = null!;
-    public static Chat Chat { get; private set; } = null!;
+    internal LocalDatabase? Storage { get; private set; }
+    internal static RaceManager RaceManager { get; private set; } = null!;
+    internal static VfxManager VfxManager { get; private set; } = null!;
+    internal static Chat Chat { get; private set; } = null!;
 
     private const string CommandName = "/racerewrite";
 
@@ -43,8 +45,15 @@ public sealed class Plugin : IDalamudPlugin
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         Chat = new Chat(this, ChatGui);
 
-        // You might normally want to embed resources and load them from the manifest stream
-        var goatImagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
+        try
+        {
+            Storage = new(this, $"{PluginInterface.GetPluginConfigDirectory()}\\data.db");
+        }
+        catch (Exception e)
+        {
+            Chat.Error(e.Message);
+            Log.Error(e.ToString());
+        }
         
         PictoService.Initialize(PluginInterface);
         RaceManager = new RaceManager(this, Framework, ObjectTable, ClientState);
@@ -67,12 +76,6 @@ public sealed class Plugin : IDalamudPlugin
             HelpMessage = "A useful message to display in /xlhelp"
         });
 
-        CommandManager.AddHandler("/racewin", new CommandInfo(OnFX)
-        {
-            HelpMessage = "Spawns the win FX at the player's feet"
-        });
-        
-
         PluginInterface.UiBuilder.Draw += DrawUI;
         
         // Register plugin installer buttons
@@ -87,6 +90,9 @@ public sealed class Plugin : IDalamudPlugin
         VfxManager.Dispose();
         Chat.Dispose();
         
+        if (Storage != null)
+            Storage.Dispose();
+        
         WindowSystem.RemoveAllWindows();
 
         ConfigWindow.Dispose();
@@ -100,20 +106,6 @@ public sealed class Plugin : IDalamudPlugin
     {
         // In response to the slash command, toggle the display status of our main ui
         ToggleMainUI();
-    }
-
-    private void OnFX(string command, string args)
-    {
-        // Framework.RunForLength(() =>
-        // {
-        //     if (ClientState.LocalPlayer != null)
-        //         PictoService.VfxRenderer.AddCommon($"{ClientState.LocalPlayer.EntityId}", "itm_tape_01c", ClientState.LocalPlayer);
-        // }, 1000);
-
-        Guid guid = Guid.NewGuid();
-        
-        if (ClientState.LocalPlayer != null)
-            VfxManager.AddVfx(new Vfx(guid.ToString(),  "itm_tape_01c", ClientState.LocalPlayer), 3000);
     }
     
     private void DrawUI() => WindowSystem.Draw();

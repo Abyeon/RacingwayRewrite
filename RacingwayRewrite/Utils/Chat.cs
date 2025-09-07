@@ -11,7 +11,7 @@ public class Chat : IDisposable
     internal readonly Plugin Plugin;
     internal readonly IChatGui ChatGui;
     
-    private const string tag = "RACE";
+    private const string tag = "Race";
     
     public const uint OpenRacingwayId = 0;
     public const uint OpenLogId = 1;
@@ -23,8 +23,9 @@ public class Chat : IDisposable
     {
         Tag = 57,
         Print = 2,
-        Error = 16,
-        Warning = 71
+        ErrorGlow = 5,
+        Error = 17,
+        Warning = 32
     }
     
     public Chat(Plugin plugin, IChatGui chatGui)
@@ -99,7 +100,7 @@ public class Chat : IDisposable
         SeString msg = Tag(BitmapFontIcon.Warning)
                        .AddUiForeground(message + " ", (ushort)Colors.Error)
                        .Add(OpenLog)
-                       .AddUiForeground("(/xllog)", (ushort)Colors.Tag)
+                       .AddUiForeground("/xllog", (ushort)Colors.Print)
                        .Add(RawPayload.LinkTerminator).BuiltString;
         
         ChatGui.Print(msg);
@@ -107,7 +108,11 @@ public class Chat : IDisposable
     
     public void Warning(string message)
     {
-        SeString msg = Tag(BitmapFontIcon.Warning).AddUiForeground(message, (ushort)Colors.Warning).BuiltString;
+        SeString msg = Tag(BitmapFontIcon.Warning)
+                       .AddItalicsOn()
+                       .AddUiForeground(message, (ushort)Colors.Warning)
+                       .AddItalicsOff().BuiltString;
+        
         ChatGui.Print(msg);
     }
 

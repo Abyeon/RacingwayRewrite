@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Dalamud.Plugin.Services;
+using LiteDB;
+using MessagePack;
 using RacingwayRewrite.Race.Territory;
+using RacingwayRewrite.Storage;
 
 namespace RacingwayRewrite.Race;
 
@@ -12,7 +16,8 @@ public class RouteManager : IDisposable
     internal readonly IClientState ClientState;
     internal static TerritoryTools TerritoryTools { get; private set; } = null!;
     
-    public IEnumerable<Route> LoadedRoutes { get; private set; } = [];
+    public Route? SelectedRoute { get; private set; }
+    public List<Route> LoadedRoutes { get; private set; } = [];
 
     public RouteManager(Plugin plugin, IClientState clientState)
     {
@@ -31,15 +36,31 @@ public class RouteManager : IDisposable
     private void AddressChanged(object? sender, Address e)
     {
         Plugin.Chat.Print(e.ReadableName);
+        UnloadRoutes();
+        LoadRoutes(e);
     }
 
-    // public async void LoadRoutes(Address address)
-    // {
-    //     
-    // }
+    public void LoadRoutes(Address address)
+    {
+        if (Plugin.Storage == null)
+        {
+            Plugin.Chat.Warning("Unable to load routes when Storage is null.");
+            return;
+        }
+        
+        ILiteCollection<RouteInfo> routeCollection = Plugin.Storage.GetRouteCollection();
+        List<RouteInfo> routes = routeCollection.Query().Where(x => x.Address == address).ToList();
+
+        Parallel.ForEach(routes, packed =>
+        {
+            Route route = MessagePackSerializer.Deserialize<Route>(packed.PackedRoute);
+            LoadedRoutes.Add(route);
+        });
+    }
 
     private void UnloadRoutes()
     {
+        SelectedRoute = null;
         if (!LoadedRoutes.Any()) return;
         // TODO: Probably save routes to disk here if they've changed
         
