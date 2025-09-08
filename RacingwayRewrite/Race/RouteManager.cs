@@ -16,7 +16,8 @@ public class RouteManager : IDisposable
     internal readonly IClientState ClientState;
     internal static TerritoryTools TerritoryTools { get; private set; } = null!;
     
-    public Route? SelectedRoute { get; private set; }
+    public Address? CurrentAddress { get; set; }
+    public Route? SelectedRoute { get; internal set; }
     public List<Route> LoadedRoutes { get; private set; } = [];
 
     public RouteManager(Plugin plugin, IClientState clientState)
@@ -36,6 +37,8 @@ public class RouteManager : IDisposable
     private void AddressChanged(object? sender, Address e)
     {
         Plugin.Chat.Print(e.ReadableName);
+        CurrentAddress = e;
+        
         UnloadRoutes();
         LoadRoutes(e);
     }
@@ -56,6 +59,7 @@ public class RouteManager : IDisposable
             Parallel.ForEach(routes, packed =>
             {
                 Route route = MessagePackSerializer.Deserialize<Route>(packed.PackedRoute);
+                route.Id = packed.Id;
                 LoadedRoutes.Add(route);
             });
         
@@ -66,9 +70,28 @@ public class RouteManager : IDisposable
 
     private void UnloadRoutes()
     {
+        if (Plugin.Storage == null) return;
+        
         SelectedRoute = null;
         if (!LoadedRoutes.Any()) return;
-        // TODO: Probably save routes to disk here if they've changed
+        
+        // Ensure routes get saved into the database
+        ILiteCollection<RouteInfo> routeCollection = Plugin.Storage.GetRouteCollection();
+        foreach (Route route in LoadedRoutes)
+        {
+            byte[] packed = MessagePackSerializer.Serialize(route);
+            
+            // This is a new route, not saved in the database
+            if (route.Id == null)
+            {
+                RouteInfo toSave = new RouteInfo(route.Name, route.Description, route.Address, packed);
+                routeCollection.Insert(toSave);
+                continue;
+            }
+            
+            // Route exists, just update the entry
+            routeCollection.Update(route.Id, new RouteInfo(route.Name, route.Description, route.Address, packed));
+        }
         
         LoadedRoutes = [];
     }
