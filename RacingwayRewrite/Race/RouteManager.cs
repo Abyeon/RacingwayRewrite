@@ -42,19 +42,25 @@ public class RouteManager : IDisposable
 
     public void LoadRoutes(Address address)
     {
-        if (Plugin.Storage == null)
+        Task.Run(() =>
         {
-            Plugin.Chat.Warning("Unable to load routes when Storage is null.");
-            return;
-        }
+            if (Plugin.Storage == null)
+            {
+                Plugin.Chat.Warning("Unable to load routes when Storage is null.");
+                return;
+            }
         
-        ILiteCollection<RouteInfo> routeCollection = Plugin.Storage.GetRouteCollection();
-        List<RouteInfo> routes = routeCollection.Query().Where(x => x.Address == address).ToList();
+            ILiteCollection<RouteInfo> routeCollection = Plugin.Storage.GetRouteCollection();
+            List<RouteInfo> routes = routeCollection.Query().Where(x => x.Address == address).ToList();
 
-        Parallel.ForEach(routes, packed =>
-        {
-            Route route = MessagePackSerializer.Deserialize<Route>(packed.PackedRoute);
-            LoadedRoutes.Add(route);
+            Parallel.ForEach(routes, packed =>
+            {
+                Route route = MessagePackSerializer.Deserialize<Route>(packed.PackedRoute);
+                LoadedRoutes.Add(route);
+            });
+        
+            if (LoadedRoutes.Count > 0)
+                Plugin.Chat.Print($"Loaded {LoadedRoutes.Count} routes.");
         });
     }
 
