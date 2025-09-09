@@ -66,10 +66,20 @@ public class RouteLoader : IDisposable
                 // Update start trigger to reference route
                 if (route.Triggers.Exists(x => x is Start))
                 {
-                    Start? trigger = (Start?)route.Triggers.Find(x => x is Start);
-                    if (trigger != null)
+                    Start? start = (Start?)route.Triggers.Find(x => x is Start);
+                    if (start != null)
                     {
-                        trigger.Route = route;
+                        start.Route = route;
+                    }
+                }
+                
+                // Do the same for loops
+                if (route.Triggers.Exists(x => x is Loop))
+                {
+                    Loop? loop = (Loop?)route.Triggers.Find(x => x is Loop);
+                    if (loop != null)
+                    {
+                        loop.Route = route;
                     }
                 }
                 

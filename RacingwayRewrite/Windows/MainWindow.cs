@@ -38,24 +38,6 @@ public class MainWindow : Window, IDisposable
         {
             Plugin.ToggleEditUI();
         }
-
-        // if (ImGui.Button("Place Checkpoint") && Plugin.ClientState.LocalPlayer != null)
-        // {
-        //     Shape shape = new Cube(Plugin.ClientState.LocalPlayer.Position - new Vector3(0, 0.01f, 0), Vector3.One, Vector3.Zero);
-        //     Plugin.RaceManager.Triggers.Add(new Checkpoint(shape));
-        // }
-        //
-        // if (ImGui.Button("Place Fail") && Plugin.ClientState.LocalPlayer != null)
-        // {
-        //     Shape shape = new Cube(Plugin.ClientState.LocalPlayer.Position - new Vector3(0, 0.01f, 0), Vector3.One, Vector3.Zero);
-        //     Plugin.RaceManager.Triggers.Add(new Fail(shape));
-        // }
-        //
-        // if (ImGui.Button("Remove All Cubes"))
-        // {
-        //     Plugin.RaceManager.Triggers.Clear();
-        // }
-        
 #if DEBUG
         ImGui.Text("Debug Buttons");
         if (ImGui.Button("Test chat functions"))
@@ -63,7 +45,11 @@ public class MainWindow : Window, IDisposable
             Plugin.Chat.Print("Printing example chats:");
             Plugin.Chat.Error("Error! Too many triggers on screen. Please check");
             Plugin.Chat.Warning("Warning, your route lacks a proper description. Consider adding one!");
-            //Plugin.Chat.TestPrintIcons();
+        }
+
+        if (ImGui.Button("Print Chat Icons"))
+        {
+            Plugin.Chat.TestPrintIcons();
         }
 #endif
     }

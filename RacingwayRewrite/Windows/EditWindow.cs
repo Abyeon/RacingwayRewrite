@@ -225,22 +225,25 @@ public class EditWindow : Window, IDisposable
         {
             var transform = trigger.Shape.Transform;
             ImGui.PushID(id++);
-
-            using (_ = ImRaii.Disabled(!ctrl))
+            
+            if (ImGuiComponents.IconButton("###RaceEditBehavior", FontAwesomeIcon.Cog))
             {
-                if (ImGuiComponents.IconButton("###RacingwayErase", FontAwesomeIcon.Eraser))
-                {
-                    route.Triggers.Remove(trigger);
-                    continue;
-                }
-                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                {
-                    ImGui.SetTooltip("Ctrl + Click to erase this trigger.");
-                }
+                ImGui.OpenPopup("Trigger Behavior");
+            }
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            {
+                ImGui.SetTooltip("Edit trigger behavior.");
+            }
+            
+            ITrigger temp = trigger;
+            if (DrawTriggerBehaviourPopup(route, ref temp))
+            {
+                int index = route.Triggers.IndexOf(trigger);
+                route.Triggers[index] = temp;
             }
 
             ImGui.SameLine();
-            if (ImGuiComponents.IconButton("###RacingwayToPlayer", FontAwesomeIcon.ArrowsToDot))
+            if (ImGuiComponents.IconButton("###RaceMove", FontAwesomeIcon.ArrowsToDot))
             {
                 trigger.Shape.Transform.Position = Plugin.ClientState.LocalPlayer.Position - new Vector3(0, 0.01f, 0);
                 Plugin.Chat.Print("Moved trigger to player's feet.");
@@ -253,7 +256,7 @@ public class EditWindow : Window, IDisposable
             if (loader.SelectedTrigger != trigger)
             {
                 ImGui.SameLine();
-                if (ImGuiComponents.IconButton(id, FontAwesomeIcon.RulerCombined))
+                if (ImGuiComponents.IconButton("###RaceGizmo", FontAwesomeIcon.RulerCombined))
                 {
                     loader.SelectedTrigger = trigger;
                 }
@@ -263,14 +266,27 @@ public class EditWindow : Window, IDisposable
                 }
             }
             
+            ImGui.SameLine();
+            using (_ = ImRaii.Disabled(!ctrl))
+            {
+                if (ImGuiComponents.IconButton("###RaceErase", FontAwesomeIcon.Eraser))
+                {
+                    route.Triggers.Remove(trigger);
+                    continue;
+                }
+                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                {
+                    ImGui.SetTooltip("Ctrl + Click to erase this trigger.");
+                }
+            }
+            
             // Draw trigger type selection
             ImGui.SameLine();
             if (ImGui.Selectable(trigger.GetType().Name))
             {
-                ImGui.OpenPopup("Trigger Popup");
+                ImGui.OpenPopup("Trigger Type");
             }
-
-            ITrigger temp = trigger;
+            
             if (DrawTriggerTypePopup(route, ref temp))
             {
                 int index = route.Triggers.IndexOf(trigger);
@@ -299,9 +315,35 @@ public class EditWindow : Window, IDisposable
         }
     }
 
+    private bool DrawTriggerBehaviourPopup(Route route, ref ITrigger trigger)
+    {
+        using var popup = ImRaii.Popup("Trigger Behavior");
+        if (!popup.Success) return false;
+
+        if (ImGui.Selectable("Trigger if player inside", trigger.TriggerFlags == Behavior.Always))
+        {
+            trigger.TriggerFlags = Behavior.Always;
+            return true;
+        }
+
+        if (ImGui.Selectable("Trigger when on ground", trigger.TriggerFlags == Behavior.OnlyGrounded))
+        {
+            trigger.TriggerFlags = Behavior.OnlyGrounded;
+            return true;
+        }
+
+        if (ImGui.Selectable("Trigger when jumping", trigger.TriggerFlags == Behavior.OnlyJumping))
+        {
+            trigger.TriggerFlags = Behavior.OnlyJumping;
+            return true;
+        }
+
+        return false;
+    }
+
     private bool DrawTriggerTypePopup(Route route, ref ITrigger trigger)
     {
-        using var popup = ImRaii.Popup("Trigger Popup");
+        using var popup = ImRaii.Popup("Trigger Type");
         if (!popup.Success) return false;
 
         if (ImGui.Selectable("Start", trigger is Start))
@@ -314,12 +356,42 @@ public class EditWindow : Window, IDisposable
                 return false;
             }
 
+            if (route.Triggers.Exists(trigger => trigger is Loop))
+            {
+                Plugin.Chat.Warning("Cannot add start trigger when there is a loop trigger.");
+                return false;
+            }
+
             trigger = new Start(trigger.Shape)
             {
                 Route = route
             };
             
-            return true; // Updated the trigger, return true.
+            return true;
+        }
+
+        if (ImGui.Selectable("Loop", trigger is Loop))
+        {
+            if (trigger is Loop) return false;
+
+            if (route.Triggers.Exists(trigger => trigger is Loop))
+            {
+                Plugin.Chat.Warning("Route already contains a loop! You cannot have more than one.");
+                return false;
+            }
+
+            if (route.Triggers.Exists(trigger => trigger is Start or Finish))
+            {
+                Plugin.Chat.Warning("Cannot add a loop when there are start or finish triggers.");
+                return false;
+            }
+
+            trigger = new Loop(trigger.Shape)
+            {
+                Route = route
+            };
+
+            return true;
         }
 
         if (ImGui.Selectable("Checkpoint", trigger is Checkpoint))
@@ -341,6 +413,12 @@ public class EditWindow : Window, IDisposable
         if (ImGui.Selectable("Finish", trigger is Finish))
         {
             if (trigger is Finish) return false;
+
+            if (route.Triggers.Exists(trigger => trigger is Loop))
+            {
+                Plugin.Chat.Warning("Cannot add a finish trigger when there is a loop trigger.");
+                return false;
+            }
             
             trigger = new Finish(trigger.Shape);
             return true;

@@ -16,6 +16,7 @@ public enum Behavior : ushort
 [Union(1, typeof(Checkpoint))]
 [Union(2, typeof(Fail))]
 [Union(3, typeof(Finish))]
+[Union(4, typeof(Loop))]
 public interface ITrigger
 {
     Shape Shape { get; set; }

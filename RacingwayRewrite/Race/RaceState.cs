@@ -21,6 +21,7 @@ public class RaceState(Player player)
     /// <param name="route">The route the player is in</param>
     public void Start(Route route)
     {
+        Lap = 0;
         CurrentRoute = route;
         Timer.Restart();
         InRace = true;
@@ -67,7 +68,16 @@ public class RaceState(Player player)
     /// </summary>
     public void Loop()
     {
-        // TODO: Implement lap count in Route
+        //TODO: Handle checkpoint logic
+        // Check if the player has reached each checkpoint before this
+        
+        Lap++;
+        
+        // Reached needed lap count
+        if (CurrentRoute != null && Lap == CurrentRoute.Laps)
+        {
+            Finish();
+        }
     }
 
     /// <summary>
@@ -80,6 +90,7 @@ public class RaceState(Player player)
         
         CurrentRoute?.Kick(player);
         CurrentRoute = null;
+        InRace = false;
         
         if (Plugin.Configuration.AllowChat)
         {

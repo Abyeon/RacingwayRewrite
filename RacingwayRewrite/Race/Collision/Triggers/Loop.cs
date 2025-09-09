@@ -6,7 +6,7 @@ using RacingwayRewrite.Race.Collision.Shapes;
 namespace RacingwayRewrite.Race.Collision;
 
 [MessagePackObject]
-public class Start : ITrigger
+public class Loop : ITrigger
 {
     [Key(0)] public Shape Shape { get; set; } 
     [Key(1)] public Behavior TriggerFlags { get; set; } = Behavior.OnlyGrounded;
@@ -14,15 +14,16 @@ public class Start : ITrigger
     [IgnoreMember] public uint DefaultColor { get; set; } = 0x5500FF0F;
     [IgnoreMember] public uint TriggeredColor { get; set; } = 0x55FF0000;
     [IgnoreMember] public List<uint> Touchers { get; } = [];
-
+    
     [IgnoreMember] public Route? Route { get; set; } = null;
+    
 
-    public Start(Shape shape)
+    public Loop(Shape shape)
     {
         Shape = shape;
     }
     
-    public Start(Shape shape, Behavior triggerFlags)
+    public Loop(Shape shape, Behavior triggerFlags)
     {
         Shape = shape;
         TriggerFlags = triggerFlags;
@@ -30,14 +31,17 @@ public class Start : ITrigger
 
     public void OnEnter(Player player)
     {
-        Plugin.Log.Verbose("Start entered");
+        if (player.State.InRace)
+            player.State.Loop();
+        
+        Plugin.Log.Verbose("Loop entered");
     }
 
     public void OnExit(Player player)
     {
-        if (Route == null) throw new NullReferenceException("Route is null");
+        if (!player.State.InRace && Route != null)
+            player.State.Start(Route);
         
-        player.State.Start(Route);
-        Plugin.Log.Debug("Start exited");
+        Plugin.Log.Debug("Loop exited");
     }
 }

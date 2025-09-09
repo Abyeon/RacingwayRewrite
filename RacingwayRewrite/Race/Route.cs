@@ -40,7 +40,8 @@ public class Route
     public void CheckCollision(Player player)
     {
         // Return early if we don't even have a complete route
-        if (!Triggers.Exists(x => x is Start) || !Triggers.Exists(x => x is Finish))
+        bool traditionalTriggers = Triggers.Exists(x => x is Start) || Triggers.Exists(x => x is Finish);
+        if (!traditionalTriggers || Triggers.Exists(x => x is Loop))
             return;
         
         if (!AllowMounts && player.Mounted)
@@ -77,7 +78,7 @@ public class Route
     {
         foreach (var trigger in Triggers)
         {
-            trigger.Exit(player);
+            trigger.Touchers.Remove(player.Id);
         }
     }
 }
