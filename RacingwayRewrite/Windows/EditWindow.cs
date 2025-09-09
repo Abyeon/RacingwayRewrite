@@ -3,6 +3,7 @@ using System.Numerics;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
+using LiteDB;
 using RacingwayRewrite.Race;
 using RacingwayRewrite.Race.Territory;
 
@@ -10,7 +11,7 @@ namespace RacingwayRewrite.Windows;
 
 public class EditWindow : Window, IDisposable
 {
-    private Plugin Plugin;
+    internal readonly Plugin Plugin;
     
     public EditWindow(Plugin plugin)
         : base("Racingway Editor###HiFellas", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
@@ -30,7 +31,7 @@ public class EditWindow : Window, IDisposable
     public override void Draw()
     {
         // TODO: Find better names.. This sucks lol
-        RouteManager manager = Plugin.RaceManager.RouteManager;
+        RouteLoader loader = Plugin.RaceManager.RouteLoader;
 
         if (Plugin.ClientState.LocalPlayer == null)
         {
@@ -38,13 +39,17 @@ public class EditWindow : Window, IDisposable
             return;
         }
         
-        if (manager.CurrentAddress == null)
+        if (loader.CurrentAddress == null)
         {
             ImGui.Text("Current zone not detected. Consider loading into a new zone.");
             return;
         }
+        
+        // Cast to non-nullable to get the readable name.
+        Address currentAddress = (Address)loader.CurrentAddress;
+        WindowName = $"Racingway Editor - {currentAddress.ReadableName}##HiFellas";
 
-        if (manager.SelectedRoute == null)
+        if (loader.SelectedRoute == null)
         {
             // Draw route creation button
             if (ImGui.Button("Create New Route"))
@@ -54,7 +59,7 @@ public class EditWindow : Window, IDisposable
             {
                 if (popup.Success)
                 {
-                    ImGui.Text("Please input a name for your new route!");
+                    ImGui.Text("Please enter a name for your new route!");
                     ImGui.Separator();
 
                     ImGui.InputText("##routeNameInput", ref routeNameInputBuf, 64);
@@ -67,8 +72,8 @@ public class EditWindow : Window, IDisposable
                         }
                         else
                         {
-                            Route newRoute = new Route(routeNameInputBuf, (Address)manager.CurrentAddress);
-                            manager.LoadedRoutes.Add(newRoute);
+                            Route newRoute = new Route(routeNameInputBuf, (Address)loader.CurrentAddress);
+                            loader.LoadedRoutes.Add(newRoute);
                             routeNameInputBuf = "";
                         
                             ImGui.CloseCurrentPopup();
@@ -84,43 +89,61 @@ public class EditWindow : Window, IDisposable
             }
             
             // Draw route selection Dropdown
-            if (manager.LoadedRoutes.Count > 0)
+            if (loader.LoadedRoutes.Count > 0)
             {
                 ImGui.Text("Select Route:");
-
-                using (var tree = ImRaii.TreeNode("Routes"))
-                {
-                    if (tree.Success)
-                    {
-                        uint id = 0;
-                        foreach (var route in manager.LoadedRoutes)
-                        {
-                            if (ImGui.Selectable($"{route.Name}##{id}", route == manager.SelectedRoute))
-                            {
-                                if (route == manager.SelectedRoute) return;
-                                manager.SelectedRoute = route;
-                            }
-                        
-                            id++;
-                        }
-                    }
-                }
+                DrawLoadedRoutes(loader);
             }
         }
         else
         {
-            if (ImGui.Button("Stop Editing Route"))
-            {
-                manager.SelectedRoute = null;
-                return;
-            }
-            
-            DrawRouteInfo(manager.SelectedRoute);
+            DrawRouteInfo(loader);
         }
     }
 
-    public void DrawRouteInfo(Route route)
+    public void DrawLoadedRoutes(RouteLoader loader)
     {
+        using (ImRaii.PushStyle(ImGuiStyleVar.WindowPadding, new Vector2(5f, 5f)))
+        {
+            using (ImRaii.PushColor(ImGuiCol.ChildBg, ImGui.GetColorU32(ImGuiCol.FrameBg)))
+            {
+                using var child = ImRaii.Child("Routes", Vector2.Zero, true, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.AlwaysUseWindowPadding);
+                if (child.Success)
+                {
+                    uint id = 0;
+                    foreach (var route in loader.LoadedRoutes)
+                    {
+                        if (ImGui.Selectable($"{route.Name}##{id}", route == loader.SelectedRoute))
+                        {
+                            if (route == loader.SelectedRoute) return;
+                            loader.SelectedRoute = route;
+                        }
+                        
+                        id++;
+                    }
+                }
+            }
+        }
+    }
+
+    public void DrawRouteInfo(RouteLoader loader)
+    {
+        if (loader.SelectedRoute == null) return;
+        
+        if (ImGui.Button("Stop Editing Route"))
+        {
+            loader.SelectedRoute = null;
+            return;
+        }
+        
+        Route route = loader.SelectedRoute;
+        
+        ImGui.SameLine();
+        if (ImGui.Button("Delete")) 
+            ImGui.OpenPopup("Delete Route");
+        
+        DrawRouteDeletionPopup(loader);
+        
         ImGui.Text(route.Name);
         ImGui.Text(route.Description);
 
@@ -141,6 +164,63 @@ public class EditWindow : Window, IDisposable
             }
             
             ImGui.Unindent();
+        }
+        
+        DrawTriggerSettings(route);
+    }
+
+    public void DrawTriggerSettings(Route route)
+    {
+        
+    }
+
+    private void DrawRouteDeletionPopup(RouteLoader loader)
+    {
+        if (loader.SelectedRoute == null) return;
+        if (Plugin.Storage == null) return;
+
+        try
+        {
+            using (var popup = ImRaii.Popup("Delete Route"))
+            {
+                if (popup.Success)
+                {
+                    ImGui.Text("Are you sure you want to delete this route?");
+                    ImGui.Separator();
+
+                    if (ImGui.Button("Confirm"))
+                    {
+                        var routeCollection = Plugin.Storage.GetRouteCollection();
+                        
+                        // If the route exists in DB, delete it
+                        var id = loader.SelectedRoute.Id;
+                        if (loader.SelectedRoute.Id != null && routeCollection.Exists(x => x.Id == (ObjectId)id!))
+                        {
+                            routeCollection.Delete(loader.SelectedRoute.Id);
+                        }
+                        
+                        string name = loader.SelectedRoute.Name;
+
+                        loader.LoadedRoutes.Remove(loader.SelectedRoute);
+                        loader.SelectedRoute = null;
+                        
+                        Plugin.Chat.Print($"Deleted {name} from storage.");
+
+                        ImGui.CloseCurrentPopup();
+                    }
+
+                    ImGui.SameLine();
+                    if (ImGui.Button("Cancel"))
+                    {
+                        ImGui.CloseCurrentPopup();
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Chat.Error(ex.Message);
+            Plugin.Log.Error(ex.ToString());
         }
     }
 }

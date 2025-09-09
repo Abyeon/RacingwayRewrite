@@ -10,7 +10,7 @@ using RacingwayRewrite.Storage;
 
 namespace RacingwayRewrite.Race;
 
-public class RouteManager : IDisposable
+public class RouteLoader : IDisposable
 {
     internal readonly Plugin Plugin;
     internal readonly IClientState ClientState;
@@ -20,7 +20,7 @@ public class RouteManager : IDisposable
     public Route? SelectedRoute { get; internal set; }
     public List<Route> LoadedRoutes { get; private set; } = [];
 
-    public RouteManager(Plugin plugin, IClientState clientState)
+    public RouteLoader(Plugin plugin, IClientState clientState)
     {
         Plugin = plugin;
         ClientState = clientState;
@@ -45,6 +45,7 @@ public class RouteManager : IDisposable
 
     public void LoadRoutes(Address address)
     {
+        // Run off the main thread to avoid hangs when loading
         Task.Run(() =>
         {
             if (Plugin.Storage == null)
@@ -56,12 +57,15 @@ public class RouteManager : IDisposable
             ILiteCollection<RouteInfo> routeCollection = Plugin.Storage.GetRouteCollection();
             List<RouteInfo> routes = routeCollection.Query().Where(x => x.Address == address).ToList();
 
-            Parallel.ForEach(routes, packed =>
+            foreach (var packed in routes)
             {
                 Route route = MessagePackSerializer.Deserialize<Route>(packed.PackedRoute);
                 route.Id = packed.Id;
                 LoadedRoutes.Add(route);
-            });
+            }
+            
+            // Pre-sort routes by name
+            LoadedRoutes.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
         
             if (LoadedRoutes.Count > 0)
                 Plugin.Chat.Print($"Loaded {LoadedRoutes.Count} routes.");

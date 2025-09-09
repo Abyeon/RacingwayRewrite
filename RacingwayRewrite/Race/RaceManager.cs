@@ -11,7 +11,7 @@ namespace RacingwayRewrite.Race;
 
 public class RaceManager : IDisposable
 {
-    public RouteManager RouteManager { get; private set; }
+    public RouteLoader RouteLoader { get; private set; }
     
     internal readonly Plugin Plugin;
     internal readonly IFramework Framework;
@@ -27,7 +27,7 @@ public class RaceManager : IDisposable
         ClientState = clientState;
         
         Framework.Update += Update;
-        RouteManager = new RouteManager(plugin, clientState);
+        RouteLoader = new RouteLoader(plugin, clientState);
     }
 
     private IBattleChara? localPlayer;
@@ -149,7 +149,7 @@ public class RaceManager : IDisposable
         Players.Clear();
         Triggers.Clear();
         
-        RouteManager.Dispose();
+        RouteLoader.Dispose();
         
         localPlayer = null;
     }
