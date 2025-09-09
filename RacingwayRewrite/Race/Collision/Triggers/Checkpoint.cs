@@ -30,9 +30,6 @@ public class Checkpoint : ITrigger
 
     public void OnEnter(Player player)
     {
-        Guid guid = Guid.NewGuid();
-        Plugin.VfxManager.AddVfx(new Vfx(guid.ToString(), "itm_tape_01c", player.Character), 3000);
-        
         Plugin.Log.Debug("Checkpoint entered");
     }
 

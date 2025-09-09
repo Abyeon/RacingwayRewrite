@@ -15,6 +15,8 @@ public class Start : ITrigger
     [IgnoreMember] public uint TriggeredColor { get; set; } = 0x55FF0000;
     [IgnoreMember] public List<uint> Touchers { get; } = [];
 
+    [IgnoreMember] public Route? Route { get; set; } = null;
+
     public Start(Shape shape)
     {
         Shape = shape;
@@ -28,7 +30,10 @@ public class Start : ITrigger
 
     public void OnEnter(Player player)
     {
-        Plugin.Log.Debug("Start entered");
+        if (Route == null) throw new NullReferenceException("Route is null");
+        
+        player.State.Start(Route);
+        Plugin.Log.Verbose("Start entered");
     }
 
     public void OnExit(Player player)

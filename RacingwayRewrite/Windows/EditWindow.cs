@@ -4,11 +4,9 @@ using System.Numerics;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Bindings.ImGuizmo;
 using Dalamud.Interface;
-using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using LiteDB;
 using RacingwayRewrite.Race;
 using RacingwayRewrite.Race.Collision;
 using RacingwayRewrite.Race.Collision.Shapes;
@@ -235,6 +233,10 @@ public class EditWindow : Window, IDisposable
                     route.Triggers.Remove(trigger);
                     continue;
                 }
+                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                {
+                    ImGui.SetTooltip("Ctrl + Click to erase this trigger.");
+                }
             }
 
             ImGui.SameLine();
@@ -261,6 +263,19 @@ public class EditWindow : Window, IDisposable
                 }
             }
             
+            // Draw trigger type selection
+            ImGui.SameLine();
+            if (ImGui.Selectable(trigger.GetType().Name))
+            {
+                ImGui.OpenPopup("Trigger Popup");
+            }
+
+            ITrigger temp = trigger;
+            if (DrawTriggerTypePopup(route, ref temp))
+            {
+                int index = route.Triggers.IndexOf(trigger);
+                route.Triggers[index] = temp;
+            }
         
             Vector3 pos = transform.Position;
             if (ImGui.DragFloat3("Position", ref pos, 0.05f))
@@ -284,6 +299,56 @@ public class EditWindow : Window, IDisposable
         }
     }
 
+    private bool DrawTriggerTypePopup(Route route, ref ITrigger trigger)
+    {
+        using var popup = ImRaii.Popup("Trigger Popup");
+        if (!popup.Success) return false;
+
+        if (ImGui.Selectable("Start", trigger is Start))
+        {
+            if (trigger is Start) return false;
+            
+            if (route.Triggers.Exists(trigger => trigger is Start))
+            {
+                Plugin.Chat.Warning("Route already contains a start! You cannot have more than one.");
+                return false;
+            }
+
+            trigger = new Start(trigger.Shape)
+            {
+                Route = route
+            };
+            
+            return true; // Updated the trigger, return true.
+        }
+
+        if (ImGui.Selectable("Checkpoint", trigger is Checkpoint))
+        {
+            if (trigger is Checkpoint) return false;
+            
+            trigger = new Checkpoint(trigger.Shape);
+            return true;
+        }
+
+        if (ImGui.Selectable("Fail", trigger is Fail))
+        {
+            if (trigger is Fail) return false;
+            
+            trigger = new Fail(trigger.Shape);
+            return true;
+        }
+
+        if (ImGui.Selectable("Finish", trigger is Finish))
+        {
+            if (trigger is Finish) return false;
+            
+            trigger = new Finish(trigger.Shape);
+            return true;
+        }
+
+        return false;
+    }
+
     private void DrawRouteDeletionPopup(RouteLoader loader)
     {
         if (loader.SelectedRoute == null) return;
@@ -291,39 +356,37 @@ public class EditWindow : Window, IDisposable
 
         try
         {
-            using (var popup = ImRaii.Popup("Delete Route"))
+            using var popup = ImRaii.Popup("Delete Route");
+            if (popup.Success)
             {
-                if (popup.Success)
+                ImGui.Text("Are you sure you want to delete this route?");
+                ImGui.Separator();
+
+                if (ImGui.Button("Confirm"))
                 {
-                    ImGui.Text("Are you sure you want to delete this route?");
-                    ImGui.Separator();
-
-                    if (ImGui.Button("Confirm"))
+                    var routeCollection = Plugin.Storage.GetRouteCollection();
+                        
+                    // If the route exists in DB, delete it
+                    var id = loader.SelectedRoute.Id;
+                    if (loader.SelectedRoute.Id != null && routeCollection.Exists(x => x.Id == id!))
                     {
-                        var routeCollection = Plugin.Storage.GetRouteCollection();
-                        
-                        // If the route exists in DB, delete it
-                        var id = loader.SelectedRoute.Id;
-                        if (loader.SelectedRoute.Id != null && routeCollection.Exists(x => x.Id == (ObjectId)id!))
-                        {
-                            routeCollection.Delete(loader.SelectedRoute.Id);
-                        }
-                        
-                        string name = loader.SelectedRoute.Name;
-
-                        loader.LoadedRoutes.Remove(loader.SelectedRoute);
-                        loader.SelectedRoute = null;
-                        
-                        Plugin.Chat.Print($"Deleted {name} from storage.");
-
-                        ImGui.CloseCurrentPopup();
+                        routeCollection.Delete(loader.SelectedRoute.Id);
                     }
+                        
+                    string name = loader.SelectedRoute.Name;
 
-                    ImGui.SameLine();
-                    if (ImGui.Button("Cancel"))
-                    {
-                        ImGui.CloseCurrentPopup();
-                    }
+                    loader.LoadedRoutes.Remove(loader.SelectedRoute);
+                    loader.SelectedRoute = null;
+                        
+                    Plugin.Chat.Print($"Deleted {name} from storage.");
+
+                    ImGui.CloseCurrentPopup();
+                }
+
+                ImGui.SameLine();
+                if (ImGui.Button("Cancel"))
+                {
+                    ImGui.CloseCurrentPopup();
                 }
             }
         }

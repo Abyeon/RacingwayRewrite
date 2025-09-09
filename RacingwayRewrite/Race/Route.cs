@@ -39,12 +39,35 @@ public class Route
 
     public void CheckCollision(Player player)
     {
+        // Return early if we don't even have a complete route
+        if (!Triggers.Exists(x => x is Start) || !Triggers.Exists(x => x is Finish))
+            return;
+        
         if (!AllowMounts && player.Mounted)
         {
             player.State.Fail();
         }
 
-        Parallel.ForEach(Triggers,trigger =>
+        List<ITrigger> triggersToCheck = [];
+
+        if (player.State.InRace)
+        {
+            if (player.State.CurrentRoute == this)
+            {
+                triggersToCheck = Triggers;
+            }
+            else
+            {
+                return; // Leave if the player isn't currently in this route
+            }
+        }
+        else
+        {
+            // Only check start trigger if not in race
+            triggersToCheck.Add(Triggers.Find(x => x is Start)!);
+        }
+
+        Parallel.ForEach(triggersToCheck,trigger =>
         {
             trigger.CheckCollision(player);
         });

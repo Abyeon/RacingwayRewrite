@@ -10,7 +10,7 @@ public class Fail: ITrigger
 {
     [Key(0)] public Shape Shape { get; set; } 
     [Key(1)] public Behavior TriggerFlags { get; set; } = Behavior.Always;
-    [IgnoreMember] public uint Color { get; set; } = 0x5500FF0F;
+    [IgnoreMember] public uint Color { get; set; } = 0x551111FF;
     [IgnoreMember] public uint DefaultColor { get; set; } = 0x551111FF;
     [IgnoreMember] public uint TriggeredColor { get; set; } = 0x55FF0000;
     [IgnoreMember] public List<uint> Touchers { get; } = [];
@@ -42,6 +42,8 @@ public class Fail: ITrigger
             
             Plugin.VfxManager.AddVfx(new Vfx(guid.ToString(), "dk05th_stdn0t", player.Character), 2000);
         }
+        
+        player.State.Fail();
         
         Plugin.Log.Debug("Fail entered");
     }

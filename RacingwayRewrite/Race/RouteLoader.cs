@@ -62,6 +62,17 @@ public class RouteLoader : IDisposable
             {
                 Route route = MessagePackSerializer.Deserialize<Route>(packed.PackedRoute);
                 route.Id = packed.Id;
+                
+                // Update start trigger to reference route
+                if (route.Triggers.Exists(x => x is Start))
+                {
+                    Start? trigger = (Start?)route.Triggers.Find(x => x is Start);
+                    if (trigger != null)
+                    {
+                        trigger.Route = route;
+                    }
+                }
+                
                 LoadedRoutes.Add(route);
             }
             

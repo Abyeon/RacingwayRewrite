@@ -118,14 +118,18 @@ public class Chat : IDisposable
 
     public void PrintPlayer(Player player, string message)
     {
-        if (Plugin.ClientState.LocalPlayer == null) return; 
+        // Have to run on framework thread since we're checking for the local player
+        Plugin.Framework.RunOnFrameworkThread(() =>
+        {
+            if (Plugin.ClientState.LocalPlayer == null) return; 
         
-        SeString payload = Tag()
-                           .AddPlayer(player) 
-                           .AddUiForeground(" " + message, (ushort)Colors.Print) 
-                           .BuiltString;
+            SeString payload = Tag()
+                               .AddPlayer(player) 
+                               .AddUiForeground(" " + message, (ushort)Colors.Print) 
+                               .BuiltString;
         
-        ChatGui.Print(payload);
+            ChatGui.Print(payload);
+        });
     }
 
     public void Dispose()

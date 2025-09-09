@@ -54,6 +54,7 @@ public class RaceState(Player player)
         Checkpoint = 0;
         InRace = false;
         CurrentRoute.Kick(player);
+        CurrentRoute = null;
 
         if (player.IsClient && Plugin.Configuration.AllowChat)
         {
@@ -76,6 +77,9 @@ public class RaceState(Player player)
     {
         TimeSpan elapsed = Timer.Elapsed;
         Timer.Stop();
+        
+        CurrentRoute?.Kick(player);
+        CurrentRoute = null;
         
         if (Plugin.Configuration.AllowChat)
         {
