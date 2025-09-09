@@ -1,11 +1,19 @@
 ﻿using System;
+using System.Linq;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Bindings.ImGuizmo;
+using Dalamud.Interface;
+using Dalamud.Interface.Colors;
+using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using LiteDB;
 using RacingwayRewrite.Race;
+using RacingwayRewrite.Race.Collision;
+using RacingwayRewrite.Race.Collision.Shapes;
 using RacingwayRewrite.Race.Territory;
+using RacingwayRewrite.Utils;
 
 namespace RacingwayRewrite.Windows;
 
@@ -133,6 +141,7 @@ public class EditWindow : Window, IDisposable
         if (ImGui.Button("Stop Editing Route"))
         {
             loader.SelectedRoute = null;
+            loader.SelectedTrigger = null;
             return;
         }
         
@@ -166,12 +175,113 @@ public class EditWindow : Window, IDisposable
             ImGui.Unindent();
         }
         
-        DrawTriggerSettings(route);
+        DrawTriggerSettings(loader);
     }
 
-    public void DrawTriggerSettings(Route route)
+    public void DrawTriggerSettings(RouteLoader loader)
     {
+        if (Plugin.ClientState.LocalPlayer == null) return;
+        if (loader.SelectedRoute == null) return;
         
+        Route route = loader.SelectedRoute;
+        
+        if (ImGui.Button("Add Trigger"))
+        {
+            Shape shape = new Cube(Plugin.ClientState.LocalPlayer.Position - new Vector3(0, 0.01f, 0), Vector3.One, Vector3.Zero);
+            route.Triggers.Add(new Checkpoint(shape));
+        }
+
+        if (loader.SelectedTrigger != null)
+        {
+            if (ImGui.Button("Stop Editing"))
+            {
+                loader.SelectedTrigger = null;
+            }
+            
+            ImGui.SameLine();
+            if (ImGuiComponents.IconButton("RacingwayTranslate", FontAwesomeIcon.ArrowsUpDownLeftRight))
+            {
+                DrawExtensions.Operation = ImGuizmoOperation.Translate;
+            }
+        
+            ImGui.SameLine();
+            if (ImGuiComponents.IconButton("RacingwayRotate", FontAwesomeIcon.ArrowsSpin))
+            {
+                DrawExtensions.Operation = ImGuizmoOperation.Rotate;
+            }
+        
+            ImGui.SameLine();
+            if (ImGuiComponents.IconButton("RacingwayScale", FontAwesomeIcon.ExpandAlt))
+            {
+                DrawExtensions.Operation = ImGuizmoOperation.Scale;
+            }
+        }
+
+        using var child = ImRaii.Child("RouteTriggersChild",  Vector2.Zero, true, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.AlwaysVerticalScrollbar);
+        if (!child.Success) return;
+        
+        var ctrl = ImGui.GetIO().KeyCtrl;
+            
+        int id = 0;
+        foreach (var trigger in route.Triggers.ToList())
+        {
+            var transform = trigger.Shape.Transform;
+            ImGui.PushID(id++);
+
+            using (_ = ImRaii.Disabled(!ctrl))
+            {
+                if (ImGuiComponents.IconButton("###RacingwayErase", FontAwesomeIcon.Eraser))
+                {
+                    route.Triggers.Remove(trigger);
+                    continue;
+                }
+            }
+
+            ImGui.SameLine();
+            if (ImGuiComponents.IconButton("###RacingwayToPlayer", FontAwesomeIcon.ArrowsToDot))
+            {
+                trigger.Shape.Transform.Position = Plugin.ClientState.LocalPlayer.Position - new Vector3(0, 0.01f, 0);
+                Plugin.Chat.Print("Moved trigger to player's feet.");
+            }
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            {
+                ImGui.SetTooltip("Set trigger position to your characters position.");
+            }
+            
+            if (loader.SelectedTrigger != trigger)
+            {
+                ImGui.SameLine();
+                if (ImGuiComponents.IconButton(id, FontAwesomeIcon.RulerCombined))
+                {
+                    loader.SelectedTrigger = trigger;
+                }
+                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                {
+                    ImGui.SetTooltip("Edit using the gizmo");
+                }
+            }
+            
+        
+            Vector3 pos = transform.Position;
+            if (ImGui.DragFloat3("Position", ref pos, 0.05f))
+            {
+                transform.Position = pos;
+            }
+            
+            Vector3 scale = transform.Scale;
+            if (ImGui.DragFloat3("Scale", ref scale, 0.05f))
+            {
+                transform.Scale = scale;
+            }
+            
+            Vector3 rot = transform.Rotation;
+            if (ImGui.DragFloat3("Rotation", ref rot, 0.1f))
+            {
+                transform.Rotation = rot;
+            }
+            
+            ImGui.Separator();
+        }
     }
 
     private void DrawRouteDeletionPopup(RouteLoader loader)

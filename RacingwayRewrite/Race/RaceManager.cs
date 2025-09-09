@@ -80,8 +80,6 @@ public class RaceManager : IDisposable
     }
 
     public readonly Dictionary<uint, Player> Players = new();
-    public readonly List<Route> Routes = [];
-    public readonly List<ITrigger> Triggers = [];
     public int SelectedTrigger = -1;
     
     private void TrackPlayer(IBattleChara? actor)
@@ -135,11 +133,11 @@ public class RaceManager : IDisposable
             
             player.Position = actor.Position;
         }
-        
-        Parallel.ForEach(Triggers, trigger =>
+
+        foreach (var route in RouteLoader.LoadedRoutes)
         {
-            trigger.CheckCollision(player);
-        });
+            route.CheckCollision(player);
+        }
     }
 
     public void Dispose()
@@ -147,7 +145,6 @@ public class RaceManager : IDisposable
         Framework.Update -= Update;
         
         Players.Clear();
-        Triggers.Clear();
         
         RouteLoader.Dispose();
         

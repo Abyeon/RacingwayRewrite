@@ -37,7 +37,7 @@ public class Route
         AllowMounts = allowMounts;
     }
 
-    public void CheckCollision(Player player, bool jumped)
+    public void CheckCollision(Player player)
     {
         if (!AllowMounts && player.Mounted)
         {

@@ -48,51 +48,34 @@ public class ConfigWindow : Window, IDisposable
             Plugin.RaceManager.SelectedTrigger = -1;
         }
 
-        if (ImGuiComponents.IconButton("RacingwayTranslate", FontAwesomeIcon.ArrowsUpDownLeftRight, ImGuiColors.DalamudGrey, ImGuiColors.ParsedBlue))
-        {
-            DrawExtensions.Operation = ImGuizmoOperation.Translate;
-        }
-        
-        ImGui.SameLine();
-        if (ImGuiComponents.IconButton("RacingwayRotate", FontAwesomeIcon.ArrowsSpin))
-        {
-            DrawExtensions.Operation = ImGuizmoOperation.Rotate;
-        }
-        
-        ImGui.SameLine();
-        if (ImGuiComponents.IconButton("RacingwayScale", FontAwesomeIcon.ExpandAlt))
-        {
-            DrawExtensions.Operation = ImGuizmoOperation.Scale;
-        }
-
-        int id = 0;
-        foreach (var trigger in Plugin.RaceManager.Triggers)
-        {
-            var transform = trigger.Shape.Transform;
-            ImGui.PushID(id++);
-
-            if (Plugin.RaceManager.SelectedTrigger != id - 1 && ImGui.Button("Edit With Gizmo"))
-            {
-                Plugin.RaceManager.SelectedTrigger = id - 1;
-            }
-
-            Vector3 pos = transform.Position;
-            if (ImGui.DragFloat3("Position", ref pos, 0.05f))
-            {
-                transform.Position = pos;
-            }
-            
-            Vector3 scale = transform.Scale;
-            if (ImGui.DragFloat3("Scale", ref scale, 0.05f))
-            {
-                transform.Scale = scale;
-            }
-            
-            Vector3 rot = transform.Rotation;
-            if (ImGui.DragFloat3("Rotation", ref rot, 0.1f))
-            {
-                transform.Rotation = rot;
-            }
-        }
+        // int id = 0;
+        // foreach (var trigger in Plugin.RaceManager.Triggers)
+        // {
+        //     var transform = trigger.Shape.Transform;
+        //     ImGui.PushID(id++);
+        //
+        //     if (Plugin.RaceManager.SelectedTrigger != id - 1 && ImGui.Button("Edit With Gizmo"))
+        //     {
+        //         Plugin.RaceManager.SelectedTrigger = id - 1;
+        //     }
+        //
+        //     Vector3 pos = transform.Position;
+        //     if (ImGui.DragFloat3("Position", ref pos, 0.05f))
+        //     {
+        //         transform.Position = pos;
+        //     }
+        //     
+        //     Vector3 scale = transform.Scale;
+        //     if (ImGui.DragFloat3("Scale", ref scale, 0.05f))
+        //     {
+        //         transform.Scale = scale;
+        //     }
+        //     
+        //     Vector3 rot = transform.Rotation;
+        //     if (ImGui.DragFloat3("Rotation", ref rot, 0.1f))
+        //     {
+        //         transform.Rotation = rot;
+        //     }
+        // }
     }
 }

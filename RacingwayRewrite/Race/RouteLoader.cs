@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Dalamud.Plugin.Services;
 using LiteDB;
 using MessagePack;
+using RacingwayRewrite.Race.Collision;
 using RacingwayRewrite.Race.Territory;
 using RacingwayRewrite.Storage;
 
@@ -18,6 +19,7 @@ public class RouteLoader : IDisposable
     
     public Address? CurrentAddress { get; set; }
     public Route? SelectedRoute { get; internal set; }
+    public ITrigger? SelectedTrigger { get; internal set; }
     public List<Route> LoadedRoutes { get; private set; } = [];
 
     public RouteLoader(Plugin plugin, IClientState clientState)
@@ -36,7 +38,6 @@ public class RouteLoader : IDisposable
 
     private void AddressChanged(object? sender, Address e)
     {
-        Plugin.Chat.Print(e.ReadableName);
         CurrentAddress = e;
         
         UnloadRoutes();
@@ -68,7 +69,7 @@ public class RouteLoader : IDisposable
             LoadedRoutes.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
         
             if (LoadedRoutes.Count > 0)
-                Plugin.Chat.Print($"Loaded {LoadedRoutes.Count} routes.");
+                Plugin.Chat.Print($"Loaded {LoadedRoutes.Count} route(s).");
         });
     }
 
