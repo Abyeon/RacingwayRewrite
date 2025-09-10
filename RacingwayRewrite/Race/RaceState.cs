@@ -47,7 +47,7 @@ public class RaceState(Player player)
     /// <summary>
     /// Kicks the player out of their current race
     /// </summary>
-    public void Fail()
+    public void Fail(string reason = "")
     {
         if (CurrentRoute == null) throw new NullReferenceException("Route was null");
         
@@ -59,7 +59,7 @@ public class RaceState(Player player)
 
         if (player.IsClient && Plugin.Configuration.AllowChat)
         {
-            Plugin.Chat.Warning("Failed race!");
+            Plugin.Chat.Warning($"Failed race! {reason}");
         }
     }
 

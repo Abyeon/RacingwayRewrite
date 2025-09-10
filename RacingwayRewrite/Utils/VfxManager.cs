@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using Pictomancy;
 
-namespace RacingwayRewrite.Race;
+namespace RacingwayRewrite.Utils;
 
 // Eventually want to move from Pictomancy to something more custom for this. For now works fine though.
+/// <summary>
+/// Handles spawning/deleting custom VFX from the scene
+/// </summary>
 public class VfxManager : IDisposable
 {
     internal readonly IFramework Framework;
@@ -58,6 +60,7 @@ public class VfxManager : IDisposable
 
     public void Dispose()
     {
+        currentVfx = [];
         Framework.Update -= Update;
     }
 }

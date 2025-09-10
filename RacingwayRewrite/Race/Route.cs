@@ -44,9 +44,9 @@ public class Route
         if (!traditionalTriggers || Triggers.Exists(x => x is Loop))
             return;
         
-        if (!AllowMounts && player.Mounted)
+        if (player.State.CurrentRoute == this && !AllowMounts && player.Mounted)
         {
-            player.State.Fail();
+            player.State.Fail("Cannot use mounts in this route.");
         }
 
         List<ITrigger> triggersToCheck = [];
