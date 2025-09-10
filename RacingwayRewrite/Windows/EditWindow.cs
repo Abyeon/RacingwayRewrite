@@ -55,7 +55,7 @@ public class EditWindow : Window, IDisposable
         Address currentAddress = (Address)loader.CurrentAddress;
         WindowName = $"Racingway Editor - {currentAddress.ReadableName}##HiFellas";
 
-        if (loader.SelectedRoute == null)
+        if (loader.SelectedRoute == -1)
         {
             // Draw route creation button
             if (ImGui.Button("Create New Route"))
@@ -117,12 +117,14 @@ public class EditWindow : Window, IDisposable
                 if (child.Success)
                 {
                     uint id = 0;
-                    foreach (var route in loader.LoadedRoutes)
+                    for (int i = 0; i < loader.LoadedRoutes.Count; i++)
                     {
-                        if (ImGui.Selectable($"{route.Name}##{id}", route == loader.SelectedRoute))
+                        var route = loader.LoadedRoutes[i];
+                        
+                        if (ImGui.Selectable($"{route.Name}##{id}", i == loader.SelectedRoute))
                         {
-                            if (route == loader.SelectedRoute) return;
-                            loader.SelectedRoute = route;
+                            if (i == loader.SelectedRoute) return;
+                            loader.SelectedRoute = i;
                         }
                         
                         id++;
@@ -134,16 +136,16 @@ public class EditWindow : Window, IDisposable
 
     public void DrawRouteInfo(RouteLoader loader)
     {
-        if (loader.SelectedRoute == null) return;
+        if (loader.SelectedRoute == -1) return;
         
         if (ImGui.Button("Stop Editing Route"))
         {
-            loader.SelectedRoute = null;
+            loader.SelectedRoute = -1;
             loader.SelectedTrigger = null;
             return;
         }
         
-        Route route = loader.SelectedRoute;
+        Route route = loader.LoadedRoutes[loader.SelectedRoute];
         
         ImGui.SameLine();
         if (ImGui.Button("Delete")) 
@@ -179,9 +181,9 @@ public class EditWindow : Window, IDisposable
     public void DrawTriggerSettings(RouteLoader loader)
     {
         if (Plugin.ClientState.LocalPlayer == null) return;
-        if (loader.SelectedRoute == null) return;
+        if (loader.SelectedRoute == -1) return;
         
-        Route route = loader.SelectedRoute;
+        Route route = loader.LoadedRoutes[loader.SelectedRoute];
         
         if (ImGui.Button("Add Trigger"))
         {
@@ -236,7 +238,7 @@ public class EditWindow : Window, IDisposable
             }
             
             ITrigger temp = trigger;
-            if (DrawTriggerBehaviourPopup(route, ref temp))
+            if (DrawTriggerBehaviourPopup(ref temp))
             {
                 int index = route.Triggers.IndexOf(trigger);
                 route.Triggers[index] = temp;
@@ -315,7 +317,7 @@ public class EditWindow : Window, IDisposable
         }
     }
 
-    private bool DrawTriggerBehaviourPopup(Route route, ref ITrigger trigger)
+    private bool DrawTriggerBehaviourPopup(ref ITrigger trigger)
     {
         using var popup = ImRaii.Popup("Trigger Behavior");
         if (!popup.Success) return false;
@@ -429,7 +431,7 @@ public class EditWindow : Window, IDisposable
 
     private void DrawRouteDeletionPopup(RouteLoader loader)
     {
-        if (loader.SelectedRoute == null) return;
+        if (loader.SelectedRoute == -1) return;
         if (Plugin.Storage == null) return;
 
         try
@@ -444,17 +446,28 @@ public class EditWindow : Window, IDisposable
                 {
                     var routeCollection = Plugin.Storage.GetRouteCollection();
                         
-                    // If the route exists in DB, delete it
-                    var id = loader.SelectedRoute.Id;
-                    if (loader.SelectedRoute.Id != null && routeCollection.Exists(x => x.Id == id!))
+                    var route = loader.LoadedRoutes[loader.SelectedRoute];
+
+                    // Kick every player just in case
+                    foreach (var player in Plugin.RaceManager.Players.Values)
                     {
-                        routeCollection.Delete(loader.SelectedRoute.Id);
+                        if (player.State.CurrentRoute == route)
+                        {
+                            player.State.Fail("Route was deleted!");
+                            route.Kick(player);
+                        }
+                    }
+                    
+                    // If the route exists in DB, delete it
+                    if (route.Id != null && routeCollection.Exists(x => x.Id == route.Id!))
+                    {
+                        routeCollection.Delete(route.Id);
                     }
                         
-                    string name = loader.SelectedRoute.Name;
+                    string name = route.Name;
 
-                    loader.LoadedRoutes.Remove(loader.SelectedRoute);
-                    loader.SelectedRoute = null;
+                    loader.LoadedRoutes.RemoveAt(loader.SelectedRoute);
+                    loader.SelectedRoute = -1;
                         
                     Plugin.Chat.Print($"Deleted {name} from storage.");
 

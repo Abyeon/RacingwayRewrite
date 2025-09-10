@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using RacingwayRewrite.Race.Collision;
 using RacingwayRewrite.Utils;
 
 namespace RacingwayRewrite.Race;
@@ -21,6 +22,14 @@ public class RaceState(Player player)
     /// <param name="route">The route the player is in</param>
     public void Start(Route route)
     {
+        if (InRace && route != CurrentRoute)
+        {
+            Plugin.Chat.Warning("Tried to start a race in a route while actively in a race!" +
+                                " If this was intended, quit your last race with /race quit");
+            //Plugin.Chat.Warning("");
+            return;
+        }
+        
         Lap = 0;
         CurrentRoute = route;
         Timer.Restart();
@@ -54,7 +63,7 @@ public class RaceState(Player player)
         Timer.Reset();
         Checkpoint = 0;
         InRace = false;
-        CurrentRoute.Kick(player);
+        CurrentRoute?.Kick(player);
         CurrentRoute = null;
 
         if (player.IsClient && Plugin.Configuration.AllowChat)
@@ -87,6 +96,9 @@ public class RaceState(Player player)
     {
         TimeSpan elapsed = Timer.Elapsed;
         Timer.Stop();
+
+        Checkpoint = 0;
+        Lap = 0;
         
         CurrentRoute?.Kick(player);
         CurrentRoute = null;

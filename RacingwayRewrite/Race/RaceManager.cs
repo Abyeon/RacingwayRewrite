@@ -44,7 +44,6 @@ public class RaceManager : IDisposable
         
         if (Plugin.Configuration.TrackOthers)
         {
-            IEnumerable<IBattleChara> playersToTrack = ObjectTable.PlayerObjects;
             List<uint> touchedIds = new List<uint>();
             
             foreach (var player in ObjectTable.PlayerObjects)
@@ -88,17 +87,16 @@ public class RaceManager : IDisposable
         {
             if (actor == null) return;
 
-            if (!Players.ContainsKey(actor.EntityId))
+            if (!Players.TryGetValue(actor.EntityId, out var player))
             {
-                Player player = new Player(actor);
-                Players.Add(actor.EntityId, player);
+                Player newPlayer = new Player(actor);
+                Players.Add(actor.EntityId, newPlayer);
 
-                player.UpdateState(actor, (float)Framework.UpdateDelta.TotalSeconds);
-                PlayerUpdated(player, actor);
+                newPlayer.UpdateState(actor, (float)Framework.UpdateDelta.TotalSeconds);
+                PlayerUpdated(newPlayer, actor);
             }
             else
             {
-                Player player = Players[actor.EntityId];
                 player.Rotation = actor.Rotation;
 
                 bool lastGrounded = player.Grounded;

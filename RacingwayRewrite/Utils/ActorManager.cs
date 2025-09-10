@@ -21,6 +21,8 @@ public class ActorManager : IDisposable
     }
     
     private Stack<uint> ids = new Stack<uint>();
+    
+    // Probably want to implement a queue much like OrangeGuidanceTomestone's here
 
     private unsafe void Update(IFramework framework)
     {

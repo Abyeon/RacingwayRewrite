@@ -63,9 +63,8 @@ public class Overlay : Window, IDisposable
         }
 #endif
 
-        if (Plugin.RaceManager.RouteLoader.SelectedRoute == null) return;
-            
-        Route route = Plugin.RaceManager.RouteLoader.SelectedRoute;
+        if (Plugin.RaceManager.RouteLoader.SelectedRoute == -1) return;
+        Route route = Plugin.RaceManager.RouteLoader.LoadedRoutes[Plugin.RaceManager.RouteLoader.SelectedRoute];
 
         foreach (var trigger in route.Triggers)
         {

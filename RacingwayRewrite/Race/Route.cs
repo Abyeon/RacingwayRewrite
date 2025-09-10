@@ -47,24 +47,18 @@ public class Route
         if (player.State.CurrentRoute == this && !AllowMounts && player.Mounted)
         {
             player.State.Fail("Cannot use mounts in this route.");
+            Kick(player);
         }
 
         List<ITrigger> triggersToCheck = [];
 
-        if (player.State.InRace)
+        if (player.State.InRace && player.State.CurrentRoute == this)
         {
-            if (player.State.CurrentRoute == this)
-            {
-                triggersToCheck = Triggers;
-            }
-            else
-            {
-                return; // Leave if the player isn't currently in this route
-            }
+            triggersToCheck = Triggers;
         }
         else
         {
-            // Only check start trigger if not in race
+            // Only check start trigger if not racing in this route
             triggersToCheck.Add(Triggers.Find(x => x is Start)!);
         }
 
@@ -78,7 +72,12 @@ public class Route
     {
         foreach (var trigger in Triggers)
         {
-            trigger.Touchers.Remove(player.Id);
+            // Weird bug where trigger colors don't get updated when player fails/finishes
+            // Best to look at this with awake eyes lol.
+            if (trigger.Touchers.Contains(player.Id))
+                trigger.Exit(player);
+
+            trigger.UpdateColor();
         }
     }
 }

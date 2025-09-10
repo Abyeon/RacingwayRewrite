@@ -18,7 +18,7 @@ public class RouteLoader : IDisposable
     internal static TerritoryTools TerritoryTools { get; private set; } = null!;
     
     public Address? CurrentAddress { get; set; }
-    public Route? SelectedRoute { get; internal set; }
+    public int SelectedRoute { get; internal set; } = -1;
     public ITrigger? SelectedTrigger { get; internal set; }
     public List<Route> LoadedRoutes { get; private set; } = [];
 
@@ -98,7 +98,7 @@ public class RouteLoader : IDisposable
     {
         if (Plugin.Storage == null) return;
         
-        SelectedRoute = null;
+        SelectedRoute = -1;
         if (!LoadedRoutes.Any()) return;
         
         // Ensure routes get saved into the database

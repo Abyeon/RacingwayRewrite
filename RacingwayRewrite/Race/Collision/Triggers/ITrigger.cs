@@ -75,7 +75,7 @@ public interface ITrigger
         }
     }
 
-    private void UpdateColor()
+    void UpdateColor()
     {
         Color = Touchers.Count == 0 ? DefaultColor : TriggeredColor;
     }

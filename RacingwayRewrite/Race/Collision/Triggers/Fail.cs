@@ -7,7 +7,7 @@ using RacingwayRewrite.Utils;
 namespace RacingwayRewrite.Race.Collision;
 
 [MessagePackObject]
-public class Fail: ITrigger
+public class Fail : ITrigger
 {
     [Key(0)] public Shape Shape { get; set; } 
     [Key(1)] public Behavior TriggerFlags { get; set; } = Behavior.Always;
@@ -43,7 +43,7 @@ public class Fail: ITrigger
             
             Plugin.VfxManager.AddVfx(new Vfx(guid.ToString(), "dk05th_stdn0t", player.Character), 2000);
         }
-        
+
         player.State.Fail();
         
         Plugin.Log.Debug("Fail entered");
