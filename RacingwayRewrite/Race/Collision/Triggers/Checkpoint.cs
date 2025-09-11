@@ -30,6 +30,7 @@ public class Checkpoint : ITrigger
 
     public void OnEnter(Player player)
     {
+        player.State.HitCheckpoint(Position);
         Plugin.Log.Debug("Checkpoint entered");
     }
 

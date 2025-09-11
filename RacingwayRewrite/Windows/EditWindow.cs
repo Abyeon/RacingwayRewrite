@@ -36,7 +36,6 @@ public class EditWindow : Window, IDisposable
     private string routeNameInputBuf = "";
     public override void Draw()
     {
-        // TODO: Find better names.. This sucks lol
         RouteLoader loader = Plugin.RaceManager.RouteLoader;
 
         if (Plugin.ClientState.LocalPlayer == null)
@@ -138,14 +137,22 @@ public class EditWindow : Window, IDisposable
     {
         if (loader.SelectedRoute == -1) return;
         
+        Route route = loader.LoadedRoutes[loader.SelectedRoute];
+        
         if (ImGui.Button("Stop Editing Route"))
         {
+            if (!route.ValidCheckpoints())
+            {
+                Plugin.Chat.Warning("This route's checkpoints are not set up correctly!\n" +
+                                    "Please check that each checkpoint position increments by one or matches that of another checkpoint (this allows for branching paths.)");
+            }
+            
             loader.SelectedRoute = -1;
             loader.SelectedTrigger = null;
+            
             return;
         }
         
-        Route route = loader.LoadedRoutes[loader.SelectedRoute];
         
         ImGui.SameLine();
         if (ImGui.Button("Delete")) 
@@ -284,7 +291,10 @@ public class EditWindow : Window, IDisposable
             
             // Draw trigger type selection
             ImGui.SameLine();
-            if (ImGui.Selectable(trigger.GetType().Name))
+            
+            var name = trigger is Checkpoint checkpoint ? $"{trigger.GetType().Name} ({checkpoint.Position})" : trigger.GetType().Name;
+            
+            if (ImGui.Selectable(name))
             {
                 ImGui.OpenPopup("Trigger Type");
             }
@@ -321,6 +331,17 @@ public class EditWindow : Window, IDisposable
     {
         using var popup = ImRaii.Popup("Trigger Behavior");
         if (!popup.Success) return false;
+
+        if (trigger is Checkpoint checkpoint)
+        {
+            var position = checkpoint.Position;
+            if (ImGui.InputUInt("Position", ref position) && position > 0)
+            {
+                checkpoint.Position = position;
+                trigger = checkpoint;
+                return true;
+            }
+        }
 
         if (ImGui.Selectable("Trigger if player inside", trigger.TriggerFlags == Behavior.Always))
         {

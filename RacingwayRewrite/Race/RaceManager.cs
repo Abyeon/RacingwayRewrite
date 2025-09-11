@@ -38,10 +38,6 @@ public class RaceManager : IDisposable
         if (localPlayer == null) return; // Return if the player is null
         if (ClientState.IsPvPExcludingDen) return; // Return if the player is in pvp
         
-        // Experiments with showing confetti.
-        // TODO: Implement a VFX handler for spawning/stopping vfx
-        //PictoService.VfxRenderer.AddCommon($"{localPlayer.EntityId}", "itm_tape_01c", localPlayer);
-        
         if (Plugin.Configuration.TrackOthers)
         {
             List<uint> touchedIds = new List<uint>();

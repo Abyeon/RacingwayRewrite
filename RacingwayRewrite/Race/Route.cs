@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 using LiteDB;
 using MessagePack;
 using RacingwayRewrite.Race.Collision;
 using RacingwayRewrite.Race.Territory;
+using ZLinq;
 
 namespace RacingwayRewrite.Race;
 
@@ -37,6 +40,10 @@ public class Route
         AllowMounts = allowMounts;
     }
 
+    /// <summary>
+    /// Checks the collision between the player and every trigger in this route.
+    /// </summary>
+    /// <param name="player">The player to check</param>
     public void CheckCollision(Player player)
     {
         // Return early if we don't even have a complete route
@@ -68,6 +75,10 @@ public class Route
         });
     }
 
+    /// <summary>
+    /// Remove the player from every trigger in this route
+    /// </summary>
+    /// <param name="player">Player to remove</param>
     public void Kick(Player player)
     {
         foreach (var trigger in Triggers)
@@ -78,6 +89,52 @@ public class Route
                 trigger.Exit(player);
 
             trigger.UpdateColor();
+        }
+    }
+
+    /// <summary>
+    /// Checks if this route's checkpoint layout is valid
+    /// </summary>
+    /// <returns>True if the checkpoints are valid, False if not</returns>
+    public bool ValidCheckpoints()
+    {
+        // Get checkpoints in Triggers and then sort by their position
+        var checkpoints = Triggers.AsValueEnumerable().Where(x => x is Checkpoint).Cast<Checkpoint>().ToArray();
+        Array.Sort(checkpoints, (a, b) => a.Position.CompareTo(b.Position));
+        
+        if (checkpoints.Length <= 1)
+        {
+            switch (checkpoints.Length)
+            {
+                case 0:
+                case 1 when checkpoints[0].Position == 1:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        
+        // Check if there are any gaps between checkpoints
+        for (var i = 1; i < checkpoints.Length; i++)
+        {
+            var lastPos = checkpoints[i-1].Position;
+            var pos = checkpoints[i].Position;
+
+            if (lastPos < 1) throw new ConstraintException("Checkpoint positions cannot be less than 1.");
+
+            if (pos - lastPos > 1) return false;
+        }
+        
+        return true;
+    }
+
+    [IgnoreMember]
+    public uint LastCheckpoint
+    {
+        get
+        {
+            var checkpoints = Triggers.AsValueEnumerable().Where(x => x is Checkpoint).Cast<Checkpoint>().ToArray();
+            return checkpoints.Length == 0 ? 0 : checkpoints.Max(x => x.Position);
         }
     }
 }

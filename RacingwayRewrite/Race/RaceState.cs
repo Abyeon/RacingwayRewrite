@@ -29,7 +29,15 @@ public class RaceState(Player player)
             //Plugin.Chat.Warning("");
             return;
         }
-        
+
+        if (!route.ValidCheckpoints())
+        {
+            Plugin.Chat.Warning("This route's checkpoints are not set up correctly!\n" +
+                                "Please check that each checkpoint position increments by one or matches that of another checkpoint (this allows for branching paths.)");
+            return;
+        }
+
+        Checkpoint = 0;
         Lap = 0;
         CurrentRoute = route;
         Timer.Restart();
@@ -42,6 +50,11 @@ public class RaceState(Player player)
     /// <param name="position"></param>
     public void HitCheckpoint(uint position)
     {
+        if (!InRace) return;
+        
+        // Player already hit this checkpoint
+        if (position <= Checkpoint) return;
+        
         if (Checkpoint + 1 == position)
         {
             Checkpoint = position;
@@ -58,6 +71,8 @@ public class RaceState(Player player)
     /// </summary>
     public void Fail(string reason = "")
     {
+        if (!InRace) return;
+        
         if (CurrentRoute == null) throw new NullReferenceException("Route was null");
         
         Timer.Reset();
@@ -77,13 +92,23 @@ public class RaceState(Player player)
     /// </summary>
     public void Loop()
     {
-        //TODO: Handle checkpoint logic
-        // Check if the player has reached each checkpoint before this
+        if (CurrentRoute == null)
+        {
+            Plugin.Chat.Error("The current route is null! This should never happen.");
+            return;
+        }
+        
+        if (Checkpoint != CurrentRoute.LastCheckpoint)
+        {
+            Plugin.Chat.Warning("You have not hit every checkpoint in this route yet! Turn back!");
+            return;
+        }
         
         Lap++;
+        Checkpoint = 0;
         
         // Reached needed lap count
-        if (CurrentRoute != null && Lap == CurrentRoute.Laps)
+        if (Lap == CurrentRoute.Laps)
         {
             Finish();
         }
@@ -94,9 +119,25 @@ public class RaceState(Player player)
     /// </summary>
     public void Finish()
     {
+        if (CurrentRoute == null)
+        {
+            Plugin.Chat.Error("The current route is null! This should never happen.");
+            return;
+        }
+        
+        if (Checkpoint != CurrentRoute.LastCheckpoint)
+        {
+            Plugin.Chat.Print(Checkpoint.ToString() +" "+CurrentRoute.LastCheckpoint.ToString());
+            Plugin.Chat.Warning("You have not hit every checkpoint in this route yet! Turn back!");
+            return;
+        }
+        
         TimeSpan elapsed = Timer.Elapsed;
         Timer.Stop();
-
+        
+        var guid = Guid.NewGuid();
+        Plugin.VfxManager.AddVfx(new Vfx(guid.ToString(), "itm_tape_01c", player.Character), 3000);
+        
         Checkpoint = 0;
         Lap = 0;
         
