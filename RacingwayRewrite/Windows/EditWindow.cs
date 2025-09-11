@@ -32,8 +32,7 @@ public class EditWindow : Window, IDisposable
     }
 
     public void Dispose() {}
-
-    private string routeNameInputBuf = "";
+    
     public override void Draw()
     {
         RouteLoader loader = Plugin.RaceManager.RouteLoader;
@@ -60,37 +59,18 @@ public class EditWindow : Window, IDisposable
             if (ImGui.Button("Create New Route"))
                 ImGui.OpenPopup("New Route");
 
-            using (var popup = ImRaii.Popup("New Route"))
+
+            var name = "";
+            if (Ui.AddTextConfirmationPopup("New Route", "Please enter a name for your new route!", ref name, 64))
             {
-                if (popup.Success)
+                if (name.Length == 0)
                 {
-                    ImGui.Text("Please enter a name for your new route!");
-                    ImGui.Separator();
-
-                    ImGui.InputText("##routeNameInput", ref routeNameInputBuf, 64);
-
-                    if (ImGui.Button("Create"))
-                    {
-                        if (routeNameInputBuf.Length == 0)
-                        {
-                            Plugin.Chat.Warning("Please enter a name for the new route!");
-                        }
-                        else
-                        {
-                            Route newRoute = new Route(routeNameInputBuf, (Address)loader.CurrentAddress);
-                            loader.LoadedRoutes.Add(newRoute);
-                            routeNameInputBuf = "";
-                        
-                            ImGui.CloseCurrentPopup();
-                        }
-                    }
-
-                    ImGui.SameLine();
-                    if (ImGui.Button("Cancel"))
-                    {
-                        ImGui.CloseCurrentPopup();
-                    }
+                    Plugin.Chat.Warning("Please enter a name for the new route!");
+                    return;
                 }
+                
+                Route newRoute = new Route(name, (Address)loader.CurrentAddress);
+                loader.LoadedRoutes.Add(newRoute);
             }
             
             // Draw route selection Dropdown
@@ -160,8 +140,42 @@ public class EditWindow : Window, IDisposable
         
         DrawRouteDeletionPopup(loader);
         
-        ImGui.Text(route.Name);
-        ImGui.Text(route.Description);
+        ImGuiComponents.TextWithLabel("Name", route.Name);
+        
+        ImGui.SameLine();
+        if (ImGuiComponents.IconButton(FontAwesomeIcon.Pen, Vector4.Zero))
+        {
+            ImGui.OpenPopup("Edit Name");
+        }
+        
+        var name = route.Name;
+        if (Ui.AddTextConfirmationPopup("Edit Name", "Please enter a new name for the route.", ref name, 64))
+        {
+            if (name.Length == 0)
+            {
+                Plugin.Chat.Warning("Please enter a name for the route!");
+                return;
+            }
+            
+            route.Name = name;
+        }
+        
+        ImGuiComponents.TextWithLabel("Description", route.Description.Length > 0 ? route.Description : "No description for this route.");
+        
+        ImGui.SameLine();
+        ImGui.PushID(1); // ImGui hates me if this isn't here.
+        if (ImGuiComponents.IconButton(FontAwesomeIcon.Pen, Vector4.Zero))
+        {
+            ImGui.OpenPopup("Edit Description");
+        }
+        
+        var desc = route.Description;
+        if (Ui.AddTextConfirmationPopup("Edit Description", "Please enter a new description for the route.", ref desc, 128))
+        {
+            route.Description = desc;
+            Plugin.Chat.Print(route.Description);
+        }
+        
 
         if (ImGui.CollapsingHeader("Behavior Settings"))
         {
@@ -229,98 +243,109 @@ public class EditWindow : Window, IDisposable
         
         var ctrl = ImGui.GetIO().KeyCtrl;
             
-        int id = 0;
+        var id = 0;
         foreach (var trigger in route.Triggers.ToList())
         {
-            var transform = trigger.Shape.Transform;
-            ImGui.PushID(id++);
-            
-            if (ImGuiComponents.IconButton("###RaceEditBehavior", FontAwesomeIcon.Cog))
+            using (new Ui.Wrap(id.ToString()))
             {
-                ImGui.OpenPopup("Trigger Behavior");
-            }
-            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-            {
-                ImGui.SetTooltip("Edit trigger behavior.");
-            }
-            
-            ITrigger temp = trigger;
-            if (DrawTriggerBehaviourPopup(ref temp))
-            {
-                int index = route.Triggers.IndexOf(trigger);
-                route.Triggers[index] = temp;
+                var transform = trigger.Shape.Transform;
+                ImGui.PushID(id++);
+                    
+                if (ImGuiComponents.IconButton("###RaceEditBehavior", FontAwesomeIcon.Cog))
+                {
+                    ImGui.OpenPopup("Trigger Behavior");
+                }
+                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                {
+                    ImGui.SetTooltip("Edit trigger behavior.");
+                }
+                    
+                ITrigger temp = trigger;
+                if (DrawTriggerBehaviourPopup(ref temp))
+                {
+                    int index = route.Triggers.IndexOf(trigger);
+                    route.Triggers[index] = temp;
+                }
+
+                ImGui.SameLine();
+                if (ImGuiComponents.IconButton("###RaceMove", FontAwesomeIcon.ArrowsToDot))
+                {
+                    trigger.Shape.Transform.Position = Plugin.ClientState.LocalPlayer.Position - new Vector3(0, 0.01f, 0);
+                    Plugin.Chat.Print("Moved trigger to player's feet.");
+                }
+                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                {
+                    ImGui.SetTooltip("Set trigger position to your characters position.");
+                }
+                    
+                if (loader.SelectedTrigger != trigger)
+                {
+                    ImGui.SameLine();
+                    if (ImGuiComponents.IconButton("###RaceGizmo", FontAwesomeIcon.RulerCombined))
+                    {
+                        loader.SelectedTrigger = trigger;
+                    }
+                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                    {
+                        ImGui.SetTooltip("Edit using the gizmo");
+                    }
+                }
+                    
+                ImGui.SameLine();
+                using (_ = ImRaii.Disabled(!ctrl))
+                {
+                    if (ImGuiComponents.IconButton("###RaceErase", FontAwesomeIcon.Eraser))
+                    {
+                        route.Triggers.Remove(trigger);
+                        continue;
+                    }
+                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                    {
+                        ImGui.SetTooltip("Ctrl + Click to erase this trigger.");
+                    }
+                }
+                    
+                // Draw trigger type selection
+                ImGui.SameLine();
+                    
+                var name = trigger is Checkpoint checkpoint ? $"{trigger.GetType().Name} ({checkpoint.Position})" : trigger.GetType().Name;
+                    
+                if (ImGui.Selectable(name))
+                {
+                    ImGui.OpenPopup("Trigger Type");
+                }
+                    
+                if (DrawTriggerTypePopup(route, ref temp))
+                {
+                    int index = route.Triggers.IndexOf(trigger);
+                    route.Triggers[index] = temp;
+                }
+                
+                Vector3 pos = transform.Position;
+                if (ImGui.DragFloat3("Position", ref pos, 0.05f))
+                {
+                    transform.Position = pos;
+                }
+                    
+                Vector3 scale = transform.Scale;
+                if (ImGui.DragFloat3("Scale", ref scale, 0.05f))
+                {
+                    transform.Scale = scale;
+                }
+                    
+                Vector3 rot = transform.Rotation;
+                if (ImGui.DragFloat3("Rotation", ref rot, 0.1f))
+                {
+                    transform.Rotation = rot;
+                }
             }
 
-            ImGui.SameLine();
-            if (ImGuiComponents.IconButton("###RaceMove", FontAwesomeIcon.ArrowsToDot))
-            {
-                trigger.Shape.Transform.Position = Plugin.ClientState.LocalPlayer.Position - new Vector3(0, 0.01f, 0);
-                Plugin.Chat.Print("Moved trigger to player's feet.");
-            }
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
             {
-                ImGui.SetTooltip("Set trigger position to your characters position.");
-            }
-            
-            if (loader.SelectedTrigger != trigger)
+                loader.HoveredTrigger = trigger;
+            } else if (loader.HoveredTrigger == trigger)
             {
-                ImGui.SameLine();
-                if (ImGuiComponents.IconButton("###RaceGizmo", FontAwesomeIcon.RulerCombined))
-                {
-                    loader.SelectedTrigger = trigger;
-                }
-                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                {
-                    ImGui.SetTooltip("Edit using the gizmo");
-                }
-            }
-            
-            ImGui.SameLine();
-            using (_ = ImRaii.Disabled(!ctrl))
-            {
-                if (ImGuiComponents.IconButton("###RaceErase", FontAwesomeIcon.Eraser))
-                {
-                    route.Triggers.Remove(trigger);
-                    continue;
-                }
-                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                {
-                    ImGui.SetTooltip("Ctrl + Click to erase this trigger.");
-                }
-            }
-            
-            // Draw trigger type selection
-            ImGui.SameLine();
-            
-            var name = trigger is Checkpoint checkpoint ? $"{trigger.GetType().Name} ({checkpoint.Position})" : trigger.GetType().Name;
-            
-            if (ImGui.Selectable(name))
-            {
-                ImGui.OpenPopup("Trigger Type");
-            }
-            
-            if (DrawTriggerTypePopup(route, ref temp))
-            {
-                int index = route.Triggers.IndexOf(trigger);
-                route.Triggers[index] = temp;
-            }
-        
-            Vector3 pos = transform.Position;
-            if (ImGui.DragFloat3("Position", ref pos, 0.05f))
-            {
-                transform.Position = pos;
-            }
-            
-            Vector3 scale = transform.Scale;
-            if (ImGui.DragFloat3("Scale", ref scale, 0.05f))
-            {
-                transform.Scale = scale;
-            }
-            
-            Vector3 rot = transform.Rotation;
-            if (ImGui.DragFloat3("Rotation", ref rot, 0.1f))
-            {
-                transform.Rotation = rot;
+                loader.HoveredTrigger = null;
             }
             
             ImGui.Separator();

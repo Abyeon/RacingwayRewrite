@@ -77,6 +77,13 @@ public class Overlay : Window, IDisposable
                     trigger.Shape.Transform = tmpTransform;
                 }
             }
+            
+            // Draw highlight for hovered trigger
+            if (trigger == Plugin.RaceManager.RouteLoader.HoveredTrigger)
+            {
+                if (trigger.Shape.GetType() == typeof(Cube))
+                    drawList.AddCube((Cube)trigger.Shape, 0xFFFFFFFF);
+            }
                 
             if (trigger.Shape.GetType() == typeof(Cube))
                 drawList.AddCubeFilled((Cube)trigger.Shape, trigger.Color);

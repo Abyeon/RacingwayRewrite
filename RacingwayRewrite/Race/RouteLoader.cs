@@ -20,6 +20,7 @@ public class RouteLoader : IDisposable
     public Address? CurrentAddress { get; set; }
     public int SelectedRoute { get; internal set; } = -1;
     public ITrigger? SelectedTrigger { get; internal set; }
+    public ITrigger? HoveredTrigger { get; internal set; }
     public List<Route> LoadedRoutes { get; private set; } = [];
 
     public RouteLoader(Plugin plugin, IClientState clientState)
