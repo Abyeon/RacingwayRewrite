@@ -140,13 +140,13 @@ public class EditWindow : Window, IDisposable
         
         DrawRouteDeletionPopup(loader);
         
-        ImGuiComponents.TextWithLabel("Name", route.Name);
-        
-        ImGui.SameLine();
         if (ImGuiComponents.IconButton(FontAwesomeIcon.Pen, Vector4.Zero))
         {
             ImGui.OpenPopup("Edit Name");
         }
+        
+        ImGui.SameLine();
+        ImGuiComponents.TextWithLabel("Name", route.Name);
         
         var name = route.Name;
         if (Ui.AddTextConfirmationPopup("Edit Name", "Please enter a new name for the route.", ref name, 64))
@@ -160,20 +160,20 @@ public class EditWindow : Window, IDisposable
             route.Name = name;
         }
         
-        ImGuiComponents.TextWithLabel("Description", route.Description.Length > 0 ? route.Description : "No description for this route.");
-        
-        ImGui.SameLine();
         ImGui.PushID(1); // ImGui hates me if this isn't here.
         if (ImGuiComponents.IconButton(FontAwesomeIcon.Pen, Vector4.Zero))
         {
             ImGui.OpenPopup("Edit Description");
         }
         
+        ImGui.SameLine();
+        ImGui.TextWrapped("Description: " + (route.Description.Length > 0 ? route.Description : "No description for this route."));
+        
+        
         var desc = route.Description;
         if (Ui.AddTextConfirmationPopup("Edit Description", "Please enter a new description for the route.", ref desc, 128))
         {
             route.Description = desc;
-            Plugin.Chat.Print(route.Description);
         }
         
 
@@ -238,18 +238,18 @@ public class EditWindow : Window, IDisposable
             }
         }
 
-        using var child = ImRaii.Child("RouteTriggersChild",  Vector2.Zero, true, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.AlwaysVerticalScrollbar);
+        using var child = ImRaii.Child("RouteTriggersChild",  Vector2.Zero, true, ImGuiWindowFlags.AlwaysAutoResize);
         if (!child.Success) return;
         
         var ctrl = ImGui.GetIO().KeyCtrl;
-            
+        
         var id = 0;
         foreach (var trigger in route.Triggers.ToList())
         {
-            using (new Ui.Wrap(id.ToString()))
+            using (new Ui.Hoverable(id.ToString()))
             {
                 var transform = trigger.Shape.Transform;
-                ImGui.PushID(id++);
+                using var pushedId = ImRaii.PushId(id++);
                     
                 if (ImGuiComponents.IconButton("###RaceEditBehavior", FontAwesomeIcon.Cog))
                 {
@@ -309,8 +309,8 @@ public class EditWindow : Window, IDisposable
                 ImGui.SameLine();
                     
                 var name = trigger is Checkpoint checkpoint ? $"{trigger.GetType().Name} ({checkpoint.Position})" : trigger.GetType().Name;
-                    
-                if (ImGui.Selectable(name))
+                
+                if (ImGui.Selectable(name, size: new Vector2(150f, 0)))
                 {
                     ImGui.OpenPopup("Trigger Type");
                 }
@@ -347,8 +347,9 @@ public class EditWindow : Window, IDisposable
             {
                 loader.HoveredTrigger = null;
             }
-            
-            ImGui.Separator();
+
+            ImGui.Spacing();
+            //ImGui.Separator();
         }
     }
 
