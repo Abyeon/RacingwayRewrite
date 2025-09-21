@@ -14,7 +14,7 @@ public class RaceState(Player player)
     public bool InRace { get; set; }
     public uint Checkpoint { get; set; }
     public uint Lap { get; set; }
-    public Stopwatch Timer { get; set; } = new Stopwatch();
+    public Stopwatch Timer { get; set; } = new();
 
     /// <summary>
     /// Start's the timer for the player

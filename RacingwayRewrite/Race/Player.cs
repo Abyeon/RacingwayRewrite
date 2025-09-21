@@ -14,11 +14,11 @@ public class Player
     public uint HomeworldRow { get; set; }
     
     public IPlayerCharacter? Character { get; set; }
-    public bool IsClient { get; set; } = false;
+    public bool IsClient { get; set; }
     public RaceState State { get; set; }
     
     public bool Grounded { get; set; } = true;
-    public bool Mounted { get; set; } = false;
+    public bool Mounted { get; set; }
     public Vector3 LastPosition { get; set; }
     public Vector3 Position { get; set; }
     public Vector3 LastVelocity { get; set; }
