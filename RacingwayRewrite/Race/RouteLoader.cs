@@ -97,10 +97,13 @@ public class RouteLoader : IDisposable
 
     private void UnloadRoutes()
     {
-        if (Plugin.Storage == null) return;
-        
-        SelectedRoute = -1;
         if (!LoadedRoutes.Any()) return;
+        SelectedRoute = -1;
+        
+        // Kick players out of their race
+        Plugin.RaceManager.KickAllPlayers();
+        
+        if (Plugin.Storage == null) return;
         
         // Ensure routes get saved into the database
         ILiteCollection<RouteInfo> routeCollection = Plugin.Storage.GetRouteCollection();

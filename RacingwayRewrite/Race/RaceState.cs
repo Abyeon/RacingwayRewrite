@@ -65,6 +65,21 @@ public class RaceState(Player player)
             Plugin.Log.Verbose($"{player.Name} tried hitting a checkpoint without going through the previous ones.");
         }
     }
+
+    /// <summary>
+    /// Silently kicks the player out of their current race.
+    /// </summary>
+    public void SilentFail()
+    {
+        if (!InRace) return;
+        if (CurrentRoute == null) throw new NullReferenceException("Route was null");
+        
+        Timer.Reset();
+        Checkpoint = 0;
+        InRace = false;
+        CurrentRoute?.Kick(player);
+        CurrentRoute = null;
+    }
     
     /// <summary>
     /// Kicks the player out of their current race
@@ -73,13 +88,7 @@ public class RaceState(Player player)
     {
         if (!InRace) return;
         
-        if (CurrentRoute == null) throw new NullReferenceException("Route was null");
-        
-        Timer.Reset();
-        Checkpoint = 0;
-        InRace = false;
-        CurrentRoute?.Kick(player);
-        CurrentRoute = null;
+        SilentFail();
 
         if (player.IsClient && Plugin.Configuration.AllowChat)
         {

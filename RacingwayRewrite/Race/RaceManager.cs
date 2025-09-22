@@ -134,6 +134,17 @@ public class RaceManager : IDisposable
         }
     }
 
+    /// <summary>
+    /// Removes all players from their races
+    /// </summary>
+    public void KickAllPlayers()
+    {
+        foreach (var player in Players.Values.ToList())
+        {
+            player.State.SilentFail();
+        }
+    }
+
     public void Dispose()
     {
         Framework.Update -= Update;
