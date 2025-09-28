@@ -1,17 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Pictomancy;
 using RacingwayRewrite.Race.Collision;
 using RacingwayRewrite.Race.Collision.Shapes;
+using RacingwayRewrite.Windows.Tabs;
 
 namespace RacingwayRewrite.Windows;
 
 public class MainWindow : Window, IDisposable
 {
     private Plugin Plugin;
+    private List<ITab> Tabs;
     
     public MainWindow(Plugin plugin)
         : base("My Amazing Window##With a hidden ID", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
@@ -23,34 +27,57 @@ public class MainWindow : Window, IDisposable
         };
         
         Plugin = plugin;
+
+        Tabs = [
+            new Debug(Plugin),
+            new About(Plugin)
+        ];
     }
 
-    public void Dispose() { }
+    public void Dispose()
+    {
+        foreach (var tab in Tabs)
+        {
+            tab.Dispose();
+        }
+    }
 
+    private string? SelectedTab { get; set; }
+
+    public void SelectTab(string label)
+    {
+        SelectedTab = label;
+    }
+    
+    // Thanks to Asriel:
+    //https://github.com/WorkingRobot/Waitingway/blob/5b97266c2f68f8a6f38d19e1d9a0337973254264/Waitingway/Windows/Settings.cs#L75
+    private ImRaii.IEndObject TabItem(string label)
+    {
+        var isSelected = string.Equals(SelectedTab, label, StringComparison.Ordinal);
+        if (isSelected)
+        {
+            SelectedTab = null;
+            var open = true;
+            return ImRaii.TabItem(label, ref open, ImGuiTabItemFlags.SetSelected);
+        }
+        return ImRaii.TabItem(label);
+    }
+    
     public override void Draw()
     {
-        if (ImGui.Button("Show Settings"))
+        using var tabBar = ImRaii.TabBar("##race-tabs", ImGuiTabBarFlags.None);
+        if (tabBar)
         {
-            Plugin.ToggleConfigUI();
-        }
-        
-        if (ImGui.Button("Show Edit Window"))
-        {
-            Plugin.ToggleEditUI();
-        }
-#if DEBUG
-        ImGui.Text("Debug Buttons");
-        if (ImGui.Button("Test chat functions"))
-        {
-            Plugin.Chat.Print("Printing example chats:");
-            Plugin.Chat.Error("Error! Too many triggers on screen. Please check");
-            Plugin.Chat.Warning("Warning, your route lacks a proper description. Consider adding one!");
-        }
+            foreach (var tab in Tabs)
+            {
+                using var child = TabItem(tab.Name);
+                if (!child.Success) continue;
 
-        if (ImGui.Button("Print Chat Icons"))
-        {
-            Plugin.Chat.TestPrintIcons();
+                // Make the tab bar sticky by making every tab a child
+                using var tabChild = ImRaii.Child($"###{tab.Name}-child");
+                if (!tabChild.Success) continue;
+                tab.Draw();
+            }
         }
-#endif
     }
 }
