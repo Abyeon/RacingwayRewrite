@@ -8,22 +8,15 @@ namespace RacingwayRewrite.Storage;
 /// <summary>
 /// Small packed version of a Route
 /// </summary>
-public class RouteInfo
+public struct RouteInfo(string name, string author, string description, Address address, byte[] packedRoute)
 {
-    public RouteInfo(string name, string description, Address address, byte[] packedRoute)
-    {
-        Name = name;
-        Description = description;
-        Address = address;
-        PackedRoute = packedRoute;
-    }
-
-    public ObjectId Id { get; set; } = new ObjectId();
-    public string Name { get; set; }
-    public string Description { get; set; }
-    public Address Address { get; set; }
-    public byte[] PackedRoute { get; set; }
+    public ObjectId Id { get; set; } = new();
+    public string Name { get; set; } = name;
+    public string Author { get; set; } = author;
+    public string Description { get; set; } = description;
+    public Address Address { get; set; } = address;
+    public byte[] PackedRoute { get; set; } = packedRoute;
 
     [BsonIgnore]
-    Route Route => MessagePackSerializer.Deserialize<Route>(PackedRoute);
+    public Route Route => MessagePackSerializer.Deserialize<Route>(PackedRoute);
 }

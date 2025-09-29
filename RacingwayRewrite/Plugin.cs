@@ -89,10 +89,8 @@ public sealed class Plugin : IDalamudPlugin
         RaceManager.Dispose();
         VfxManager.Dispose();
         Chat.Dispose();
-        
-        if (Storage != null)
-            Storage.Dispose();
-        
+        Storage?.Dispose();
+
         WindowSystem.RemoveAllWindows();
 
         ConfigWindow.Dispose();

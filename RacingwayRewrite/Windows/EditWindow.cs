@@ -20,7 +20,7 @@ public class EditWindow : Window, IDisposable
     internal readonly Plugin Plugin;
     
     public EditWindow(Plugin plugin)
-        : base("Racingway Editor###HiFellas", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
+        : base("Racingway Editor###RacingwayEditor", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
     {
         SizeConstraints = new WindowSizeConstraints
         {
@@ -51,7 +51,7 @@ public class EditWindow : Window, IDisposable
         
         // Cast to non-nullable to get the readable name.
         Address currentAddress = (Address)loader.CurrentAddress;
-        WindowName = $"Racingway Editor - {currentAddress.ReadableName}##HiFellas";
+        WindowName = $"Racingway Editor - {currentAddress.ReadableName}###RacingwayEditor";
 
         if (loader.SelectedRoute == -1)
         {
@@ -69,7 +69,7 @@ public class EditWindow : Window, IDisposable
                     return;
                 }
                 
-                Route newRoute = new Route(name, (Address)loader.CurrentAddress);
+                Route newRoute = new Route(name, Plugin.ClientState.LocalPlayer.Name.ToString(), (Address)loader.CurrentAddress);
                 loader.LoadedRoutes.Add(newRoute);
             }
             
@@ -140,6 +140,8 @@ public class EditWindow : Window, IDisposable
         
         DrawRouteDeletionPopup(loader);
         
+        ImGui.Text(route.Address.ToString());
+        
         if (ImGuiComponents.IconButton(FontAwesomeIcon.Pen, Vector4.Zero))
         {
             ImGui.OpenPopup("Edit Name");
@@ -159,8 +161,24 @@ public class EditWindow : Window, IDisposable
             
             route.Name = name;
         }
+
+        ImGui.PushID(1);
+        if (ImGuiComponents.IconButton(FontAwesomeIcon.Pen, Vector4.Zero))
+        {
+            ImGui.OpenPopup("Edit Author Name");
+        }
+
+        ImGui.SameLine();
+        ImGui.Text("Author: " + route.Author);
+        ImGuiComponents.HelpMarker("It is recommended that you list the author of the jump puzzle you are making this route for.");
         
-        ImGui.PushID(1); // ImGui hates me if this isn't here.
+        var author = route.Author;
+        if (Ui.AddTextConfirmationPopup("Edit Author Name", "Please name the author of the puzzle you are creating a route for!", ref author, 64))
+        {
+            route.Author = author;
+        }
+        
+        ImGui.PushID(2); // ImGui hates me if this isn't here.
         if (ImGuiComponents.IconButton(FontAwesomeIcon.Pen, Vector4.Zero))
         {
             ImGui.OpenPopup("Edit Description");

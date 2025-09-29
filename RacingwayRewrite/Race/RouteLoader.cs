@@ -56,12 +56,12 @@ public class RouteLoader : IDisposable
                 return;
             }
         
-            ILiteCollection<RouteInfo> routeCollection = Plugin.Storage.GetRouteCollection();
-            List<RouteInfo> routes = routeCollection.Query().Where(x => x.Address == address).ToList();
+            var routeCollection = Plugin.Storage.GetRouteCollection();
+            var routes = routeCollection.Query().Where(x => x.Address == address).ToList();
 
             foreach (var packed in routes)
             {
-                Route route = MessagePackSerializer.Deserialize<Route>(packed.PackedRoute);
+                var route = packed.Route;
                 route.Id = packed.Id;
                 
                 // Update start trigger to reference route
@@ -97,7 +97,7 @@ public class RouteLoader : IDisposable
 
     private void UnloadRoutes()
     {
-        if (!LoadedRoutes.Any()) return;
+        if (LoadedRoutes.Count == 0) return;
         SelectedRoute = -1;
         
         // Kick players out of their race
@@ -106,21 +106,22 @@ public class RouteLoader : IDisposable
         if (Plugin.Storage == null) return;
         
         // Ensure routes get saved into the database
-        ILiteCollection<RouteInfo> routeCollection = Plugin.Storage.GetRouteCollection();
+        var routeCollection = Plugin.Storage.GetRouteCollection();
         foreach (Route route in LoadedRoutes)
         {
             byte[] packed = MessagePackSerializer.Serialize(route);
+            var toSave = new RouteInfo(route.Name, route.Author, route.Description, route.Address, packed);
+            // For some reason, specifically the Address is not saved properly... LiteDB issue?
             
             // This is a new route, not saved in the database
             if (route.Id == null)
             {
-                RouteInfo toSave = new RouteInfo(route.Name, route.Description, route.Address, packed);
                 routeCollection.Insert(toSave);
                 continue;
             }
             
             // Route exists, just update the entry
-            routeCollection.Update(route.Id, new RouteInfo(route.Name, route.Description, route.Address, packed));
+            routeCollection.Update(route.Id, toSave);
         }
         
         LoadedRoutes = [];

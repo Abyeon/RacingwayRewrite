@@ -29,53 +29,6 @@ public class ConfigWindow : Window, IDisposable
 
     public override void Draw()
     {
-        var trackOthers = Configuration.TrackOthers;
-        if (ImGui.Checkbox("Track Others", ref trackOthers))
-        {
-            Configuration.TrackOthers = trackOthers;
-            Configuration.Save();
-        }
-
-        var showDebug = Configuration.ShowDebug;
-        if (ImGui.Checkbox("Show Debug", ref showDebug))
-        {
-            Configuration.ShowDebug = showDebug;
-            Configuration.Save();
-        }
-
-        if (Plugin.RaceManager.SelectedTrigger != -1 && ImGui.Button("Stop Editing"))
-        {
-            Plugin.RaceManager.SelectedTrigger = -1;
-        }
-
-        // int id = 0;
-        // foreach (var trigger in Plugin.RaceManager.Triggers)
-        // {
-        //     var transform = trigger.Shape.Transform;
-        //     ImGui.PushID(id++);
-        //
-        //     if (Plugin.RaceManager.SelectedTrigger != id - 1 && ImGui.Button("Edit With Gizmo"))
-        //     {
-        //         Plugin.RaceManager.SelectedTrigger = id - 1;
-        //     }
-        //
-        //     Vector3 pos = transform.Position;
-        //     if (ImGui.DragFloat3("Position", ref pos, 0.05f))
-        //     {
-        //         transform.Position = pos;
-        //     }
-        //     
-        //     Vector3 scale = transform.Scale;
-        //     if (ImGui.DragFloat3("Scale", ref scale, 0.05f))
-        //     {
-        //         transform.Scale = scale;
-        //     }
-        //     
-        //     Vector3 rot = transform.Rotation;
-        //     if (ImGui.DragFloat3("Rotation", ref rot, 0.1f))
-        //     {
-        //         transform.Rotation = rot;
-        //     }
-        // }
+        
     }
 }

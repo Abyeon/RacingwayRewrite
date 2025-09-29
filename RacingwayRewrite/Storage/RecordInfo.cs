@@ -3,7 +3,7 @@ using LiteDB;
 
 namespace RacingwayRewrite.Storage;
 
-public class RecordInfo
+public struct RecordInfo
 {
     public required ObjectId Id { get; set; }
     public required string Name { get; set; }

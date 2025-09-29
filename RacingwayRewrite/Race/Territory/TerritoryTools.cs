@@ -75,8 +75,8 @@ public class TerritoryTools
         }
         catch (Exception e)
         {
-            Plugin.Chat.Error(e.Message);
-            if (e.StackTrace != null) Plugin.Log.Error(e.StackTrace);
+            Plugin.Chat.Error("Error when getting the area name for territory.");
+            Plugin.Log.Error(e.ToString());
         }
 
         return "UNKNOWN";

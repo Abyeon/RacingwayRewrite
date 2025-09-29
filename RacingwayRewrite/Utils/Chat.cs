@@ -49,21 +49,22 @@ public class Chat : IDisposable
         Plugin.CommandManager.ProcessCommand("/xllog");
     }
 
-    public SeStringBuilder Tag()
-    {
-        return new SeStringBuilder()
-               .AddUiForeground((ushort)Colors.Tag)
-               .Add(OpenRacingway)
-               .AddText($"[{tag}]")
-               .Add(RawPayload.LinkTerminator)
-               .AddText(" ")
-               .AddUiForegroundOff();
-    }
+    // public SeStringBuilder Tag()
+    // {
+    //     return new SeStringBuilder()
+    //            .AddUiForeground((ushort)Colors.Tag)
+    //            .Add(OpenRacingway)
+    //            .AddText($"[{tag}]")
+    //            .Add(RawPayload.LinkTerminator)
+    //            .AddText(" ")
+    //            .AddUiForegroundOff();
+    // }
 
-    public SeStringBuilder Tag(BitmapFontIcon icon)
+    public SeStringBuilder Tag(BitmapFontIcon? icon = null)
     {
-        return new SeStringBuilder()
-               .AddIcon(icon)
+        var builder = new SeStringBuilder();
+        if (icon != null) builder = builder.AddIcon(icon.Value);
+        return builder
                .AddUiForeground((ushort)Colors.Tag)
                .Add(OpenRacingway)
                .AddText($"[{tag}]")
@@ -89,15 +90,15 @@ public class Chat : IDisposable
         }
     }
 
-    public void Print(string message)
+    public void Print(string message, BitmapFontIcon? icon = null)
     {
-        SeString msg = Tag().AddUiForeground(message, (ushort)Colors.Print).BuiltString;
+        SeString msg = Tag(icon).AddUiForeground(message, (ushort)Colors.Print).BuiltString;
         ChatGui.Print(msg);
     }
     
-    public void Error(string message)
+    public void Error(string message, BitmapFontIcon? icon = BitmapFontIcon.Warning)
     {
-        SeString msg = Tag(BitmapFontIcon.Warning)
+        SeString msg = Tag(icon)
                        .AddUiForeground(message + " ", (ushort)Colors.Error)
                        .Add(OpenLog)
                        .AddUiForeground("/xllog", (ushort)Colors.Print)
@@ -106,9 +107,9 @@ public class Chat : IDisposable
         ChatGui.Print(msg);
     }
     
-    public void Warning(string message)
+    public void Warning(string message, BitmapFontIcon? icon = BitmapFontIcon.Warning)
     {
-        SeString msg = Tag(BitmapFontIcon.Warning)
+        SeString msg = Tag(icon)
                        .AddItalicsOn()
                        .AddUiForeground(message, (ushort)Colors.Warning)
                        .AddItalicsOff().BuiltString;

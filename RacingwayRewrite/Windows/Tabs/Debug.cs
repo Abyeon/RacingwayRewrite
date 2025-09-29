@@ -1,4 +1,6 @@
 ﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Interface.Colors;
 
 namespace RacingwayRewrite.Windows.Tabs;
 
@@ -12,28 +14,31 @@ public class Debug(Plugin plugin) : ITab
     
     public void Draw()
     {
-        if (ImGui.Button("Show Settings"))
-        {
-            Plugin.ToggleConfigUI();
-        }
-        
         if (ImGui.Button("Show Edit Window"))
         {
             Plugin.ToggleEditUI();
         }
-#if DEBUG
-        ImGui.Text("Debug Buttons");
+
+        ImGui.SameLine();
         if (ImGui.Button("Test chat functions"))
         {
             Plugin.Chat.Print("Printing example chats:");
+            Plugin.Chat.Print("This message has an icon!", BitmapFontIcon.VentureDeliveryMoogle);
             Plugin.Chat.Error("Error! Too many triggers on screen. Please check");
             Plugin.Chat.Warning("Warning, your route lacks a proper description. Consider adding one!");
         }
 
+        ImGui.SameLine();
         if (ImGui.Button("Print Chat Icons"))
         {
             Plugin.Chat.TestPrintIcons();
         }
-#endif
+
+        ImGui.Spacing();
+        ImGui.Text("Current Address:");
+
+        var address = Plugin.RaceManager.RouteLoader.CurrentAddress;
+        if (address != null)
+            ImGui.TextColoredWrapped(ImGuiColors.DalamudGrey, address.ToString());
     }
 }

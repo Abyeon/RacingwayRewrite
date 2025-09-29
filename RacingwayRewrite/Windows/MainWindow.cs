@@ -15,10 +15,10 @@ namespace RacingwayRewrite.Windows;
 public class MainWindow : Window, IDisposable
 {
     private Plugin Plugin;
-    private List<ITab> Tabs;
+    private ITab[] Tabs;
     
     public MainWindow(Plugin plugin)
-        : base("My Amazing Window##With a hidden ID", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
+        : base("Racingway##RacingwayRewrite", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
     {
         SizeConstraints = new WindowSizeConstraints
         {
@@ -29,8 +29,12 @@ public class MainWindow : Window, IDisposable
         Plugin = plugin;
 
         Tabs = [
-            new Debug(Plugin),
-            new About(Plugin)
+            new Explore(Plugin),
+            new Settings(Plugin.Configuration),
+            new About(Plugin),
+            #if DEBUG
+            new Debug(Plugin)
+            #endif
         ];
     }
 

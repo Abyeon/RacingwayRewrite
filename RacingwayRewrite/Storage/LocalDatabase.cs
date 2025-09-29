@@ -1,6 +1,8 @@
 ﻿using System;
 using LiteDB;
+using MessagePack;
 using RacingwayRewrite.Race;
+using RacingwayRewrite.Race.Territory;
 
 namespace RacingwayRewrite.Storage;
 
@@ -14,6 +16,10 @@ public class LocalDatabase : IDisposable
     {
         Plugin = plugin;
         db = new LiteDatabase($"filename={path};upgrade=true");
+        
+        // Register Address serialization using MessagePack- LiteDB serializer doesnt like uints or sbytes.
+        BsonMapper.Global.RegisterType(serialize: address => new BsonValue(MessagePackSerializer.Serialize(address)), 
+                                       deserialize: bson => MessagePackSerializer.Deserialize<Address>(bson.AsBinary));
         
         // Initiate Collections
         var routeCollection = GetRouteCollection();
@@ -30,9 +36,14 @@ public class LocalDatabase : IDisposable
         db.Dispose();
     }
 
+    internal RouteInfo[] RouteCache = [];
+    
     internal ILiteCollection<RouteInfo> GetRouteCollection()
     {
-        return db.GetCollection<RouteInfo>("routes");
+        var collection = db.GetCollection<RouteInfo>("routes");
+        RouteCache = collection.Query().ToArray(); // Update the cache every time the collection is acquired.
+        
+        return collection;
     }
 
     internal ILiteCollection<RecordInfo> GetRecordCollection()
