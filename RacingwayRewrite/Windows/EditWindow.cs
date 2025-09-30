@@ -140,8 +140,6 @@ public class EditWindow : Window, IDisposable
         
         DrawRouteDeletionPopup(loader);
         
-        ImGui.Text(route.Address.ToString());
-        
         if (ImGuiComponents.IconButton(FontAwesomeIcon.Pen, Vector4.Zero))
         {
             ImGui.OpenPopup("Edit Name");
@@ -264,7 +262,7 @@ public class EditWindow : Window, IDisposable
         var id = 0;
         foreach (var trigger in route.Triggers.ToList())
         {
-            using (new Ui.Hoverable(id.ToString()))
+            using (new Ui.Hoverable(id.ToString(), padding: new Vector2(5f, 5f)))
             {
                 var transform = trigger.Shape.Transform;
                 using var pushedId = ImRaii.PushId(id++);

@@ -77,17 +77,19 @@ public class Chat : IDisposable
     {
         uint[] iconValues = (uint[])Enum.GetValues(typeof(BitmapFontIcon));
         string[] iconNames = Enum.GetNames(typeof(BitmapFontIcon));
+        
+        var builder = new SeStringBuilder();
+        
         for (int i = 0; i < iconValues.Length; i++)
         {
             if (Enum.IsDefined(typeof(BitmapFontIcon), iconValues[i]))
             {
-                SeString message = new SeStringBuilder()
-                    .AddIcon((BitmapFontIcon)iconValues[i])
-                    .AddText(iconNames[i]).BuiltString;
-                
-                ChatGui.Print(message);
+                builder.AddIcon((BitmapFontIcon)iconValues[i])
+                       .AddText(iconNames[i]);
             }
         }
+        
+        ChatGui.Print(builder.BuiltString);
     }
 
     public void Print(string message, BitmapFontIcon? icon = null)

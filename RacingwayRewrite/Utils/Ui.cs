@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
@@ -59,8 +60,10 @@ public static class Ui
     /// </summary>
     public class Hoverable : IDisposable
     {
-        public Vector2 StartPos { get; init; }
+        public Vector2 StartPos { get; private set; }
         public Vector2 EndPos { get; private set; }
+        public Vector2 Margin { get; init; }
+        public Vector2 Padding { get; init; }
         
         public bool Disposed { get; private set; }
         public string Id { get; private set; }
@@ -69,28 +72,53 @@ public static class Ui
 
         public Hoverable(string id)
         {
+            Id = id;
+            Margin = Vector2.Zero;
+            Padding = new Vector2(5f, 2f);
+
+            Begin();
+        }
+        
+        public Hoverable(string id, Vector2 margin = default(Vector2), Vector2 padding = default(Vector2))
+        {
+            Id = id;
+            Margin = margin;
+            Padding = padding;
+            
+            Begin();
+        }
+
+        private void Begin()
+        {
             StartPos = ImGui.GetCursorScreenPos();
             
-            Id = id;
             draw = ImGui.GetWindowDrawList();
 
             ImGui.ChannelsSplit(draw, 2);
             draw.ChannelsSetCurrent(1);
+            
+            ImGui.BeginGroup();
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + Padding.Y);
+            ImGui.Indent(Padding.X);
         }
 
         public void Dispose()
         {
+            ImGui.Unindent();
+            ImGui.EndGroup();
+            
             EndPos = ImGui.GetCursorScreenPos();
             ImGui.SetCursorScreenPos(StartPos);
+            
             draw.ChannelsSetCurrent(0); // Set the channel to the background
             
             using (ImRaii.Disabled())
-                ImGui.Selectable($"##{Id}", false, ImGuiSelectableFlags.AllowItemOverlap, EndPos - StartPos);
+                ImGui.Selectable($"###{Id}", false, ImGuiSelectableFlags.AllowItemOverlap, EndPos - StartPos);
 
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
             {
-                var min = StartPos + new Vector2(-2f, -2f);
-                var max = EndPos + new Vector2(2f + ImGui.GetContentRegionAvail().X, 2f);
+                var min = StartPos + Margin with { Y = Margin.X };
+                var max = EndPos + new Vector2(Margin.Y + ImGui.GetContentRegionAvail().X, Margin.Y);
                 var color = ImGui.GetColorU32(ImGuiCol.FrameBgHovered);
                 
                 draw.AddRectFilled(min, max, color, 5f, ImDrawFlags.None);
