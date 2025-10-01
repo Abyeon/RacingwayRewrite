@@ -103,6 +103,13 @@ public class RouteLoader : IDisposable
         // Kick players out of their race
         Plugin.RaceManager.KickAllPlayers();
         
+        SaveRoutes();
+        
+        LoadedRoutes = [];
+    }
+
+    public void SaveRoutes()
+    {
         if (Plugin.Storage == null) return;
         
         // Ensure routes get saved into the database
@@ -111,7 +118,6 @@ public class RouteLoader : IDisposable
         {
             byte[] packed = MessagePackSerializer.Serialize(route);
             var toSave = new RouteInfo(route.Name, route.Author, route.Description, route.Address, packed);
-            // For some reason, specifically the Address is not saved properly... LiteDB issue?
             
             // This is a new route, not saved in the database
             if (route.Id == null)
@@ -123,8 +129,9 @@ public class RouteLoader : IDisposable
             // Route exists, just update the entry
             routeCollection.Update(route.Id, toSave);
         }
-        
-        LoadedRoutes = [];
+
+        // Just update the internal route cache here
+        Plugin.Storage.GetRouteCollection();
     }
     
     public void Dispose()

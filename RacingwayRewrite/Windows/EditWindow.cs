@@ -119,7 +119,7 @@ public class EditWindow : Window, IDisposable
         
         Route route = loader.LoadedRoutes[loader.SelectedRoute];
         
-        if (ImGui.Button("Stop Editing Route"))
+        if (ImGui.Button("Save and Stop Editing"))
         {
             if (!route.ValidCheckpoints())
             {
@@ -129,11 +129,17 @@ public class EditWindow : Window, IDisposable
             
             loader.SelectedRoute = -1;
             loader.SelectedTrigger = null;
+            loader.SaveRoutes();
             
             return;
         }
         
-        
+        ImGui.SameLine();
+        if (ImGui.Button("Save")) {
+            loader.SaveRoutes();
+        }
+
+
         ImGui.SameLine();
         if (ImGui.Button("Delete")) 
             ImGui.OpenPopup("Delete Route");
@@ -509,6 +515,7 @@ public class EditWindow : Window, IDisposable
                 {
                     var route = loader.LoadedRoutes[loader.SelectedRoute];
                     Plugin.Storage.DeleteRoute(route.Id);
+                    loader.SaveRoutes();
 
                     ImGui.CloseCurrentPopup();
                 }
