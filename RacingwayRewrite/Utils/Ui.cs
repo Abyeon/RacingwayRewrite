@@ -140,11 +140,17 @@ public static class Ui
                 var min = StartPos + Margin with { Y = Margin.X };
                 var max = EndPos + Margin with { X = Margin.Y + ImGui.GetContentRegionAvail().X };
                 var color = ImGui.GetColorU32(ImGuiCol.FrameBgHovered);
-                
-                draw.AddRectFilled(min, max, color, Rounding, ImDrawFlags.None);
-                
+
                 if (Highlight)
+                {
+                    var color1 = ImGui.GetColorU32(ImGuiCol.FrameBgHovered, 0f);
+                    draw.AddRectFilledMultiColor(min, max, color, color1, color1, color);
                     draw.AddLine(min, EndPos, ImGui.GetColorU32(ImGuiCol.TabActive));
+                }
+                else
+                {
+                    draw.AddRectFilled(min, max, color, Rounding, ImDrawFlags.None);
+                }
             }
             
             ImGui.SetCursorScreenPos(EndPos);

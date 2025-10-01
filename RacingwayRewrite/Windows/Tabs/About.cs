@@ -1,4 +1,5 @@
 ﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Colors;
 
 namespace RacingwayRewrite.Windows.Tabs;
 
@@ -12,6 +13,6 @@ public class About(Plugin plugin) : ITab
     
     public void Draw()
     {
-        ImGui.Text("RACINGWAY OMG!");
+        ImGui.TextColored(ImGuiColors.DalamudGrey, $"Size on disk: {Plugin.Storage?.FileSize}");
     }
 }

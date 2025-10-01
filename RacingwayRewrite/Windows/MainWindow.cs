@@ -30,7 +30,7 @@ public class MainWindow : Window, IDisposable
 
         Tabs = [
             new Explore(Plugin),
-            new Settings(Plugin.Configuration),
+            new Settings(Plugin),
             new About(Plugin),
             #if DEBUG
             new Debug(Plugin)
@@ -69,6 +69,11 @@ public class MainWindow : Window, IDisposable
     
     public override void Draw()
     {
+        if (ImGui.Button("Open Editor"))
+        {
+            Plugin.ToggleEditUI();
+        }
+        
         using var tabBar = ImRaii.TabBar("##race-tabs", ImGuiTabBarFlags.None);
         if (tabBar)
         {

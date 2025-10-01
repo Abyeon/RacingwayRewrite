@@ -2,28 +2,31 @@
 
 namespace RacingwayRewrite.Windows.Tabs;
 
-public class Settings(Configuration configuration) : ITab
+public class Settings(Plugin plugin) : ITab
 {
     public string Name => "Settings";
 
-    private Configuration Configuration = configuration;
+    private Plugin Plugin = plugin;
     
     public void Dispose() { }
     
     public void Draw()
     {
-        var trackOthers = Configuration.TrackOthers;
+        Configuration configuration = Plugin.Configuration;
+        
+        var trackOthers = configuration.TrackOthers;
         if (ImGui.Checkbox("Track Others", ref trackOthers))
         {
-            Configuration.TrackOthers = trackOthers;
-            Configuration.Save();
+            configuration.TrackOthers = trackOthers;
+            configuration.Save();
         }
 
-        var showDebug = Configuration.ShowDebug;
+        var showDebug = configuration.ShowDebug;
         if (ImGui.Checkbox("Show Debug", ref showDebug))
         {
-            Configuration.ShowDebug = showDebug;
-            Configuration.Save();
+            configuration.ShowDebug = showDebug;
+            configuration.Save();
+            Plugin.ShowHideOverlay();
         }
 
         if (Plugin.RaceManager.SelectedTrigger != -1 && ImGui.Button("Stop Editing"))

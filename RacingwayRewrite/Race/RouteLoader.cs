@@ -122,6 +122,7 @@ public class RouteLoader : IDisposable
             // This is a new route, not saved in the database
             if (route.Id == null)
             {
+                route.Id = new ObjectId();
                 routeCollection.Insert(toSave);
                 continue;
             }

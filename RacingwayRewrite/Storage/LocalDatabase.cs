@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using LiteDB;
 using MessagePack;
@@ -11,12 +12,14 @@ namespace RacingwayRewrite.Storage;
 public class LocalDatabase : IDisposable
 {
     internal readonly Plugin Plugin;
-    
+
+    private string dbPath;
     private LiteDatabase db;
 
     public LocalDatabase(Plugin plugin, string path)
     {
         Plugin = plugin;
+        dbPath = path;
         db = new LiteDatabase($"filename={path};upgrade=true");
         
         // Register Address serialization using MessagePack- LiteDB serializer doesnt like uints or sbytes.
@@ -36,6 +39,32 @@ public class LocalDatabase : IDisposable
     public void Dispose()
     {
         db.Dispose();
+    }
+
+    public string FileSize
+    {
+        get
+        {
+            try
+            {
+                var info = new FileInfo(dbPath);
+                string[] suffixes = { "B", "KB", "MB", "GB", "TB" };
+
+                int i = 0;
+                decimal dValue = info.Length;
+                while (Math.Round(dValue / 1024) >= 1)
+                {
+                    dValue /= 1024;
+                    i++;
+                }
+
+                return $"{dValue:n1} {suffixes[i]}";
+            }
+            catch
+            {
+                return "Error";
+            }
+        }
     }
 
     internal RouteInfo[] RouteCache = [];

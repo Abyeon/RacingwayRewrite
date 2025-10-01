@@ -32,15 +32,14 @@ public class Overlay : Window, IDisposable
     
     public override void Draw()
     {
+        if (!Plugin.Configuration.ShowDebug) return;
         if (Plugin.ClientState.LocalPlayer == null) return;
         
         io = ImGui.GetIO();
         
         ImGuiHelpers.SetWindowPosRelativeMainViewport("###RacingwayOverlay", new Vector2(0, 0));
         ImGui.SetWindowSize(io.DisplaySize);
-
-        if (!Plugin.Configuration.ShowDebug) return;
-
+        
         using var drawList = PictoService.Draw();
         if (drawList == null) return;
         

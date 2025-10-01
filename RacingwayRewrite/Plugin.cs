@@ -63,13 +63,13 @@ public sealed class Plugin : IDalamudPlugin
         MainWindow = new MainWindow(this);
         EditWindow = new EditWindow(this);
         Overlay = new Overlay(this);
-
+        
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
         WindowSystem.AddWindow(EditWindow);
         WindowSystem.AddWindow(Overlay);
         
-        Overlay.IsOpen = true;
+        ShowHideOverlay();
 
         CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
         {
@@ -107,6 +107,18 @@ public sealed class Plugin : IDalamudPlugin
     }
     
     private void DrawUI() => WindowSystem.Draw();
+
+    public void ShowHideOverlay()
+    {
+        if (Configuration.ShowDebug)
+        {
+            Overlay.IsOpen = true;
+        }
+        else
+        {
+            Overlay.IsOpen = false;
+        }
+    }
 
     public void ToggleConfigUI() => ConfigWindow.Toggle();
     public void ToggleMainUI() => MainWindow.Toggle();
