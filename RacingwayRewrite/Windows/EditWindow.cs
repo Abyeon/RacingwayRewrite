@@ -187,7 +187,7 @@ public class EditWindow : Window, IDisposable
         
         
         var desc = route.Description;
-        if (Ui.AddTextConfirmationPopup("Edit Description", "Please enter a new description for the route.", ref desc, 128))
+        if (Ui.AddTextConfirmationPopup("Edit Description", "Please enter a new description for the route.", ref desc, 256, true))
         {
             route.Description = desc;
         }
@@ -507,32 +507,8 @@ public class EditWindow : Window, IDisposable
 
                 if (ImGui.Button("Confirm"))
                 {
-                    var routeCollection = Plugin.Storage.GetRouteCollection();
-                        
                     var route = loader.LoadedRoutes[loader.SelectedRoute];
-
-                    // Kick every player just in case
-                    foreach (var player in Plugin.RaceManager.Players.Values)
-                    {
-                        if (player.State.CurrentRoute == route)
-                        {
-                            player.State.Fail("Route was deleted!");
-                            route.Kick(player);
-                        }
-                    }
-                    
-                    // If the route exists in DB, delete it
-                    if (route.Id != null && routeCollection.Exists(x => x.Id == route.Id!))
-                    {
-                        routeCollection.Delete(route.Id);
-                    }
-                        
-                    string name = route.Name;
-
-                    loader.LoadedRoutes.RemoveAt(loader.SelectedRoute);
-                    loader.SelectedRoute = -1;
-                        
-                    Plugin.Chat.Print($"Deleted {name} from storage.");
+                    Plugin.Storage.DeleteRoute(route.Id);
 
                     ImGui.CloseCurrentPopup();
                 }

@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using LiteDB;
 using MessagePack;
 using RacingwayRewrite.Race;
 using RacingwayRewrite.Race.Territory;
+using ZLinq;
 
 namespace RacingwayRewrite.Storage;
 
@@ -49,5 +51,55 @@ public class LocalDatabase : IDisposable
     internal ILiteCollection<RecordInfo> GetRecordCollection()
     {
         return db.GetCollection<RecordInfo>("records");
+    }
+
+    internal void DeleteRoute(ObjectId? id)
+    {
+        var loader = Plugin.RaceManager.RouteLoader;
+        var cacheIndex = Array.FindIndex(RouteCache, x => x.Id == id);
+        
+        var route = RouteCache.FirstOrDefault(x => x.Id == id);
+        
+        // If the route is loaded, delete it from the loaded routes
+        int index = loader.LoadedRoutes.FindIndex(x => x.Id == id);
+        if (index != -1)
+        {
+            var loadedRoute = loader.LoadedRoutes[index];
+            
+            // Kick every player just in case
+            foreach (var player in Plugin.RaceManager.Players.Values)
+            {
+                if (player.State.CurrentRoute?.Id == id)
+                {
+                    player.State.Fail("Route was deleted!");
+                    loadedRoute.Kick(player);
+                }
+            }
+            
+            // Delete from loader
+            loader.LoadedRoutes.RemoveAt(index);
+            if (loader.SelectedRoute == index)
+                loader.SelectedRoute = -1;
+        }
+        
+        var routeCollection = GetRouteCollection();
+                    
+        // If the route exists in DB, delete it
+        if (route.Id != null && routeCollection.Exists(x => x.Id == route.Id!))
+        {
+            routeCollection.Delete(route.Id);
+        }
+        
+        string name = route.Name;
+        
+        // Delete from the cache
+        if (cacheIndex != -1)
+        {
+            var list = RouteCache.ToList();
+            list.RemoveAt(cacheIndex);
+            RouteCache = list.ToArray();
+        }
+                        
+        Plugin.Chat.Print($"Deleted {name} from storage.");
     }
 }

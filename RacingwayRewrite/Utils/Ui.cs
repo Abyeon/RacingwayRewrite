@@ -5,6 +5,8 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Utility.Numerics;
+
 namespace RacingwayRewrite.Utils;
 
 /// <summary>
@@ -22,8 +24,10 @@ public static class Ui
     /// <param name="description">The text that appears inside the popup</param>
     /// <param name="input">Reference input to be updated</param>
     /// <param name="maxLength">Maximum length for the input</param>
+    /// <param name="multiline">Whether the input should be multiline or not.</param>
     /// <returns>True if the input was updated</returns>
-    public static bool AddTextConfirmationPopup(string id, string description, ref string input, int maxLength = 512)
+    public static bool AddTextConfirmationPopup(
+        string id, string description, ref string input, int maxLength = 512, bool multiline = false)
     {
         using var popup = ImRaii.Popup(id);
         if (popup.Success)
@@ -31,8 +35,15 @@ public static class Ui
             ImGui.PushID(id);
             ImGui.Text(description);
             ImGui.Separator();
-
-            ImGui.InputText("##textInput", ref Buf, maxLength);
+            
+            if (multiline)
+            {
+                ImGui.InputTextMultiline("##textInput", ref Buf, maxLength, flags: ImGuiInputTextFlags.NoHorizontalScroll);
+            }
+            else
+            {
+                ImGui.InputText("##textInput", ref Buf, maxLength);
+            }
 
             if (ImGui.Button("Confirm"))
             {
@@ -64,6 +75,8 @@ public static class Ui
         public Vector2 EndPos { get; private set; }
         public Vector2 Margin { get; init; }
         public Vector2 Padding { get; init; }
+        public float Rounding { get; init; }
+        public bool Highlight { get; init; }
         
         public bool Disposed { get; private set; }
         public string Id { get; private set; }
@@ -75,15 +88,19 @@ public static class Ui
             Id = id;
             Margin = Vector2.Zero;
             Padding = new Vector2(5f, 2f);
+            Rounding = 5f;
+            Highlight = false;
 
             Begin();
         }
         
-        public Hoverable(string id, Vector2 margin = default(Vector2), Vector2 padding = default(Vector2))
+        public Hoverable(string id, float rounding = 5f, Vector2 margin = default(Vector2), Vector2 padding = default(Vector2), bool highlight = false)
         {
             Id = id;
             Margin = margin;
             Padding = padding;
+            Rounding = rounding;
+            Highlight = highlight;
             
             Begin();
         }
@@ -111,17 +128,23 @@ public static class Ui
             ImGui.SetCursorScreenPos(StartPos);
             
             draw.ChannelsSetCurrent(0); // Set the channel to the background
-            
+
             using (ImRaii.Disabled())
+            {
                 ImGui.Selectable($"###{Id}", false, ImGuiSelectableFlags.AllowItemOverlap, EndPos - StartPos);
+                //ImGui.Button($"###{Id}", EndPos - StartPos);
+            }
 
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
             {
                 var min = StartPos + Margin with { Y = Margin.X };
-                var max = EndPos + new Vector2(Margin.Y + ImGui.GetContentRegionAvail().X, Margin.Y);
+                var max = EndPos + Margin with { X = Margin.Y + ImGui.GetContentRegionAvail().X };
                 var color = ImGui.GetColorU32(ImGuiCol.FrameBgHovered);
                 
-                draw.AddRectFilled(min, max, color, 5f, ImDrawFlags.None);
+                draw.AddRectFilled(min, max, color, Rounding, ImDrawFlags.None);
+                
+                if (Highlight)
+                    draw.AddLine(min, EndPos, ImGui.GetColorU32(ImGuiCol.TabActive));
             }
             
             ImGui.SetCursorScreenPos(EndPos);
