@@ -152,22 +152,27 @@ public static class Ui
                 //ImGui.Button($"###{Id}", EndPos - StartPos);
             }
 
+            var min = StartPos + Margin with { Y = Margin.X };
+            var max = EndPos + Margin with { X = Margin.Y + ImGui.GetContentRegionAvail().X };
+            var color = ImGui.GetColorU32(ImGuiCol.FrameBg, 0.25f);
+            var color1 = ImGui.GetColorU32(ImGuiCol.FrameBg, 0f); // Used for gradient
+            var lineColor = ImGui.GetColorU32(ImGuiCol.Tab);
+            
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
             {
-                var min = StartPos + Margin with { Y = Margin.X };
-                var max = EndPos + Margin with { X = Margin.Y + ImGui.GetContentRegionAvail().X };
-                var color = ImGui.GetColorU32(ImGuiCol.FrameBgHovered);
-
-                if (Highlight)
-                {
-                    var color1 = ImGui.GetColorU32(ImGuiCol.FrameBgHovered, 0f);
-                    draw.AddRectFilledMultiColor(min, max, color, color1, color1, color);
-                    draw.AddLine(min, EndPos, ImGui.GetColorU32(ImGuiCol.TabActive));
-                }
-                else
-                {
-                    draw.AddRectFilled(min, max, color, Rounding, ImDrawFlags.None);
-                }
+                color = ImGui.GetColorU32(ImGuiCol.FrameBgHovered);
+                color1 = ImGui.GetColorU32(ImGuiCol.FrameBgHovered, 0f);
+                lineColor = ImGui.GetColorU32(ImGuiCol.TabActive);
+            }
+            
+            if (Highlight)
+            {
+                draw.AddRectFilledMultiColor(min, max, color, color1, color1, color);
+                draw.AddLine(min, EndPos, lineColor);
+            }
+            else
+            {
+                draw.AddRectFilled(min, max, color, Rounding, ImDrawFlags.None);
             }
             
             ImGui.SetCursorScreenPos(EndPos);

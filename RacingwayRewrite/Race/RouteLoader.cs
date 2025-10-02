@@ -113,26 +113,10 @@ public class RouteLoader : IDisposable
         if (Plugin.Storage == null) return;
         
         // Ensure routes get saved into the database
-        var routeCollection = Plugin.Storage.GetRouteCollection();
-        foreach (Route route in LoadedRoutes)
+        foreach (var route in LoadedRoutes)
         {
-            byte[] packed = MessagePackSerializer.Serialize(route);
-            var toSave = new RouteInfo(route.Name, route.Author, route.Description, route.Address, packed);
-            
-            // This is a new route, not saved in the database
-            if (route.Id == null)
-            {
-                route.Id = new ObjectId();
-                routeCollection.Insert(toSave);
-                continue;
-            }
-            
-            // Route exists, just update the entry
-            routeCollection.Update(route.Id, toSave);
+            Plugin.Storage.SaveRoute(route);
         }
-
-        // Just update the internal route cache here
-        Plugin.Storage.GetRouteCollection();
     }
     
     public void Dispose()

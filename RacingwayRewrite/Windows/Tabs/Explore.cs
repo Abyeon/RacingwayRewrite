@@ -38,17 +38,17 @@ public class Explore(Plugin plugin) : ITab
                 if (!string.IsNullOrEmpty(routeInfo.Description))
                     ImGui.TextColoredWrapped(ImGuiColors.DalamudGrey2, routeInfo.Description);
                 
-                ImGui.TextColored(new Vector4(1f, 0.75f, 0f, 1f), "Name One");
-                ImGui.SameLine();
-                ImGui.TextColored(ImGuiColors.DalamudGrey, "1:28.006");
-                ImGui.SameLine();
-                ImGui.TextColored(new Vector4(0.75f, 0.75f, 0.75f, 1f), "Name Two");
-                ImGui.SameLine();
-                ImGui.TextColored(ImGuiColors.DalamudGrey, "1:28.006");
-                ImGui.SameLine();
-                ImGui.TextColored(new Vector4(0.808f, 0.537f, 0.275f, 1f), "Name Three");
-                ImGui.SameLine();
-                ImGui.TextColored(ImGuiColors.DalamudGrey, "1:28.006");
+                // ImGui.TextColored(new Vector4(1f, 0.75f, 0f, 1f), "Name One");
+                // ImGui.SameLine();
+                // ImGui.TextColored(ImGuiColors.DalamudGrey, "1:28.006");
+                // ImGui.SameLine();
+                // ImGui.TextColored(new Vector4(0.75f, 0.75f, 0.75f, 1f), "Name Two");
+                // ImGui.SameLine();
+                // ImGui.TextColored(ImGuiColors.DalamudGrey, "1:28.006");
+                // ImGui.SameLine();
+                // ImGui.TextColored(new Vector4(0.808f, 0.537f, 0.275f, 1f), "Name Three");
+                // ImGui.SameLine();
+                // ImGui.TextColored(ImGuiColors.DalamudGrey, "1:28.006");
             }
 
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
@@ -74,6 +74,15 @@ public class Explore(Plugin plugin) : ITab
         {
             ImGui.SetClipboardText(routeInfo.Address.ReadableName);
             ImGui.CloseCurrentPopup();
+        }
+
+        if (Plugin.LifestreamIpcHandler.ExecuteCommand.HasAction)
+        {
+            if (ImGui.Button("Teleport with Lifestream"))
+            {
+                routeInfo.Address.TeleportWithLifestream();
+                ImGui.CloseCurrentPopup();
+            }
         }
 
         if (ImGui.Button("Export to clipboard"))

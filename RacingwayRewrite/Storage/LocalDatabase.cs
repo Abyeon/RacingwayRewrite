@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using LiteDB;
 using MessagePack;
 using RacingwayRewrite.Race;
@@ -80,6 +81,29 @@ public class LocalDatabase : IDisposable
     internal ILiteCollection<RecordInfo> GetRecordCollection()
     {
         return db.GetCollection<RecordInfo>("records");
+    }
+
+    internal void SaveRoute(Route route)
+    {
+        Task.Run(() =>
+        {
+            var routeCollection = GetRouteCollection();
+            byte[] packed = MessagePackSerializer.Serialize(route);
+            var toSave = new RouteInfo(route.Name, route.Author, route.Description, route.Address, packed);
+            
+            // This is a new route, not saved in the database
+            if (route.Id == null)
+            {
+                route.Id = new ObjectId();
+                routeCollection.Insert(toSave);
+                RouteCache = routeCollection.Query().ToArray();
+                return;
+            }
+            
+            // Route exists, just update the entry
+            routeCollection.Update(route.Id, toSave);
+            RouteCache = routeCollection.Query().ToArray();
+        });
     }
 
     internal void DeleteRoute(ObjectId? id)

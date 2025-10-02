@@ -32,4 +32,32 @@ public readonly record struct Address(uint WorldId, uint TerritoryId, uint MapId
             return TerritoryTools.GetAreaFromId(TerritoryId);
         }
     }
+
+    [IgnoreMember]
+    public string LifestreamCommand
+    {
+        get
+        {
+            if (Plot != null && Room != null && Ward != null)
+            {
+                var isAptWing = TerritoryTools.AptWings.ContainsKey((sbyte)Plot);
+        
+                // World, District, Ward, Subdivision / Plot, Room
+                var command = Plugin.DataManager.GetExcelSheet<Sheet.World>().GetRow(WorldId).Name.ExtractText() + " " +
+                              TerritoryTools.HousingDistricts[TerritoryTools.GetAreaRowId(TerritoryId)] +
+                              $" w{Ward + 1}" +
+                              (isAptWing ? (Plot == -128 ? "" : " s") + (Room == 0 ? "" : $" a{Room}") : $" p{Plot + 1}");
+
+                return command;
+            }
+            
+            // Just return the area name if not in a room/plot
+            return TerritoryTools.GetAreaFromId(TerritoryId);
+        }
+    }
+
+    public void TeleportWithLifestream()
+    {
+        Plugin.LifestreamIpcHandler.ExecuteCommand.InvokeAction(LifestreamCommand);
+    }
 }

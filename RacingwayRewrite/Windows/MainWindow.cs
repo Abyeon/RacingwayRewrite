@@ -5,9 +5,12 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
+using MessagePack;
 using Pictomancy;
+using RacingwayRewrite.Race;
 using RacingwayRewrite.Race.Collision;
 using RacingwayRewrite.Race.Collision.Shapes;
+using RacingwayRewrite.Storage;
 using RacingwayRewrite.Windows.Tabs;
 
 namespace RacingwayRewrite.Windows;
@@ -72,6 +75,29 @@ public class MainWindow : Window, IDisposable
         if (ImGui.Button("Open Editor"))
         {
             Plugin.ToggleEditUI();
+        }
+
+        ImGui.SameLine();
+        if (ImGui.Button("Import Route"))
+        {
+            try
+            {
+                if (Plugin.Storage == null) throw new NullReferenceException("Storage is null");
+                var packed = Convert.FromBase64String(ImGui.GetClipboardText());
+                var route = MessagePackSerializer.Deserialize<Route>(packed);
+                
+                route.Id = null;
+                Plugin.Storage.SaveRoute(route);
+            }
+            catch (Exception e)
+            {
+                Plugin.Chat.Error("Error while trying to import route.");
+                Plugin.Log.Error(e.ToString());
+            }
+        }
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Imports any route that is stored on your clipboard!");
         }
         
         using var tabBar = ImRaii.TabBar("##race-tabs", ImGuiTabBarFlags.None);

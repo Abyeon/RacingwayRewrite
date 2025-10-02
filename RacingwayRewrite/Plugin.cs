@@ -29,6 +29,8 @@ public sealed class Plugin : IDalamudPlugin
     internal static RaceManager RaceManager { get; private set; } = null!;
     internal static VfxManager VfxManager { get; private set; } = null!;
     internal static Chat Chat { get; private set; } = null!;
+    internal static LifestreamIpcHandler LifestreamIpcHandler { get; private set; } = null!;
+    
 
     private const string CommandName = "/racerewrite";
 
@@ -55,6 +57,7 @@ public sealed class Plugin : IDalamudPlugin
             Log.Error(e.ToString());
         }
         
+        LifestreamIpcHandler = new LifestreamIpcHandler(PluginInterface);
         PictoService.Initialize(PluginInterface);
         RaceManager = new RaceManager(this, Framework, ObjectTable, ClientState);
         VfxManager = new VfxManager(Framework);
