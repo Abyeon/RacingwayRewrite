@@ -37,7 +37,7 @@ public sealed class Plugin : IDalamudPlugin
     public readonly WindowSystem WindowSystem = new("RacingwayRewrite");
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
-    private EditWindow EditWindow { get; init; }
+    internal EditWindow EditWindow { get; init; }
     private Overlay Overlay { get; init; } 
 
     public Plugin()

@@ -64,6 +64,23 @@ public static class Ui
 
         return false;
     }
+
+    public static bool CtrlButton(ImU8String label, string hoverLabel = "Hold Ctrl to enable.", Vector2 size = default)
+    {
+        var ctrl = ImGui.GetIO().KeyCtrl;
+        using var _ = ImRaii.Disabled(!ctrl);
+        if (ImGui.Button(label, size))
+        {
+            return true;
+        }
+
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+        {
+            ImGui.SetTooltip(hoverLabel);
+        }
+
+        return false;
+    }
     
     /// <summary>
     /// Using this class will wrap any item in this context with a disabled ImGui.Selectable node which will display if the user hovers it.

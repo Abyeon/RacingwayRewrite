@@ -83,7 +83,7 @@ public class Explore(Plugin plugin) : ITab
             ImGui.CloseCurrentPopup();
         }
 
-        if (ImGui.Button("Delete Route"))
+        if (Ui.CtrlButton("Delete Route", "Ctrl+click to delete this route."))
         {
             Plugin.Storage?.DeleteRoute(routeInfo.Id);
             ImGui.CloseCurrentPopup();
@@ -93,7 +93,9 @@ public class Explore(Plugin plugin) : ITab
         {
             if (ImGui.Button("Open in editor"))
             {
-                //
+                Plugin.RaceManager.RouteLoader.SelectedRoute = Plugin.RaceManager.RouteLoader.LoadedRoutes.FindIndex(x => x.Id == routeInfo.Id);
+                Plugin.EditWindow.IsOpen = true;
+                
                 ImGui.CloseCurrentPopup();
             }
         }
