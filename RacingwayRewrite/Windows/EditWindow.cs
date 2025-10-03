@@ -4,6 +4,7 @@ using System.Numerics;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Bindings.ImGuizmo;
 using Dalamud.Interface;
+using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
@@ -69,8 +70,9 @@ public class EditWindow : Window, IDisposable
                     return;
                 }
                 
-                Route newRoute = new Route(name, Plugin.ClientState.LocalPlayer.Name.ToString(), (Address)loader.CurrentAddress);
+                var newRoute = new Route(name, Plugin.ClientState.LocalPlayer.Name.ToString(), (Address)loader.CurrentAddress);
                 loader.LoadedRoutes.Add(newRoute);
+                loader.SaveRoutes();
             }
             
             // Draw route selection Dropdown
@@ -116,6 +118,11 @@ public class EditWindow : Window, IDisposable
     public void DrawRouteInfo(RouteLoader loader)
     {
         if (loader.SelectedRoute == -1) return;
+
+        if (!Plugin.Configuration.ShowDebug)
+        {
+            ImGui.TextColoredWrapped(ImGuiColors.DalamudOrange, "Warning! Show Debug not enabled in settings, you will not see your triggers!");
+        }
         
         Route route = loader.LoadedRoutes[loader.SelectedRoute];
         

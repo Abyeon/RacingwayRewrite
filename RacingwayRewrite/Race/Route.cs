@@ -15,27 +15,32 @@ namespace RacingwayRewrite.Race;
 [MessagePackObject]
 public class Route
 {
-    [IgnoreMember] public ObjectId? Id { get; set; }
-    [Key(0)] public string Name { get; set; }
-    [Key(1)] public string Author { get; set; }
-    [Key(2)] public string Description { get; set; } = "";
-    [Key(3)] public Address Address { get; init; }
-    [Key(4)] public int Laps { get; set; } = 1;
-    [Key(5)] public bool AllowMounts  { get; set; } = false;
-    [Key(6)] public List<ITrigger> Triggers { get; set; } = [];
+    [IgnoreMember] public ObjectId Id { get; set; }
+    [Key(0)] public byte[] IdBytes { get; set; }
+    [Key(1)] public string Name { get; set; }
+    [Key(2)] public string Author { get; set; }
+    [Key(3)] public string Description { get; set; } = "";
+    [Key(4)] public Address Address { get; init; }
+    [Key(5)] public int Laps { get; set; } = 1;
+    [Key(6)] public bool AllowMounts  { get; set; } = false;
+    [Key(7)] public List<ITrigger> Triggers { get; set; } = [];
     
     // Would be best to have a db for all records and fetch related ones whenever we want them.
     //public List<Record> Records { get; set; } = [];
     
     public Route(string name, string author, Address address)
     {
+        Id = ObjectId.NewObjectId();
+        IdBytes = Id.ToByteArray();
         Name = name;
         Author = author;
         Address = address;
     }
 
-    public Route(string name, string author, string description, Address address, int laps, bool allowMounts)
+    public Route(byte[] idBytes, string name, string author, string description, Address address, int laps, bool allowMounts)
     {
+        Id = new ObjectId(idBytes);
+        IdBytes = Id.ToByteArray();
         Name = name;
         Author = author;
         Description = description;

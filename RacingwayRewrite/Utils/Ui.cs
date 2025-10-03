@@ -82,6 +82,23 @@ public static class Ui
         return false;
     }
     
+    public static bool CtrlSelectable(ImU8String label, string hoverLabel = "Hold Ctrl to enable.")
+    {
+        var ctrl = ImGui.GetIO().KeyCtrl;
+        using var _ = ImRaii.Disabled(!ctrl);
+        if (ImGui.Selectable(label))
+        {
+            return true;
+        }
+
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+        {
+            ImGui.SetTooltip(hoverLabel);
+        }
+
+        return false;
+    }
+    
     /// <summary>
     /// Using this class will wrap any item in this context with a disabled ImGui.Selectable node which will display if the user hovers it.
     /// This will split the current ImGui DrawList into 2 channels and default to the front one.

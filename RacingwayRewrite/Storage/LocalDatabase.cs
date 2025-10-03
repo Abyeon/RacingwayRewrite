@@ -88,20 +88,16 @@ public class LocalDatabase : IDisposable
         Task.Run(() =>
         {
             var routeCollection = GetRouteCollection();
-            byte[] packed = MessagePackSerializer.Serialize(route);
-            var toSave = new RouteInfo(route.Name, route.Author, route.Description, route.Address, packed);
             
-            // This is a new route, not saved in the database
-            if (route.Id == null)
+            var lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4Block);
+            byte[] packed = MessagePackSerializer.Serialize(route, lz4Options);
+            var toSave = new RouteInfo(route.Name, route.Author, route.Description, route.Address, packed)
             {
-                route.Id = new ObjectId();
-                routeCollection.Insert(toSave);
-                RouteCache = routeCollection.Query().ToArray();
-                return;
-            }
+                Id = route.Id
+            };
             
-            // Route exists, just update the entry
-            routeCollection.Update(route.Id, toSave);
+            // Update entry or insert a new one
+            routeCollection.Upsert(route.Id, toSave);
             RouteCache = routeCollection.Query().ToArray();
         });
     }

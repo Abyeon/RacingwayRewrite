@@ -30,6 +30,7 @@ public class Explore(Plugin plugin) : ITab
             using (new Ui.Hoverable(routeInfo.Name, rounding: 0f, padding: new Vector2(5f, 2f), highlight: true))
             {
                 ImGui.Text(routeInfo.Name);
+                // ImGui.TextColored(ImGuiColors.DalamudYellow, routeInfo.Id.ToString());
 
                 ImGui.TextColored(ImGuiColors.DalamudGrey, $"by {routeInfo.Author}");
                 ImGui.SameLine();
@@ -53,7 +54,7 @@ public class Explore(Plugin plugin) : ITab
 
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
             {
-                if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+                if (ImGui.IsMouseClicked(ImGuiMouseButton.Left) || ImGui.IsMouseClicked(ImGuiMouseButton.Right))
                 {
                     ImGui.OpenPopup("Explore Context Menu");
                 }
@@ -67,46 +68,47 @@ public class Explore(Plugin plugin) : ITab
 
     public void DrawContextMenu(RouteInfo routeInfo)
     {
+        using var _ = ImRaii.PushStyle(ImGuiStyleVar.PopupRounding, 5);
         using var popup = ImRaii.Popup("Explore Context Menu");
         if (!popup.Success) return;
 
-        if (ImGui.Button("Copy Address"))
-        {
-            ImGui.SetClipboardText(routeInfo.Address.ReadableName);
-            ImGui.CloseCurrentPopup();
-        }
-
         if (Plugin.LifestreamIpcHandler.ExecuteCommand.HasAction)
         {
-            if (ImGui.Button("Teleport with Lifestream"))
+            if (ImGui.Selectable("Teleport with Lifestream"))
             {
                 routeInfo.Address.TeleportWithLifestream();
                 ImGui.CloseCurrentPopup();
             }
         }
+        
+        if (ImGui.Selectable("Copy Address"))
+        {
+            ImGui.SetClipboardText(routeInfo.Address.ReadableName);
+            ImGui.CloseCurrentPopup();
+        }
 
-        if (ImGui.Button("Export to clipboard"))
+        if (ImGui.Selectable("Export to clipboard"))
         {
             var data = Convert.ToBase64String(routeInfo.PackedRoute);
             ImGui.SetClipboardText(data);
             ImGui.CloseCurrentPopup();
         }
-
-        if (Ui.CtrlButton("Delete Route", "Ctrl+click to delete this route."))
-        {
-            Plugin.Storage?.DeleteRoute(routeInfo.Id);
-            ImGui.CloseCurrentPopup();
-        }
         
         if (Plugin.RaceManager.RouteLoader.CurrentAddress == routeInfo.Address)
         {
-            if (ImGui.Button("Open in editor"))
+            if (ImGui.Selectable("Open in editor"))
             {
                 Plugin.RaceManager.RouteLoader.SelectedRoute = Plugin.RaceManager.RouteLoader.LoadedRoutes.FindIndex(x => x.Id == routeInfo.Id);
                 Plugin.EditWindow.IsOpen = true;
                 
                 ImGui.CloseCurrentPopup();
             }
+        }
+        
+        if (Ui.CtrlSelectable("Delete Route", "Ctrl+click to delete this route."))
+        {
+            Plugin.Storage?.DeleteRoute(routeInfo.Id);
+            ImGui.CloseCurrentPopup();
         }
     }
 }

@@ -84,9 +84,9 @@ public class MainWindow : Window, IDisposable
             {
                 if (Plugin.Storage == null) throw new NullReferenceException("Storage is null");
                 var packed = Convert.FromBase64String(ImGui.GetClipboardText());
-                var route = MessagePackSerializer.Deserialize<Route>(packed);
+                var lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4Block);
+                var route = MessagePackSerializer.Deserialize<Route>(packed, lz4Options);
                 
-                route.Id = null;
                 Plugin.Storage.SaveRoute(route);
             }
             catch (Exception e)

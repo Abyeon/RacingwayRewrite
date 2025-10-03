@@ -11,7 +11,7 @@ namespace RacingwayRewrite.Storage;
 /// </summary>
 public struct RouteInfo(string name, string author, string description, Address address, byte[] packedRoute)
 {
-    public ObjectId Id { get; set; } = new();
+    public ObjectId Id { get; init; } = ObjectId.NewObjectId();
     public string Name { get; set; } = name;
     public string Author { get; set; } = author;
     public string Description { get; set; } = description;
