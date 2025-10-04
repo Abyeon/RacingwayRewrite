@@ -33,6 +33,7 @@ public class MainWindow : Window, IDisposable
 
         Tabs = [
             new Explore(Plugin),
+            new Records(),
             new Settings(Plugin),
             new About(Plugin),
             #if DEBUG

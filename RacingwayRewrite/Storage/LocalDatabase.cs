@@ -34,6 +34,7 @@ public class LocalDatabase : IDisposable
         
         var recordCollection = GetRecordCollection();
         recordCollection.EnsureIndex(x => x.Time);
+        recordCollection.EnsureIndex(x => x.Created);
         recordCollection.EnsureIndex(x => x.Name);
     }
 
