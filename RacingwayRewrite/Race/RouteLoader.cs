@@ -28,7 +28,7 @@ public class RouteLoader : IDisposable
         Plugin = plugin;
         ClientState = clientState;
         
-        TerritoryTools = new TerritoryTools(plugin, ClientState);
+        TerritoryTools = Plugin.TerritoryTools;
         TerritoryTools.OnAddressChanged += AddressChanged;
         ClientState.Logout += OnLogout;
         ClientState.EnterPvP += OnEnterPvp;

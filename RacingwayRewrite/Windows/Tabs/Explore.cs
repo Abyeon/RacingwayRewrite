@@ -29,7 +29,11 @@ public class Explore(Plugin plugin) : ITab
 
             using (new Ui.Hoverable(routeInfo.Name, rounding: 0f, padding: new Vector2(5f, 2f), highlight: true))
             {
-                ImGui.Text(routeInfo.Name);
+                Vector4 nameColor = ImGuiColors.DalamudWhite;
+                if (Plugin.RaceManager.RouteLoader.LoadedRoutes.Exists(x => x.Id == routeInfo.Id))
+                    nameColor = ImGuiColors.ParsedBlue;
+                
+                ImGui.TextColored(nameColor, routeInfo.Name);
                 // ImGui.TextColored(ImGuiColors.DalamudYellow, routeInfo.Id.ToString());
 
                 ImGui.TextColored(ImGuiColors.DalamudGrey, $"by {routeInfo.Author}");

@@ -6,7 +6,9 @@ using System.IO;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using Pictomancy;
+using RacingwayRewrite.Commands;
 using RacingwayRewrite.Race;
+using RacingwayRewrite.Race.Territory;
 using RacingwayRewrite.Storage;
 using RacingwayRewrite.Utils;
 using RacingwayRewrite.Windows;
@@ -16,7 +18,6 @@ namespace RacingwayRewrite;
 public sealed class Plugin : IDalamudPlugin
 {
     [PluginService] internal static IDalamudPluginInterface PluginInterface { get; private set; } = null!;
-    [PluginService] internal static ITextureProvider TextureProvider { get; private set; } = null!;
     [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
     [PluginService] internal static IClientState ClientState { get; private set; } = null!;
     [PluginService] internal static IDataManager DataManager { get; private set; } = null!;
@@ -24,15 +25,15 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IChatGui ChatGui { get; private set; } = null!;
     [PluginService] internal static IFramework Framework { get; private set; } = null!;
     [PluginService] internal static IObjectTable ObjectTable { get; private set; } = null!;
+    [PluginService] internal static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
     
     internal LocalDatabase? Storage { get; private set; }
+    internal static CommandHandler CommandHandler { get; private set; } = null!;
+    internal static TerritoryTools TerritoryTools { get; private set; } = null!;
     internal static RaceManager RaceManager { get; private set; } = null!;
     internal static VfxManager VfxManager { get; private set; } = null!;
     internal static Chat Chat { get; private set; } = null!;
     internal static LifestreamIpcHandler LifestreamIpcHandler { get; private set; } = null!;
-    
-
-    private const string CommandName = "/racerewrite";
 
     public static Configuration Configuration { get; set; } = null!;
 
@@ -59,6 +60,7 @@ public sealed class Plugin : IDalamudPlugin
         
         LifestreamIpcHandler = new LifestreamIpcHandler(PluginInterface);
         PictoService.Initialize(PluginInterface);
+        TerritoryTools = new TerritoryTools(this);
         RaceManager = new RaceManager(this, Framework, ObjectTable, ClientState);
         VfxManager = new VfxManager(Framework);
         
@@ -74,11 +76,8 @@ public sealed class Plugin : IDalamudPlugin
         
         ShowHideOverlay();
 
-        CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
-        {
-            HelpMessage = "A useful message to display in /xlhelp"
-        });
-
+        CommandHandler = new CommandHandler(this);
+        
         PluginInterface.UiBuilder.Draw += DrawUI;
         
         // Register plugin installer buttons
@@ -92,21 +91,15 @@ public sealed class Plugin : IDalamudPlugin
         RaceManager.Dispose();
         VfxManager.Dispose();
         Chat.Dispose();
-        Storage?.Dispose();
 
         WindowSystem.RemoveAllWindows();
 
         ConfigWindow.Dispose();
         MainWindow.Dispose();
         Overlay.Dispose();
-
-        CommandManager.RemoveHandler(CommandName);
-    }
-
-    private void OnCommand(string command, string args)
-    {
-        // In response to the slash command, toggle the display status of our main ui
-        ToggleMainUI();
+        
+        CommandHandler.Dispose();
+        Storage?.Dispose();
     }
     
     private void DrawUI() => WindowSystem.Draw();

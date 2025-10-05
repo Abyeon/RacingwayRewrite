@@ -97,9 +97,16 @@ public class LocalDatabase : IDisposable
                 Id = route.Id
             };
             
-            // Update entry or insert a new one
-            routeCollection.Upsert(route.Id, toSave);
-            RouteCache = routeCollection.Query().ToArray();
+            try
+            {
+                // Update entry or insert a new one
+                routeCollection.Upsert(route.Id, toSave);
+                RouteCache = routeCollection.Query().ToArray();
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.Error(e.ToString());
+            }
         });
     }
 

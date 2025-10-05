@@ -18,6 +18,15 @@ public struct RouteInfo(string name, string author, string description, Address 
     public Address Address { get; set; } = address;
     public byte[] PackedRoute { get; set; } = packedRoute;
 
+
+
     [BsonIgnore]
-    public Route Route => MessagePackSerializer.Deserialize<Route>(PackedRoute);
+    public Route Route
+    {
+        get
+        {
+            var lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4Block);
+            return MessagePackSerializer.Deserialize<Route>(PackedRoute, lz4Options);
+        }
+    }
 }

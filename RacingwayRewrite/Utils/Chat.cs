@@ -2,6 +2,7 @@
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using RacingwayRewrite.Race;
 
 namespace RacingwayRewrite.Utils;
@@ -15,9 +16,11 @@ public class Chat : IDisposable
     
     public const uint OpenRacingwayId = 0;
     public const uint OpenLogId = 1;
+    public const uint MoveDoorId = 2;
     
     private DalamudLinkPayload OpenRacingway { get; set;}
     private DalamudLinkPayload OpenLog { get; set;}
+    private DalamudLinkPayload MoveDoor { get; set;}
     
     public enum Colors : ushort
     {
@@ -35,6 +38,7 @@ public class Chat : IDisposable
         
         OpenRacingway = Plugin.ChatGui.AddChatLinkHandler(OpenRacingwayId, OnOpenRacingway);
         OpenLog = Plugin.ChatGui.AddChatLinkHandler(OpenLogId, OnOpenLog);
+        MoveDoor = Plugin.ChatGui.AddChatLinkHandler(MoveDoorId, OnMoveDoor);
     }
 
     private void OnOpenRacingway(uint id, SeString message)
@@ -47,6 +51,12 @@ public class Chat : IDisposable
     {
         Plugin.Log.Verbose($"OpenLog payload clicked: {id}, {message}");
         Plugin.CommandManager.ProcessCommand("/xllog");
+    }
+
+    private void OnMoveDoor(uint id, SeString message)
+    {
+        Plugin.Log.Verbose($"MoveDoor payload clicked: {id}, {message}");
+        Plugin.TerritoryTools.MoveToEntry();
     }
 
     // public SeStringBuilder Tag()
@@ -119,19 +129,28 @@ public class Chat : IDisposable
         ChatGui.Print(msg);
     }
 
-    public void PrintPlayer(Player player, string message)
+    public unsafe void PrintPlayer(Player player, string message, bool addDoorLink = false)
     {
         // Have to run on framework thread since we're checking for the local player
         Plugin.Framework.RunOnFrameworkThread(() =>
         {
-            if (Plugin.ClientState.LocalPlayer == null) return; 
-        
-            SeString payload = Tag()
-                               .AddPlayer(player) 
-                               .AddUiForeground(" " + message, (ushort)Colors.Print) 
-                               .BuiltString;
-        
-            ChatGui.Print(payload);
+            if (Plugin.ClientState.LocalPlayer == null) return;
+
+            SeStringBuilder payload = Tag()
+                                      .AddPlayer(player)
+                                      .AddUiForeground(" " + message, (ushort)Colors.Print);
+
+            var manager = HousingManager.Instance();
+            
+            if (addDoorLink && manager->IsInside())
+            {
+                payload = payload.AddUiForeground(" ", (ushort)Colors.Print)
+                                 .Add(MoveDoor)
+                                 .AddUiForeground("Return To Door", (ushort)Colors.Tag)
+                                 .Add(RawPayload.LinkTerminator);
+            }
+            
+            ChatGui.Print(payload.BuiltString);
         });
     }
 

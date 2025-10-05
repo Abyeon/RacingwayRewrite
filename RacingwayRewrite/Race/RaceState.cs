@@ -156,7 +156,7 @@ public class RaceState(Player player)
         
         if (Plugin.Configuration.AllowChat)
         {
-            Plugin.Chat.PrintPlayer(player, $"finished race in {Time.PrettyFormatTimeSpan(elapsed)}");
+            Plugin.Chat.PrintPlayer(player, $"finished race in {Time.PrettyFormatTimeSpan(elapsed)}", true);
         }
     }
 }

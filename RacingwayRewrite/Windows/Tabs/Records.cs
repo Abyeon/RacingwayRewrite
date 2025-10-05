@@ -2,6 +2,7 @@
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Utility;
 using RacingwayRewrite.Utils;
 
 namespace RacingwayRewrite.Windows.Tabs;
@@ -30,6 +31,8 @@ public class Records : ITab
                 ImGui.SameLine();
                 ImGui.Text("1:23.456");
             }
+            
+            ImGuiHelpers.ScaledDummy(1);
         }
     }
 }

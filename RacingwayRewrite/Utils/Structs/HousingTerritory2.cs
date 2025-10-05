@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace RacingwayRewrite.Structs;
+namespace RacingwayRewrite.Utils.Structs;
 
 // Thanks to ICritical
 // https://github.com/Critical-Impact/CriticalCommonLib/blob/main/GameStructs/HousingTerritory2.cs#L6

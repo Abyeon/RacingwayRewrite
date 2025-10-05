@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using Dalamud.Plugin.Services;
+using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
-using RacingwayRewrite.Structs;
 using RacingwayRewrite.Utils;
+using RacingwayRewrite.Utils.Structs;
 using Sheet = Lumina.Excel.Sheets;
 
 namespace RacingwayRewrite.Race.Territory;
@@ -16,14 +18,21 @@ public class TerritoryTools
     internal readonly Plugin Plugin;
     internal readonly IClientState ClientState;
     
-    public TerritoryTools(Plugin plugin, IClientState clientState)
+    public unsafe delegate byte MoveToEntryDelegate(HousingManager* thisPtr);
+
+    [Signature("E8 ?? ?? ?? ?? 84 C0 75 ?? 45 32 F6 E9")] // Thanks to Haselnussbomber for the MoveToEntry sig
+    private readonly MoveToEntryDelegate? moveToEntry = null;
+    
+    public TerritoryTools(Plugin plugin)
     {
         Plugin = plugin;
-        ClientState = clientState;
+        ClientState = Plugin.ClientState;
         
-        clientState.TerritoryChanged += TerritoryChanged;
+        Plugin.GameInteropProvider.InitializeFromAttributes(this);
+        
+        ClientState.TerritoryChanged += TerritoryChanged;
 
-        if (clientState.IsLoggedIn)
+        if (ClientState.IsLoggedIn)
             CheckLocation();
     }
     
@@ -95,6 +104,36 @@ public class TerritoryTools
         }
 
         return 0;
+    }
+    
+    private DateTime lastExecution = DateTime.MinValue;
+    private readonly Lock entryLock = new();
+
+    public unsafe void MoveToEntry()
+    {
+        Plugin.Framework.RunOnFrameworkThread(() =>
+        {
+            lock (entryLock)
+            {
+                if (DateTime.Now - lastExecution < TimeSpan.FromSeconds(0.5))
+                {
+                    Plugin.Log.Warning("Attempted to move to entry too quickly!");
+                    return;
+                }
+            
+                lastExecution = DateTime.Now;
+
+                if (moveToEntry == null)
+                {
+                    Plugin.Log.Error("Could not find move to entry sig!");
+                    return;
+                }
+
+                var manager = HousingManager.Instance();
+                if (manager->IsInside())
+                    moveToEntry.Invoke(manager);
+            }
+        });
     }
     
     // Thanks to ICritical
@@ -171,10 +210,7 @@ public class TerritoryTools
     {
         try
         {
-            bool playerOutside = await Plugin.Framework.PollForValue(() =>
-            {
-                return ClientState.LocalPlayer != null;
-            }, outside => outside, 50, 10000);
+            bool playerOutside = await Plugin.Framework.PollForValue(() => ClientState.LocalPlayer != null, outside => outside, 50, 10000);
 
             if (playerOutside)
             {

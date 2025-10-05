@@ -1,6 +1,15 @@
-﻿using Dalamud.Bindings.ImGui;
+﻿using System;
+using System.Globalization;
+using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Dalamud.Bindings.ImGui;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Interface.Colors;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using Newtonsoft.Json.Serialization;
+using RacingwayRewrite.Race;
 
 namespace RacingwayRewrite.Windows.Tabs;
 
@@ -40,5 +49,37 @@ public class Debug(Plugin plugin) : ITab
         var address = Plugin.RaceManager.RouteLoader.CurrentAddress;
         if (address != null)
             ImGui.TextColoredWrapped(ImGuiColors.DalamudGrey, address.ToString());
+
+        if (ImGui.Button("Return to door"))
+        {
+            Plugin.TerritoryTools.MoveToEntry();
+        }
+        
+        //DrawCharacterData();
+    }
+
+    public unsafe void DrawCharacterData()
+    {
+        if (Plugin.ClientState.LocalPlayer == null) return;
+        var character = (BattleChara*)Plugin.ClientState.LocalPlayer.Address;
+        
+        ActorData data = new ActorData(character);
+        ImGui.TextWrapped(data.Position.ToString());
+        ImGui.TextWrapped(data.Yaw.ToString(CultureInfo.InvariantCulture));
+        
+        //ImGui.TextWrapped(data.Effects.StatusEffects.ToString());
+        foreach (var property in data.Timeline.GetType().GetProperties())
+        {
+            try
+            {
+                ImGui.TextWrapped(property.Name);
+                //ImGui.SameLine();
+                //ImGui.TextWrapped(property.GetValue(data.Timeline)?.ToString());
+            }
+            catch
+            {
+                // ignored
+            }
+        }
     }
 }
