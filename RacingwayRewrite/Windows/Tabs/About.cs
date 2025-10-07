@@ -2,8 +2,10 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Utility;
+using RacingwayRewrite.Utils;
 
 namespace RacingwayRewrite.Windows.Tabs;
 
@@ -29,7 +31,41 @@ public class About(Plugin plugin) : ITab
             ImGui.Text("Changelog: ");
             ImGui.TextWrapped(Plugin.PluginInterface.Manifest.Changelog.ToString());
         }
+
+        DrawCommands();
+        DrawLinks();
+    }
+
+    public void DrawCommands()
+    {
+        if (ImGui.CollapsingHeader("Commands"))
+        {
+            using var _ = ImRaii.PushIndent(5f);
         
+            foreach (var command in Plugin.CommandHandler.Commands)
+            {
+                using (new Ui.Hoverable(command.Name, rounding: 0f, padding: new Vector2(5f, 2f), highlight: true))
+                {
+                    ImGui.TextColored(ImGuiColors.DalamudGrey, $"/{command.Name.ToLowerInvariant()} => ");
+                    ImGui.SameLine();
+                    ImGui.TextColored(ImGuiColors.DalamudGrey3, $"{command.Description}");
+                }
+            
+                if (Ui.Hovered(command.Name))
+                {
+                    if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                    {
+                        command.Execute(command.Name, string.Empty);
+                    }
+                }
+
+                ImGuiHelpers.ScaledDummy(1);
+            }
+        }
+    }
+
+    public void DrawLinks()
+    {
         if (ImGui.Button("GitHub"))
         {
             Util.OpenLink("https://github.com/Abyeon/Racingway");

@@ -9,9 +9,16 @@ public class Quit() : ICommand
     public void Execute(string command, string args)
     {
         if (Plugin.ClientState.LocalPlayer == null) return;
-            
-        Plugin.RaceManager.Players[Plugin.ClientState.LocalPlayer.EntityId].State.SilentFail();
-        Plugin.Chat.Print("You have quit the race.");
+
+        var player = Plugin.RaceManager.Players[Plugin.ClientState.LocalPlayer.EntityId];
+        if (player.State.InRace)
+        {
+            player.State.SilentFail();
+            Plugin.Chat.Print("You have quit the race.");
+            return;
+        }
+        
+        Plugin.Chat.Print("You are not in a race.");
     }
     
     public void Dispose() { }

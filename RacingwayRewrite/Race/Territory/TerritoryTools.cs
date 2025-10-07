@@ -131,7 +131,12 @@ public class TerritoryTools
 
                 var manager = HousingManager.Instance();
                 if (manager->IsInside())
+                {
                     moveToEntry.Invoke(manager);
+                    return;
+                }
+                
+                Plugin.Chat.Warning("Unable to move to entry, not currently inside a house!");
             }
         });
     }

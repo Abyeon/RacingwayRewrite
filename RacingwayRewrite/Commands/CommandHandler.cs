@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dalamud.Game.Command;
 
 namespace RacingwayRewrite.Commands;
@@ -15,6 +16,16 @@ public class CommandHandler : IDisposable
             new Door(),
             new Quit()
         ];
+        
+        // Sorting the local list just for viewing purposes in the About tab.
+        if (Commands.Any(x => x.DisplayOrder == -1))
+        {
+            Commands.Sort((a, b) => string.CompareOrdinal(a.Name, b.Name));
+        }
+        else
+        {
+            Commands.Sort((a, b) => a.DisplayOrder.CompareTo(b.DisplayOrder));
+        }
 
         foreach (var command in Commands)
         {

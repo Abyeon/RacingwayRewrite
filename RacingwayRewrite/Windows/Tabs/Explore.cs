@@ -4,6 +4,7 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using RacingwayRewrite.Storage;
 using RacingwayRewrite.Utils;
@@ -56,7 +57,7 @@ public class Explore(Plugin plugin) : ITab
                 // ImGui.TextColored(ImGuiColors.DalamudGrey, "1:28.006");
             }
 
-            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            if (Ui.Hovered(routeInfo.Name))
             {
                 if (ImGui.IsMouseClicked(ImGuiMouseButton.Left) || ImGui.IsMouseClicked(ImGuiMouseButton.Right))
                 {
@@ -66,7 +67,7 @@ public class Explore(Plugin plugin) : ITab
 
             DrawContextMenu(routeInfo);
 
-            ImGui.Spacing();
+            ImGuiHelpers.ScaledDummy(1);
         }
     }
 

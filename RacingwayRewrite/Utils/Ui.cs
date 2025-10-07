@@ -98,6 +98,20 @@ public static class Ui
 
         return false;
     }
+
+    private static unsafe void SetHovered(string id, bool hovered)
+    {
+        var storage = ImGuiNative.GetStateStorage();
+        var key = ImGui.GetID(id);
+        ImGuiNative.SetBool(storage, key, Convert.ToByte(hovered));
+    }
+
+    public static unsafe bool Hovered(string id)
+    {
+        var storage = ImGuiNative.GetStateStorage();
+        var key = ImGui.GetID(id);
+        return Convert.ToBoolean(ImGuiNative.GetBool(storage, key, Convert.ToByte(false)));
+    }
     
     /// <summary>
     /// Using this class will wrap any item in this context with a disabled ImGui.Selectable node which will display if the user hovers it.
@@ -165,7 +179,7 @@ public static class Ui
 
             using (ImRaii.Disabled())
             {
-                ImGui.Selectable($"###{Id}", false, ImGuiSelectableFlags.AllowItemOverlap, EndPos - StartPos);
+                ImGui.Selectable($"###{Id}", false, ImGuiSelectableFlags.None, EndPos - StartPos);
                 //ImGui.Button($"###{Id}", EndPos - StartPos);
             }
 
@@ -175,11 +189,16 @@ public static class Ui
             var color1 = ImGui.GetColorU32(ImGuiCol.FrameBg, 0f); // Used for gradient
             var lineColor = ImGui.GetColorU32(ImGuiCol.Tab);
             
-            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            if (ImGui.IsMouseHoveringRect(min, max))
             {
                 color = ImGui.GetColorU32(ImGuiCol.FrameBgHovered);
                 color1 = ImGui.GetColorU32(ImGuiCol.FrameBgHovered, 0f);
                 lineColor = ImGui.GetColorU32(ImGuiCol.TabActive);
+                SetHovered(Id, true);
+            }
+            else
+            {
+                SetHovered(Id, false);
             }
             
             if (Highlight)

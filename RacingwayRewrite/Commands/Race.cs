@@ -3,7 +3,7 @@
 public class Race(Plugin Plugin) : ICommand
 {
     public string Name => "RaceRewrite";
-    public string Description => "Opens the main Racingway UI";
+    public string Description => "Toggles the main Racingway UI";
     public bool ShowInHelp => true;
     public int DisplayOrder => 0;
     
