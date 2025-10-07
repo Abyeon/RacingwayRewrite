@@ -37,10 +37,11 @@ public class LocalDatabase : IDisposable
         recordCollection.EnsureIndex(x => x.Created);
         recordCollection.EnsureIndex(x => x.Name);
     }
-
+    
     public void Dispose()
     {
         db.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     public string FileSize
@@ -86,28 +87,25 @@ public class LocalDatabase : IDisposable
 
     internal void SaveRoute(Route route)
     {
-        Task.Run(() =>
+        var routeCollection = GetRouteCollection();
+            
+        var lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4Block);
+        byte[] packed = MessagePackSerializer.Serialize(route, lz4Options);
+        var toSave = new RouteInfo(route.Name, route.Author, route.Description, route.Address, packed)
         {
-            var routeCollection = GetRouteCollection();
-            
-            var lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4Block);
-            byte[] packed = MessagePackSerializer.Serialize(route, lz4Options);
-            var toSave = new RouteInfo(route.Name, route.Author, route.Description, route.Address, packed)
-            {
-                Id = route.Id
-            };
-            
-            try
-            {
-                // Update entry or insert a new one
-                routeCollection.Upsert(route.Id, toSave);
-                RouteCache = routeCollection.Query().ToArray();
-            }
-            catch (Exception e)
-            {
-                Plugin.Log.Error(e.ToString());
-            }
-        });
+            Id = route.Id
+        };
+        
+        try
+        {
+            // Update entry or insert a new one
+            routeCollection.Upsert(route.Id, toSave);
+            RouteCache = routeCollection.Query().ToArray();
+        }
+        catch (Exception e)
+        {
+            Plugin.Log.Error(e.ToString());
+        }
     }
 
     internal void DeleteRoute(ObjectId? id)

@@ -217,6 +217,7 @@ public static class Ui
             ImGui.ChannelsMerge(draw);
             
             Disposed = true;
+            GC.SuppressFinalize(this);
         }
     }
 }

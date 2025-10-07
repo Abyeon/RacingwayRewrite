@@ -22,7 +22,7 @@ public class Settings(Plugin plugin) : ITab
         }
 
         var showDebug = configuration.ShowDebug;
-        if (ImGui.Checkbox("Show Debug", ref showDebug))
+        if (ImGui.Checkbox("Show Overlay", ref showDebug))
         {
             configuration.ShowDebug = showDebug;
             configuration.Save();

@@ -36,7 +36,7 @@ public class About(Plugin plugin) : ITab
         DrawLinks();
     }
 
-    public void DrawCommands()
+    public static void DrawCommands()
     {
         if (ImGui.CollapsingHeader("Commands"))
         {
@@ -64,7 +64,7 @@ public class About(Plugin plugin) : ITab
         }
     }
 
-    public void DrawLinks()
+    public static void DrawLinks()
     {
         if (ImGui.Button("GitHub"))
         {
@@ -96,7 +96,7 @@ public class About(Plugin plugin) : ITab
         }
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
         {
-            ImGui.SetTooltip("Support the dev <3");
+            ImGui.SetTooltip("Want to support the dev?");
         }
     }
 }

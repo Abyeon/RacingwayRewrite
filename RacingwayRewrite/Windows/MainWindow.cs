@@ -55,6 +55,7 @@ public class MainWindow : Window, IDisposable
     public void SelectTab(string label)
     {
         SelectedTab = label;
+        IsOpen = true;
     }
     
     // Thanks to Asriel:

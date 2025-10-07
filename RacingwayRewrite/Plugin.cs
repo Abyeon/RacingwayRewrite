@@ -38,7 +38,6 @@ public sealed class Plugin : IDalamudPlugin
     public static Configuration Configuration { get; set; } = null!;
 
     public readonly WindowSystem WindowSystem = new("RacingwayRewrite");
-    private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
     internal EditWindow EditWindow { get; init; }
     private Overlay Overlay { get; init; } 
@@ -50,7 +49,7 @@ public sealed class Plugin : IDalamudPlugin
 
         try
         {
-            Storage = new(this, $"{PluginInterface.GetPluginConfigDirectory()}\\data.db");
+            Storage = new LocalDatabase(this, $"{PluginInterface.GetPluginConfigDirectory()}\\data.db");
         }
         catch (Exception e)
         {
@@ -64,12 +63,10 @@ public sealed class Plugin : IDalamudPlugin
         RaceManager = new RaceManager(this, Framework, ObjectTable, ClientState);
         VfxManager = new VfxManager(Framework);
         
-        ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
         EditWindow = new EditWindow(this);
         Overlay = new Overlay(this);
         
-        WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
         WindowSystem.AddWindow(EditWindow);
         WindowSystem.AddWindow(Overlay);
@@ -81,7 +78,7 @@ public sealed class Plugin : IDalamudPlugin
         PluginInterface.UiBuilder.Draw += DrawUI;
         
         // Register plugin installer buttons
-        PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigUI;
+        PluginInterface.UiBuilder.OpenConfigUi += OpenConfigUI;
         PluginInterface.UiBuilder.OpenMainUi += ToggleMainUI;
     }
 
@@ -93,9 +90,9 @@ public sealed class Plugin : IDalamudPlugin
         Chat.Dispose();
 
         WindowSystem.RemoveAllWindows();
-
-        ConfigWindow.Dispose();
+        
         MainWindow.Dispose();
+        EditWindow.Dispose();
         Overlay.Dispose();
         
         CommandHandler.Dispose();
@@ -106,17 +103,10 @@ public sealed class Plugin : IDalamudPlugin
 
     public void ShowHideOverlay()
     {
-        if (Configuration.ShowDebug)
-        {
-            Overlay.IsOpen = true;
-        }
-        else
-        {
-            Overlay.IsOpen = false;
-        }
+        Overlay.IsOpen = Configuration.ShowDebug;
     }
 
-    public void ToggleConfigUI() => ConfigWindow.Toggle();
+    public void OpenConfigUI() => MainWindow.SelectTab("Settings");
     public void ToggleMainUI() => MainWindow.Toggle();
     public void ToggleEditUI() => EditWindow.Toggle();
 }

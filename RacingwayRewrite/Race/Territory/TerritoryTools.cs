@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using Dalamud.Game.ClientState;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -30,13 +31,19 @@ public class TerritoryTools
         
         Plugin.GameInteropProvider.InitializeFromAttributes(this);
         
-        ClientState.TerritoryChanged += TerritoryChanged;
+        //ClientState.TerritoryChanged += TerritoryChanged;
+        ClientState.ZoneInit += ZoneInit;
 
         if (ClientState.IsLoggedIn)
             CheckLocation();
     }
     
-    private void TerritoryChanged(ushort id)
+    // private void TerritoryChanged(ushort id)
+    // {
+    //     CheckLocation();
+    // }
+
+    private void ZoneInit(ZoneInitEventArgs args)
     {
         CheckLocation();
     }
