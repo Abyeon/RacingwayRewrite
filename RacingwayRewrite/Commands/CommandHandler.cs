@@ -14,7 +14,8 @@ public class CommandHandler : IDisposable
         Commands = [
             new Race(plugin),
             new Door(),
-            new Quit()
+            new Quit(),
+            new Edit(plugin)
         ];
         
         // Sorting the local list just for viewing purposes in the About tab.
@@ -56,8 +57,10 @@ public class CommandHandler : IDisposable
     {
         foreach (var command in Commands)
         {
-            Plugin.CommandManager.RemoveHandler(command.Name);
+            Plugin.CommandManager.RemoveHandler($"/{command.Name.ToLower()}");
             command.Dispose();
         }
+        
+        GC.SuppressFinalize(this);
     }
 }

@@ -1,9 +1,18 @@
 ﻿using System;
+using System.Linq;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin.Services;
+using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
+using FFXIVClientStructs.FFXIV.Client.System.String;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+using FFXIVClientStructs.FFXIV.Client.UI.Arrays;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using RacingwayRewrite.Race;
+using RacingwayRewrite.Utils.Hooks;
 
 namespace RacingwayRewrite.Utils;
 
@@ -17,6 +26,8 @@ public class Chat : IDisposable
     public const uint OpenRacingwayId = 0;
     public const uint OpenLogId = 1;
     public const uint MoveDoorId = 2;
+    
+    private MessageHooks messageHooks;
     
     private DalamudLinkPayload OpenRacingway { get; set;}
     private DalamudLinkPayload OpenLog { get; set;}
@@ -35,6 +46,7 @@ public class Chat : IDisposable
     {
         Plugin = plugin;
         ChatGui = chatGui;
+        messageHooks = new MessageHooks();
         
         OpenRacingway = Plugin.ChatGui.AddChatLinkHandler(OpenRacingwayId, OnOpenRacingway);
         OpenLog = Plugin.ChatGui.AddChatLinkHandler(OpenLogId, OnOpenLog);
@@ -99,13 +111,13 @@ public class Chat : IDisposable
             }
         }
         
-        ChatGui.Print(builder.BuiltString);
+        Print(builder.BuiltString);
     }
 
     public void Print(string message, BitmapFontIcon? icon = null)
     {
         SeString msg = Tag(icon).AddUiForeground(message, (ushort)Colors.Print).BuiltString;
-        ChatGui.Print(msg);
+        Print(msg);
     }
     
     public void Error(string message, BitmapFontIcon? icon = BitmapFontIcon.Warning)
@@ -116,7 +128,7 @@ public class Chat : IDisposable
                        .AddUiForeground("/xllog", (ushort)Colors.Print)
                        .Add(RawPayload.LinkTerminator).BuiltString;
         
-        ChatGui.Print(msg);
+        Print(msg);
     }
     
     public void Warning(string message, BitmapFontIcon? icon = BitmapFontIcon.Warning)
@@ -126,7 +138,7 @@ public class Chat : IDisposable
                        .AddUiForeground(message, (ushort)Colors.Warning)
                        .AddItalicsOff().BuiltString;
         
-        ChatGui.Print(msg);
+        Print(msg);
     }
 
     public unsafe void PrintPlayer(Player player, string message, bool addDoorLink = false)
@@ -150,7 +162,27 @@ public class Chat : IDisposable
                                  .Add(RawPayload.LinkTerminator);
             }
             
-            ChatGui.Print(payload.BuiltString);
+            Print(payload.BuiltString);
+        });
+    }
+
+    private unsafe void Print(SeString message)
+    {
+        Plugin.Framework.RunOnFrameworkThread(() =>
+        {
+            // if (messageHooks.LastMessage != null)
+            // {
+            //     if (messageHooks.LastMessage.Message.Encode().SequenceEqual(message.Encode()))
+            //     {
+            //         messageHooks.AddDupe();
+            //         return;
+            //     }
+            // }
+            
+            var time = Framework.Instance()->UtcTime;
+            messageHooks.LastMessage = new MessageHooks.LogMessage(message, time.Timestamp, true);
+            if (messageHooks.Dupes > 1) return;
+            ChatGui.Print(message);
         });
     }
 
@@ -158,5 +190,9 @@ public class Chat : IDisposable
     {
         Plugin.ChatGui.RemoveChatLinkHandler(OpenRacingwayId);
         Plugin.ChatGui.RemoveChatLinkHandler(OpenLogId);
+        Plugin.ChatGui.RemoveChatLinkHandler(MoveDoorId);
+        
+        messageHooks.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

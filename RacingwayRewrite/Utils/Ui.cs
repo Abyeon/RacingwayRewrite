@@ -189,7 +189,7 @@ public static class Ui
             var color1 = ImGui.GetColorU32(ImGuiCol.FrameBg, 0f); // Used for gradient
             var lineColor = ImGui.GetColorU32(ImGuiCol.Tab);
             
-            if (ImGui.IsMouseHoveringRect(min, max))
+            if (ImGui.IsMouseHoveringRect(min, max) && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
             {
                 color = ImGui.GetColorU32(ImGuiCol.FrameBgHovered);
                 color1 = ImGui.GetColorU32(ImGuiCol.FrameBgHovered, 0f);

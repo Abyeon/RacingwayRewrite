@@ -72,7 +72,6 @@ public class RaceState(Player player)
     public void SilentFail()
     {
         if (!InRace) return;
-        if (CurrentRoute == null) throw new NullReferenceException("Route was null");
         
         Timer.Reset();
         Checkpoint = 0;

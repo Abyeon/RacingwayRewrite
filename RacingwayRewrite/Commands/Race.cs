@@ -1,6 +1,8 @@
-﻿namespace RacingwayRewrite.Commands;
+﻿using System;
 
-public class Race(Plugin Plugin) : ICommand
+namespace RacingwayRewrite.Commands;
+
+public class Race(Plugin plugin) : ICommand
 {
     public string Name => "RaceRewrite";
     public string Description => "Toggles the main Racingway UI";
@@ -9,8 +11,11 @@ public class Race(Plugin Plugin) : ICommand
     
     public void Execute(string command, string args)
     {
-        Plugin.ToggleMainUI();
+        plugin.ToggleMainUI();
     }
 
-    public void Dispose() { }
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+    }
 }

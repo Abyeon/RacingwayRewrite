@@ -46,7 +46,7 @@ public class About(Plugin plugin) : ITab
             {
                 using (new Ui.Hoverable(command.Name, rounding: 0f, padding: new Vector2(5f, 2f), highlight: true))
                 {
-                    ImGui.TextColored(ImGuiColors.DalamudGrey, $"/{command.Name.ToLowerInvariant()} => ");
+                    ImGui.TextColored(ImGuiColors.DalamudGrey, $"/{command.Name.ToLowerInvariant()} → ");
                     ImGui.SameLine();
                     ImGui.TextColored(ImGuiColors.DalamudGrey3, $"{command.Description}");
                 }

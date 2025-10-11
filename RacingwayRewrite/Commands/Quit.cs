@@ -1,4 +1,6 @@
-﻿namespace RacingwayRewrite.Commands;
+﻿using System;
+
+namespace RacingwayRewrite.Commands;
 
 public class Quit() : ICommand
 {
@@ -20,6 +22,9 @@ public class Quit() : ICommand
         
         Plugin.Chat.Print("You are not in a race.");
     }
-    
-    public void Dispose() { }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+    }
 }
