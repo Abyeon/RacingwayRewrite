@@ -1,23 +1,14 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using Dalamud.Game.Text;
-using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Hooking;
-using Dalamud.Utility;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
-using FFXIVClientStructs.FFXIV.Common;
 using Lumina.Text;
 using Lumina.Text.Payloads;
 using Lumina.Text.ReadOnly;
 using SeString = Dalamud.Game.Text.SeStringHandling.SeString;
-using LSeString = Lumina.Text.SeString;
-using SeStringBuilder = Lumina.Text.SeStringBuilder;
-using TextPayload = Dalamud.Game.Text.SeStringHandling.Payloads.TextPayload;
+using LSeStringBuilder = Lumina.Text.SeStringBuilder;
 
 namespace RacingwayRewrite.Utils.Hooks;
 
@@ -59,9 +50,8 @@ public unsafe class MessageHooks : IDisposable
 
     private void ChatGuiOnChatMessageUnhandled(XivChatType type, int timestamp, SeString sender, SeString message)
     {
-        //Plugin.Log.Debug($"{LastMessage?.Message}\nvs\n{message}");
         if (IsBattleType(type)) return; // Filter out any battle related chats
-        LastMessage = new LogMessage(message, timestamp, false);
+        LastMessage = new LogMessage(message, timestamp);
     }
 
     public void Dispose()
@@ -73,7 +63,6 @@ public unsafe class MessageHooks : IDisposable
 
     public static void ReloadChat()
     {
-        Plugin.Log.Debug("Reloading chat");
         var raptureLogModule = RaptureLogModule.Instance();
         for (var i = 0; i < 4; i++)
         {
@@ -93,7 +82,6 @@ public unsafe class MessageHooks : IDisposable
                 if (!value.IsRacingway) return;
                 Dupes++;
                 CheckReload();
-                //Plugin.Log.Debug(dupes.ToString());
                 return;
             }
             
@@ -115,24 +103,22 @@ public unsafe class MessageHooks : IDisposable
     {
         try
         {
-            var msg = new LogMessage(message, *timestamp);
-            using var newMsg = new Utf8String();
-
             if (LastMessage is not { IsRacingway: true })
             {
                 return formatLogHook!.Original(thisPtr, logKindId, sender, message, timestamp, a6, a7, chatTabIndex);
             }
             
+            var msg = new LogMessage(message, *timestamp);
+            using var newMsg = new Utf8String();
+            
             if (LastMessage.Equals(msg) && Dupes > 1)
             {
-                Plugin.Log.Debug("Duplicate message");
-                
                 var chat = new XivChatEntry
                 {
                     Message = LastMessage.Message
                 };
 
-                var sb = new SeStringBuilder();
+                var sb = new LSeStringBuilder();
                 
                 // Yoinked straight from Dalamud's ChatGui.cs
                 foreach (var c in UtfEnumerator.From(chat.MessageBytes, UtfEnumeratorFlags.Utf8SeString))
@@ -145,13 +131,11 @@ public unsafe class MessageHooks : IDisposable
                         sb.Append(c);
                 }
 
-                sb.Append(" (x" + Dupes + ")");
-                
+                sb.PushColorType(4).Append(" (x" + Dupes + ")").PopColorType();
                 newMsg.SetString(sb.GetViewAsSpan());
+                
                 return formatLogHook!.Original(thisPtr, logKindId, sender, &newMsg, timestamp, a6, a7, chatTabIndex);
             }
-            
-            //Plugin.Log.Debug($"{LastMessage.Message}\nvs\n{msg.Message}");
         }
         catch (Exception e)
         {
@@ -161,26 +145,14 @@ public unsafe class MessageHooks : IDisposable
         return formatLogHook!.Original(thisPtr, logKindId, sender, message, timestamp, a6, a7, chatTabIndex);
     }
 
-    public class LogMessage
+    public class LogMessage(SeString message, int timestamp, bool isRacingway = false)
     {
-        public readonly SeString Message;
-        public readonly int Timestamp;
-        public readonly bool IsRacingway;
+        public readonly SeString Message = message;
+        public readonly int Timestamp = timestamp;
+        public readonly bool IsRacingway = isRacingway;
 
-        public LogMessage(Utf8String* message, int timestamp)
-        {
-            Message = SeString.Parse(message->AsSpan());
-            Timestamp = timestamp;
-            IsRacingway = false;
-        }
+        public LogMessage(Utf8String* message, int timestamp) : this(SeString.Parse(message->AsSpan()), timestamp) { }
 
-        public LogMessage(SeString message, int timestamp, bool isRacingway = false)
-        {
-            Message = message;
-            Timestamp = timestamp;
-            IsRacingway = isRacingway;
-        }
-        
         public void Print()
         {
             Plugin.Log.Debug($"{Message} - {Timestamp}");
