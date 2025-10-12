@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using RacingwayRewrite.Race.Collision;
 using RacingwayRewrite.Utils;
 
 namespace RacingwayRewrite.Race;
@@ -155,7 +154,7 @@ public class RaceState(Player player)
         
         if (Plugin.Configuration.AllowChat)
         {
-            Plugin.Chat.PrintPlayer(player, $"finished race in {Time.PrettyFormatTimeSpan(elapsed)}", true);
+            Plugin.Chat.PrintPlayer(player, $"finished race in {Time.PrettyFormatTimeSpan(elapsed)}", player.IsClient);
         }
     }
 }

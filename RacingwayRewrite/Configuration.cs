@@ -1,6 +1,5 @@
 ﻿using Dalamud.Configuration;
 using System;
-using System.Numerics;
 
 namespace RacingwayRewrite;
 

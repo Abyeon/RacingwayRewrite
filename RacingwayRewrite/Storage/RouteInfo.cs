@@ -1,5 +1,4 @@
-﻿using System;
-using LiteDB;
+﻿using LiteDB;
 using MessagePack;
 using RacingwayRewrite.Race;
 using RacingwayRewrite.Race.Territory;

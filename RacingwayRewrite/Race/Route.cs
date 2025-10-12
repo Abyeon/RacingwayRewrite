@@ -5,9 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using LiteDB;
 using MessagePack;
-using RacingwayRewrite.Race.Collision;
+using RacingwayRewrite.Race.Collision.Triggers;
 using RacingwayRewrite.Race.Territory;
-using RacingwayRewrite.Storage;
 using ZLinq;
 
 namespace RacingwayRewrite.Race;
@@ -22,7 +21,7 @@ public class Route
     [Key(3)] public string Description { get; set; } = "";
     [Key(4)] public Address Address { get; init; }
     [Key(5)] public int Laps { get; set; } = 1;
-    [Key(6)] public bool AllowMounts  { get; set; } = false;
+    [Key(6)] public bool AllowMounts  { get; set; }
     [Key(7)] public List<ITrigger> Triggers { get; set; } = [];
     
     // Would be best to have a db for all records and fetch related ones whenever we want them.

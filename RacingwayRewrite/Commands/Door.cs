@@ -1,6 +1,6 @@
 ﻿namespace RacingwayRewrite.Commands;
 
-public class Door() : ICommand
+public class Door : ICommand
 {
     public string Name => "RaceDoor";
     public string Description => "Moves the player to the door when in a house.";

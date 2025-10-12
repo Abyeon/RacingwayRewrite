@@ -29,6 +29,13 @@ public unsafe class MessageHooks : IDisposable
         ReloadChat();
     }
     
+    public void Dispose()
+    {
+        formatLogHook?.Dispose();
+        ReloadChat();
+        GC.SuppressFinalize(this);
+    }
+    
     private static bool IsBattleType(XivChatType type) {
         var channel = ((int)type & 0x7F);
         switch (channel) {
@@ -52,13 +59,6 @@ public unsafe class MessageHooks : IDisposable
     {
         if (IsBattleType(type)) return; // Filter out any battle related chats
         LastMessage = new LogMessage(message, timestamp);
-    }
-
-    public void Dispose()
-    {
-        formatLogHook?.Dispose();
-        ReloadChat();
-        GC.SuppressFinalize(this);
     }
 
     public static void ReloadChat()
@@ -152,11 +152,6 @@ public unsafe class MessageHooks : IDisposable
         public readonly bool IsRacingway = isRacingway;
 
         public LogMessage(Utf8String* message, int timestamp) : this(SeString.Parse(message->AsSpan()), timestamp) { }
-
-        public void Print()
-        {
-            Plugin.Log.Debug($"{Message} - {Timestamp}");
-        }
 
         public bool Equals(LogMessage other)
         {

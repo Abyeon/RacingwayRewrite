@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using MessagePack;
 using RacingwayRewrite.Race.Collision.Shapes;
-using RacingwayRewrite.Utils;
 
-namespace RacingwayRewrite.Race.Collision;
+namespace RacingwayRewrite.Race.Collision.Triggers;
 
 [MessagePackObject]
 public class Finish : ITrigger

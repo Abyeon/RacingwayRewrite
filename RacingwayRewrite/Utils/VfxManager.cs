@@ -62,6 +62,7 @@ public class VfxManager : IDisposable
     {
         currentVfx = [];
         Framework.Update -= Update;
+        GC.SuppressFinalize(this);
     }
 }
 

@@ -2,7 +2,7 @@
 
 namespace RacingwayRewrite.Commands;
 
-public class Quit() : ICommand
+public class Quit : ICommand
 {
     public string Name => "RaceQuit";
     public string Description => "Kicks the player out of their current race.";

@@ -3,7 +3,6 @@ using System.Numerics;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using RacingwayRewrite.Utils;
 
 namespace RacingwayRewrite.Race;
 

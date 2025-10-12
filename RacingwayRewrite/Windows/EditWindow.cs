@@ -9,8 +9,8 @@ using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using RacingwayRewrite.Race;
-using RacingwayRewrite.Race.Collision;
 using RacingwayRewrite.Race.Collision.Shapes;
+using RacingwayRewrite.Race.Collision.Triggers;
 using RacingwayRewrite.Race.Territory;
 using RacingwayRewrite.Utils;
 

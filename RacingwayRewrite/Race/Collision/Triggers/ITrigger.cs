@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using MessagePack;
 using RacingwayRewrite.Race.Collision.Shapes;
 
-namespace RacingwayRewrite.Race.Collision;
+namespace RacingwayRewrite.Race.Collision.Triggers;
 
 public enum Behavior : ushort
 {

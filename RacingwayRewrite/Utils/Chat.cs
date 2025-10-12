@@ -1,16 +1,9 @@
 ﻿using System;
-using System.Linq;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin.Services;
-using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
-using FFXIVClientStructs.FFXIV.Client.System.String;
-using FFXIVClientStructs.FFXIV.Client.UI.Agent;
-using FFXIVClientStructs.FFXIV.Client.UI.Arrays;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using RacingwayRewrite.Race;
 using RacingwayRewrite.Utils.Hooks;
 
@@ -84,9 +77,9 @@ public class Chat : IDisposable
 
     public SeStringBuilder Tag(BitmapFontIcon? icon = null)
     {
-        var builder = new SeStringBuilder();
-        if (icon != null) builder = builder.AddIcon(icon.Value);
-        return builder
+        var sb = new SeStringBuilder();
+        if (icon != null) sb = sb.AddIcon(icon.Value);
+        return sb
                .AddUiForeground((ushort)Colors.Tag)
                .Add(OpenRacingway)
                .AddText($"[{tag}]")
@@ -148,21 +141,21 @@ public class Chat : IDisposable
         {
             if (Plugin.ClientState.LocalPlayer == null) return;
 
-            SeStringBuilder payload = Tag()
-                                      .AddPlayer(player)
-                                      .AddUiForeground(" " + message, (ushort)Colors.Print);
+            var sb = Tag()
+                     .AddPlayer(player)
+                     .AddUiForeground(" " + message, (ushort)Colors.Print);
 
             var manager = HousingManager.Instance();
             
             if (addDoorLink && manager->IsInside())
             {
-                payload = payload.AddUiForeground(" ", (ushort)Colors.Print)
+                sb = sb.AddUiForeground(" ", (ushort)Colors.Print)
                                  .Add(MoveDoor)
                                  .AddUiForeground("Return To Door", (ushort)Colors.Tag)
                                  .Add(RawPayload.LinkTerminator);
             }
             
-            Print(payload.BuiltString);
+            Print(sb.BuiltString);
         });
     }
 
@@ -170,15 +163,6 @@ public class Chat : IDisposable
     {
         Plugin.Framework.RunOnFrameworkThread(() =>
         {
-            // if (messageHooks.LastMessage != null)
-            // {
-            //     if (messageHooks.LastMessage.Message.Encode().SequenceEqual(message.Encode()))
-            //     {
-            //         messageHooks.AddDupe();
-            //         return;
-            //     }
-            // }
-            
             var time = Framework.Instance()->UtcTime;
             messageHooks.LastMessage = new MessageHooks.LogMessage(message, time.Timestamp, true);
             if (messageHooks.Dupes > 1) return;

@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using MessagePack;
-using Pictomancy;
 using RacingwayRewrite.Race;
-using RacingwayRewrite.Race.Collision;
-using RacingwayRewrite.Race.Collision.Shapes;
-using RacingwayRewrite.Storage;
 using RacingwayRewrite.Windows.Tabs;
 
 namespace RacingwayRewrite.Windows;

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
-using RacingwayRewrite.Race.Collision;
 using ZLinq;
 
 namespace RacingwayRewrite.Race;
