@@ -6,6 +6,7 @@ using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Utility;
 using RacingwayRewrite.Utils;
+using RacingwayRewrite.Utils.Interface;
 
 namespace RacingwayRewrite.Windows.Tabs;
 

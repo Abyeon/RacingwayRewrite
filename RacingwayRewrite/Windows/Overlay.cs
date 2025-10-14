@@ -8,6 +8,7 @@ using Pictomancy;
 using RacingwayRewrite.Race;
 using RacingwayRewrite.Race.Collision.Shapes;
 using RacingwayRewrite.Utils;
+using RacingwayRewrite.Utils.Interface;
 
 namespace RacingwayRewrite.Windows;
 

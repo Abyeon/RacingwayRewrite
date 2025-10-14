@@ -32,6 +32,8 @@ public unsafe class MessageHooks : IDisposable
     public void Dispose()
     {
         formatLogHook?.Dispose();
+        Plugin.ChatGui.ChatMessageUnhandled -= ChatGuiOnChatMessageUnhandled;
+        
         ReloadChat();
         GC.SuppressFinalize(this);
     }
@@ -81,19 +83,13 @@ public unsafe class MessageHooks : IDisposable
             {
                 if (!value.IsRacingway) return;
                 Dupes++;
-                CheckReload();
+                if (Dupes > 1) ReloadChat();
                 return;
             }
             
             Dupes = 1;
             lastMessage = value;
             ReloadChat();
-            return;
-
-            void CheckReload()
-            {
-                if (Dupes > 1) ReloadChat();
-            }
         }
     }
     

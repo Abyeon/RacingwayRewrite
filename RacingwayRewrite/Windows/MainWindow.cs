@@ -1,15 +1,20 @@
 ﻿using System;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
+using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
+using Dalamud.Utility.Numerics;
 using MessagePack;
 using RacingwayRewrite.Race;
+using RacingwayRewrite.Utils;
+using RacingwayRewrite.Utils.Interface;
 using RacingwayRewrite.Windows.Tabs;
 
 namespace RacingwayRewrite.Windows;
 
-public class MainWindow : Window, IDisposable
+public class MainWindow : CustomWindow, IDisposable
 {
     private Plugin Plugin;
     private ITab[] Tabs;
@@ -65,8 +70,8 @@ public class MainWindow : Window, IDisposable
         }
         return ImRaii.TabItem(label);
     }
-    
-    public override void Draw()
+
+    protected override void Render()
     {
         if (ImGui.Button("Open Editor"))
         {

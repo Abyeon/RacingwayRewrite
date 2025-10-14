@@ -4,6 +4,7 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using RacingwayRewrite.Utils;
+using RacingwayRewrite.Utils.Interface;
 
 namespace RacingwayRewrite.Windows.Tabs;
 

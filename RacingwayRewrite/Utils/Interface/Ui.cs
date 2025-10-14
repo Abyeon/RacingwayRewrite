@@ -2,8 +2,9 @@
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Interface.Windowing;
 
-namespace RacingwayRewrite.Utils;
+namespace RacingwayRewrite.Utils.Interface;
 
 /// <summary>
 /// Provides custom ImGui components
@@ -122,7 +123,6 @@ public static class Ui
         public float Rounding { get; init; }
         public bool Highlight { get; init; }
         
-        public bool Disposed { get; private set; }
         public string Id { get; private set; }
 
         private ImDrawListPtr draw;
@@ -211,8 +211,6 @@ public static class Ui
 
             draw.ChannelsSetCurrent(1);
             ImGui.ChannelsMerge(draw);
-            
-            Disposed = true;
             GC.SuppressFinalize(this);
         }
     }

@@ -1,14 +1,12 @@
 ﻿using System.Numerics;
-using Pictomancy;
-
 using Dalamud.Bindings.ImGui;
 using Dalamud.Bindings.ImGuizmo;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
+using Pictomancy;
+using RacingwayRewrite.Race.Collision.Shapes;
 using CameraManager = FFXIVClientStructs.FFXIV.Client.Game.Control.CameraManager;
 
-using RacingwayRewrite.Race.Collision.Shapes;
-
-namespace RacingwayRewrite.Utils;
+namespace RacingwayRewrite.Utils.Interface;
 
 public static class DrawExtensions
 {

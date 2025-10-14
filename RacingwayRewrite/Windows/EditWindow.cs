@@ -13,10 +13,11 @@ using RacingwayRewrite.Race.Collision.Shapes;
 using RacingwayRewrite.Race.Collision.Triggers;
 using RacingwayRewrite.Race.Territory;
 using RacingwayRewrite.Utils;
+using RacingwayRewrite.Utils.Interface;
 
 namespace RacingwayRewrite.Windows;
 
-public class EditWindow : Window, IDisposable
+public class EditWindow : CustomWindow, IDisposable
 {
     internal readonly Plugin Plugin;
     
@@ -33,8 +34,8 @@ public class EditWindow : Window, IDisposable
     }
 
     public void Dispose() {}
-    
-    public override void Draw()
+
+    protected override void Render()
     {
         RouteLoader loader = Plugin.RaceManager.RouteLoader;
 
