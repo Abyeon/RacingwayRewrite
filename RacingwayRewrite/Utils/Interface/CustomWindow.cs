@@ -4,6 +4,7 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
+using Dalamud.Utility.Numerics;
 
 namespace RacingwayRewrite.Utils.Interface;
 
@@ -14,20 +15,20 @@ public abstract class CustomWindow : Window
     { }
 
     private Vector2 padding;
-    private uint bgCol;
     private bool needsPop = false;
 
     public override void PreDraw()
     {
         // Get the current title bar color
-        var titleCol = ImGui.GetColorU32(IsFocused ? ImGuiCol.TitleBgActive : IsOpen ? ImGuiCol.TitleBg : ImGuiCol.TitleBgCollapsed);
-        var alpha = titleCol >> 24;
+        var index = IsFocused ? ImGuiCol.TitleBgActive :
+                    IsOpen ? ImGuiCol.TitleBg : ImGuiCol.TitleBgCollapsed;
         
-        // Adjust Window alpha to match title bar
-        bgCol = ImGui.GetColorU32(ImGuiCol.WindowBg);
-        bgCol = (bgCol & 0x00FFFFFF) | (alpha << 24);
+        var vec4 = Ui.GetColorVec4(index);
+        if (IsFocused) vec4.W = 1;
+        var titleCol = vec4.ToByteColor().RGBA;
         
-        ImGui.PushStyleColor(ImGuiCol.WindowBg, bgCol);
+        // Re-assign title bar color
+        ImGui.PushStyleColor(index, titleCol);
         
         // Push border style
         var borderSize = IsFocused ? 2f : ImGui.GetStyle().WindowBorderSize;
@@ -37,6 +38,7 @@ public abstract class CustomWindow : Window
         // Push padding
         padding = ImGui.GetStyle().WindowPadding;
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
+        
         needsPop = true;
         base.PreDraw();
     }
@@ -50,15 +52,15 @@ public abstract class CustomWindow : Window
         
         if (IsFocused)
         {
-            var sizeConstraints = SizeConstraints;
+            var color = Ui.GetColorVec4(ImGuiCol.TitleBgActive);
+            color.W = ImGui.GetStyle().Alpha;
             
-            var color = GetAlphaAdjustedColorU32(ImGuiCol.TitleBgActive);
             var color1 = ImGui.GetColorU32(ImGuiCol.WindowBg, 0);
             
             var size = new Vector2
             {
                 X = ImGui.GetWindowSize().X + 5f,
-                Y = sizeConstraints.HasValue ? sizeConstraints.Value.MinimumSize.Y * 0.5f : ImGui.GetWindowSize().Y * 0.5f
+                Y = SizeConstraints.HasValue ? SizeConstraints.Value.MinimumSize.Y * 0.5f : ImGui.GetWindowSize().Y * 0.5f
             };
 
             var position = new Vector2
@@ -67,7 +69,7 @@ public abstract class CustomWindow : Window
                 Y = ImGui.GetWindowPos().Y + ImGui.GetFrameHeight()
             };
             
-            drawList.AddRectFilledMultiColor(position, position + size, color, color, color1, color1);
+            drawList.AddRectFilledMultiColor(position, position + size, color.ToByteColor().RGBA, color.ToByteColor().RGBA, color1, color1);
         }
         
         drawList.ChannelsMerge();
@@ -115,13 +117,5 @@ public abstract class CustomWindow : Window
             ImGui.PopStyleColor(2);
         }
         base.PostDraw();
-    }
-    
-    private uint GetAlphaAdjustedColorU32(ImGuiCol idx)
-    {
-        var bgAlpha = bgCol >> 24;
-        
-        var color = ImGui.GetColorU32(idx);
-        return (color & 0x00FFFFFF) | (bgAlpha << 24);
     }
 }

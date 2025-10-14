@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 
@@ -108,6 +109,13 @@ public static class Ui
         var storage = ImGuiNative.GetStateStorage();
         var key = ImGui.GetID(id);
         return Convert.ToBoolean(ImGuiNative.GetBool(storage, key, Convert.ToByte(false)));
+    }
+
+    public static Vector4 GetColorVec4(ImGuiCol idx)
+    {
+        var col = ImGui.GetStyle().Colors[(int)idx];
+        col.W *= ImGui.GetStyle().Alpha;
+        return col;
     }
     
     /// <summary>
