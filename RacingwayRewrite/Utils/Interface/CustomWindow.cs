@@ -9,37 +9,36 @@ namespace RacingwayRewrite.Utils.Interface;
 
 public abstract class CustomWindow : Window
 {
-    protected CustomWindow(string name, ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) : base(name, flags, forceMainWindow)
-    {
-    }
+    protected CustomWindow(string name, ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false)
+        : base(name, flags, forceMainWindow)
+    { }
 
-    protected CustomWindow(string name) : base(name)
-    {
-    }
-    
     private Vector2 padding;
+    private uint bgCol;
     private bool needsPop = false;
 
     public override void PreDraw()
     {
+        // Get the current title bar color
+        var titleCol = ImGui.GetColorU32(IsFocused ? ImGuiCol.TitleBgActive : IsOpen ? ImGuiCol.TitleBg : ImGuiCol.TitleBgCollapsed);
+        var alpha = titleCol >> 24;
+        
+        // Adjust Window alpha to match title bar
+        bgCol = ImGui.GetColorU32(ImGuiCol.WindowBg);
+        bgCol = (bgCol & 0x00FFFFFF) | (alpha << 24);
+        
+        ImGui.PushStyleColor(ImGuiCol.WindowBg, bgCol);
+        
         // Push border style
-        var borderColor = ImGui.GetColorU32(IsFocused ? ImGuiCol.TitleBgActive : IsOpen ? ImGuiCol.TitleBg : ImGuiCol.TitleBgCollapsed);
         var borderSize = IsFocused ? 2f : ImGui.GetStyle().WindowBorderSize;
         ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, borderSize);
-        ImGui.PushStyleColor(ImGuiCol.Border, borderColor);
+        ImGui.PushStyleColor(ImGuiCol.Border, titleCol);
         
         // Push padding
         padding = ImGui.GetStyle().WindowPadding;
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
         needsPop = true;
         base.PreDraw();
-    }
-
-    public void PreRender()
-    {
-        var drawList = ImGui.GetWindowDrawList();
-        drawList.ChannelsSplit(2);
-        drawList.ChannelsSetCurrent(1);
     }
 
     protected abstract void Render();
@@ -74,25 +73,17 @@ public abstract class CustomWindow : Window
         drawList.ChannelsMerge();
     }
 
-    public override void PostDraw()
-    {
-        if (needsPop)
-        {
-            ImGui.PopStyleVar(2);
-            ImGui.PopStyleColor();
-        }
-        base.PostDraw();
-    }
-
     public override void Draw()
     {
         ImGui.PopStyleVar(2);
-        ImGui.PopStyleColor();
+        ImGui.PopStyleColor(2);
         needsPop = false;
         
         try
         {
-            PreRender();
+            var drawList = ImGui.GetWindowDrawList();
+            drawList.ChannelsSplit(2);
+            drawList.ChannelsSetCurrent(1);
 
             Vector2 start = ImGui.GetCursorPos() + padding;
             Vector2 end = ImGui.GetWindowSize() - padding;
@@ -116,14 +107,21 @@ public abstract class CustomWindow : Window
         }
     }
     
-    private static uint GetAlphaAdjustedColorU32(ImGuiCol idx)
+    public override void PostDraw()
     {
-        var bg = ImGui.GetColorU32(ImGuiCol.WindowBg);
-        var bgAlpha = bg >> 24;
-            
+        if (needsPop)
+        {
+            ImGui.PopStyleVar(2);
+            ImGui.PopStyleColor(2);
+        }
+        base.PostDraw();
+    }
+    
+    private uint GetAlphaAdjustedColorU32(ImGuiCol idx)
+    {
+        var bgAlpha = bgCol >> 24;
+        
         var color = ImGui.GetColorU32(idx);
-        var alpha = color >> 24;
-        var alphaDiff = alpha - bgAlpha;
-        return color ^ (alphaDiff << 24);
+        return (color & 0x00FFFFFF) | (bgAlpha << 24);
     }
 }
