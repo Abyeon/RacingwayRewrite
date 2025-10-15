@@ -12,15 +12,12 @@ public class RaceManager : IDisposable
 {
     public RouteLoader RouteLoader { get; private set; }
     
-    internal readonly Plugin Plugin;
     internal readonly IFramework Framework;
     internal readonly IObjectTable ObjectTable;
     internal readonly IClientState ClientState;
-
     
     public RaceManager(Plugin plugin, IFramework framework, IObjectTable objectTable, IClientState clientState)
     {
-        Plugin = plugin;
         Framework = framework;
         ObjectTable = objectTable;
         ClientState = clientState;
@@ -50,7 +47,7 @@ public class RaceManager : IDisposable
             // Cleanup old/lost players
             Task.Run(() =>
             {
-                List<uint> keysToRemove = Players.Keys.AsValueEnumerable().Where(key => !touchedIds.Contains(key)).ToList();
+                var keysToRemove = Players.Keys.AsValueEnumerable().Where(key => !touchedIds.Contains(key)).ToList();
                 foreach (var key in keysToRemove)
                 {
                     if (key == localPlayer.EntityId) continue;
@@ -75,6 +72,11 @@ public class RaceManager : IDisposable
 
     public readonly Dictionary<uint, Player> Players = new();
     public int SelectedTrigger = -1;
+
+    public Player? GetPlayer(uint entityId)
+    {
+        return Players.GetValueOrDefault(entityId);
+    }
     
     private void TrackPlayer(IBattleChara? actor)
     {

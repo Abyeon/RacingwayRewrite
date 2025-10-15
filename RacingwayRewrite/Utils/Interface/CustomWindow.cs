@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Globalization;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
@@ -12,7 +14,22 @@ public abstract class CustomWindow : Window
 {
     protected CustomWindow(string name, ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false)
         : base(name, flags, forceMainWindow)
-    { }
+    {
+        AllowClickthrough = false;
+        AllowPinning = false;
+        
+        TitleBarButtons.Add(new TitleBarButton
+        {
+            Icon = FontAwesomeIcon.Thumbtack,
+            IconOffset = new Vector2(2.5f, 1),
+            Click = _ =>
+            {
+                var pinned = (Flags & ImGuiWindowFlags.NoMove) == ImGuiWindowFlags.NoMove;
+                if (!pinned) Flags |= ImGuiWindowFlags.NoMove;
+                else Flags &= ~(ImGuiWindowFlags.NoMove);
+            }
+        });
+    }
 
     private Vector2 padding;
     private bool needsPop = false;
@@ -24,7 +41,7 @@ public abstract class CustomWindow : Window
                     IsOpen ? ImGuiCol.TitleBg : ImGuiCol.TitleBgCollapsed;
         
         var vec4 = Ui.GetColorVec4(index);
-        if (IsFocused) vec4.W = 1;
+        if (IsFocused) vec4.W = 1; // Make titlebar opaque if the window is focused.
         var titleCol = vec4.ToByteColor().RGBA;
         
         // Re-assign title bar color
@@ -44,7 +61,7 @@ public abstract class CustomWindow : Window
     }
 
     protected abstract void Render();
-
+    
     public void PostRender()
     {
         var drawList = ImGui.GetWindowDrawList();
@@ -52,10 +69,8 @@ public abstract class CustomWindow : Window
         
         if (IsFocused)
         {
-            var color = Ui.GetColorVec4(ImGuiCol.TitleBgActive);
-            color.W = ImGui.GetStyle().Alpha;
-            
-            var color1 = ImGui.GetColorU32(ImGuiCol.WindowBg, 0);
+            var color = ImGui.GetColorU32(ImGuiCol.TitleBgActive);
+            var color1 = ImGui.GetColorU32(ImGuiCol.WindowBg, 0U);
             
             var size = new Vector2
             {
@@ -63,13 +78,15 @@ public abstract class CustomWindow : Window
                 Y = SizeConstraints.HasValue ? SizeConstraints.Value.MinimumSize.Y * 0.5f : ImGui.GetWindowSize().Y * 0.5f
             };
 
+            var noDeco = (Flags & ImGuiWindowFlags.NoDecoration) == ImGuiWindowFlags.NoDecoration;
+            
             var position = new Vector2
             {
                 X = ImGui.GetWindowPos().X - 5f,
-                Y = ImGui.GetWindowPos().Y + ImGui.GetFrameHeight()
+                Y = ImGui.GetWindowPos().Y + (noDeco ? 0 : ImGui.GetFrameHeight())
             };
             
-            drawList.AddRectFilledMultiColor(position, position + size, color.ToByteColor().RGBA, color.ToByteColor().RGBA, color1, color1);
+            drawList.AddRectFilledMultiColor(position, position + size, color, color, color1, color1);
         }
         
         drawList.ChannelsMerge();
@@ -108,7 +125,7 @@ public abstract class CustomWindow : Window
             Plugin.Log.Error(ex.ToString());
         }
     }
-    
+
     public override void PostDraw()
     {
         if (needsPop)
