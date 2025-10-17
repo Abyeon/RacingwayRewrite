@@ -120,7 +120,7 @@ public class EditWindow : CustomWindow, IDisposable
     {
         if (loader.SelectedRoute == -1) return;
 
-        if (!Plugin.Configuration.ShowDebug)
+        if (!Plugin.Configuration.ShowOverlay)
         {
             ImGui.TextColoredWrapped(ImGuiColors.DalamudOrange, "Warning! Show Debug not enabled in settings, you will not see your triggers!");
         }

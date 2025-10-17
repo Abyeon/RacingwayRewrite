@@ -36,7 +36,7 @@ public sealed class Plugin : IDalamudPlugin
     public static Configuration Configuration { get; set; } = null!;
 
     public readonly WindowSystem WindowSystem = new("RacingwayRewrite");
-    private MainWindow MainWindow { get; init; }
+    internal MainWindow MainWindow { get; init; }
     internal EditWindow EditWindow { get; init; }
     private TimerWindow TimerWindow { get; init; }
     private Overlay Overlay { get; init; } 
@@ -71,6 +71,13 @@ public sealed class Plugin : IDalamudPlugin
         WindowSystem.AddWindow(EditWindow);
         WindowSystem.AddWindow(TimerWindow);
         WindowSystem.AddWindow(Overlay);
+
+        if (Configuration is { DebugMode: true, OpenWindowsOnStartup: true })
+        {
+            EditWindow.IsOpen = true;
+            MainWindow.IsOpen = true;
+            //TimerWindow.IsOpen = true;
+        }
         
         ShowHideOverlay();
 
@@ -104,7 +111,7 @@ public sealed class Plugin : IDalamudPlugin
 
     public void ShowHideOverlay()
     {
-        Overlay.IsOpen = Configuration.ShowDebug;
+        Overlay.IsOpen = Configuration.ShowOverlay;
         //TimerWindow.IsOpen = true;
     }
 

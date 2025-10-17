@@ -1,4 +1,8 @@
 ﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Colors;
+using Dalamud.Interface.Utility;
+using Dalamud.Utility.Numerics;
+using RacingwayRewrite.Utils.Interface;
 
 namespace RacingwayRewrite.Windows.Tabs;
 
@@ -13,6 +17,7 @@ public class Settings(Plugin plugin) : ITab
     public void Draw()
     {
         Configuration configuration = Plugin.Configuration;
+        Ui.CenteredTextWithLine("Main Settings", ImGui.GetColorU32(ImGuiCol.TabActive));
         
         var trackOthers = configuration.TrackOthers;
         if (ImGui.Checkbox("Track Others", ref trackOthers))
@@ -21,17 +26,34 @@ public class Settings(Plugin plugin) : ITab
             configuration.Save();
         }
 
-        var showDebug = configuration.ShowDebug;
-        if (ImGui.Checkbox("Show Overlay", ref showDebug))
+        var showOverlay = configuration.ShowOverlay;
+        if (ImGui.Checkbox("Show Overlay", ref showOverlay))
         {
-            configuration.ShowDebug = showDebug;
+            configuration.ShowOverlay = showOverlay;
             configuration.Save();
             Plugin.ShowHideOverlay();
         }
-
-        if (Plugin.RaceManager.SelectedTrigger != -1 && ImGui.Button("Stop Editing"))
+        
+        var debugMode = configuration.DebugMode;
+        if (ImGui.Checkbox("Debug Mode", ref debugMode))
         {
-            Plugin.RaceManager.SelectedTrigger = -1;
+            configuration.DebugMode = debugMode;
+            configuration.Save();
+            Plugin.MainWindow.UpdateTabs();
+        }
+        
+        // Draw Debug settings
+        if (debugMode) DebugSettings(configuration);
+    }
+
+    private void DebugSettings(Configuration configuration)
+    {
+        Ui.CenteredTextWithLine("Debug Settings", ImGui.GetColorU32(ImGuiCol.TabActive));
+        var openWindows = configuration.OpenWindowsOnStartup;
+        if (ImGui.Checkbox("Open Windows At Startup", ref openWindows))
+        {
+            configuration.OpenWindowsOnStartup = openWindows;
+            configuration.Save();
         }
     }
 }

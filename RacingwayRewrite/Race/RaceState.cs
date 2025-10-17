@@ -107,12 +107,17 @@ public class RaceState(Player player)
         
         if (Checkpoint != CurrentRoute.LastCheckpoint)
         {
+            if (Checkpoint == 0)
+            {
+                Fail("You did not hit any checkpoints.");
+                return;
+            }
+            
             Plugin.Chat.Warning("You have not hit every checkpoint in this route yet! Turn back!");
             return;
         }
         
         Lap++;
-        Checkpoint = 0;
         
         // Reached needed lap count
         if (Lap == CurrentRoute.Laps)

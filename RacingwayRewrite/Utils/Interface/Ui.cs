@@ -3,7 +3,6 @@ using System.Numerics;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Interface.Windowing;
 
 namespace RacingwayRewrite.Utils.Interface;
 
@@ -97,6 +96,62 @@ public static class Ui
         return false;
     }
 
+    public static void CenteredTextWithLine(uint textColor, ImU8String text, uint lineColor, float padding = 5f)
+    {
+        var draw = ImGui.GetWindowDrawList();
+        ImGuiHelpers.CenterCursorForText(text);
+        
+        var leftOfText = ImGui.GetWindowPos() + new Vector2
+        {
+            X = ImGui.GetCursorPos().X - padding,
+            Y = ImGui.GetCursorPos().Y + (ImGui.GetTextLineHeight() * .5f)
+        };
+        
+        ImGui.TextColored(textColor, text);
+        
+        var rightOfText = leftOfText with
+        {
+            X = leftOfText.X + ImGui.CalcTextSize(text).X + (padding * 2)
+        };
+        
+        var width = ImGui.GetWindowWidth();
+        
+        draw.AddLine(leftOfText, leftOfText with { X = leftOfText.X - width }, lineColor);
+        draw.AddLine(rightOfText, rightOfText with { X = rightOfText.X + width }, lineColor);
+    }
+    
+    public static void CenteredTextWithLine(ImGuiCol textColor, ImU8String text, float padding = 5f)
+    {
+        var lineColor = ImGui.GetColorU32(ImGuiCol.Text);
+        var textColorU = ImGui.GetColorU32(textColor);
+        CenteredTextWithLine(textColorU, text, lineColor, padding);
+    }
+    
+    public static void CenteredTextWithLine(Vector4 textColor, ImU8String text, float padding = 5f)
+    {
+        var lineColor = ImGui.GetColorU32(ImGuiCol.Text);
+        var textU = ImGui.ColorConvertFloat4ToU32(textColor);
+        CenteredTextWithLine(textU, text, lineColor, padding);
+    }
+    
+    public static void CenteredTextWithLine(uint textColor, ImU8String text, float padding = 5f)
+    {
+        var lineColor = ImGui.GetColorU32(ImGuiCol.Text);
+        CenteredTextWithLine(textColor, text, lineColor, padding);
+    }
+    
+    public static void CenteredTextWithLine(ImU8String text, uint lineColor, float padding = 5f)
+    {
+        var textColor = ImGui.GetColorU32(ImGuiCol.Text);
+        CenteredTextWithLine(textColor, text, lineColor, padding);
+    }
+
+    public static void CenteredTextWithLine(ImU8String text, float padding = 5f)
+    {
+        var color = ImGui.GetColorU32(ImGuiCol.Text);
+        CenteredTextWithLine(color, text, color, padding);
+    }
+    
     private static unsafe void SetHovered(string id, bool hovered)
     {
         var storage = ImGuiNative.GetStateStorage();

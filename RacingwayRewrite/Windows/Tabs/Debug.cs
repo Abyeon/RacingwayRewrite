@@ -27,8 +27,7 @@ public class Debug(Plugin plugin) : ITab
         {
             Plugin.ToggleEditUI();
         }
-
-        ImGui.SameLine();
+        
         if (ImGui.Button("Test chat functions"))
         {
             Plugin.Chat.Print("Printing example chats:");
@@ -36,8 +35,7 @@ public class Debug(Plugin plugin) : ITab
             Plugin.Chat.Error("Error! Too many triggers on screen. Please check");
             Plugin.Chat.Warning("Warning, your route lacks a proper description. Consider adding one!");
         }
-
-        ImGui.SameLine();
+        
         if (ImGui.Button("Print Chat Icons"))
         {
             Plugin.Chat.TestPrintIcons();

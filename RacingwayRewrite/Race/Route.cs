@@ -55,8 +55,10 @@ public class Route
     public void CheckCollision(Player player)
     {
         // Return early if we don't even have a complete route
-        bool traditionalTriggers = Triggers.Exists(x => x is Start) || Triggers.Exists(x => x is Finish);
-        if (!traditionalTriggers || Triggers.Exists(x => x is Loop))
+        bool hasStart = Triggers.Exists(x => x is Start);
+        bool hasLoop = Triggers.Exists(x => x is Loop);
+        bool traditionalTriggers = (hasStart && Triggers.Exists(x => x is Finish)) || hasLoop;
+        if (!traditionalTriggers)
             return;
         
         if (player.State.CurrentRoute == this && !AllowMounts && player.Mounted)
@@ -74,7 +76,13 @@ public class Route
         else
         {
             // Only check start trigger if not racing in this route
-            triggersToCheck.Add(Triggers.Find(x => x is Start)!);
+            if (hasStart)
+            {
+                triggersToCheck.Add(Triggers.Find(x => x is Start)!);
+            } else if (hasLoop)
+            {
+                triggersToCheck.Add(Triggers.Find(x => x is Loop)!);
+            }
         }
 
         Parallel.ForEach(triggersToCheck,trigger =>

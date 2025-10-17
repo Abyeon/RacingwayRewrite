@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
@@ -30,15 +32,25 @@ public class MainWindow : CustomWindow, IDisposable
         
         Plugin = plugin;
 
-        Tabs = [
+        Tabs = [];
+        UpdateTabs();
+    }
+
+    public void UpdateTabs()
+    {
+        List<ITab> tabs = [
             new Explore(Plugin),
             new Records(),
             new Settings(Plugin),
-            new About(Plugin),
-            #if DEBUG
-            new Debug(Plugin)
-            #endif
+            new About(Plugin)
         ];
+
+        if (Plugin.Configuration.DebugMode)
+        {
+            tabs.Add(new Debug(Plugin));
+        }
+        
+        Tabs = tabs.ToArray();
     }
 
     public void Dispose()

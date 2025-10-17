@@ -5,6 +5,7 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Utility;
+using Dalamud.Utility.Numerics;
 using RacingwayRewrite.Utils;
 using RacingwayRewrite.Utils.Interface;
 
@@ -20,21 +21,29 @@ public class About(Plugin plugin) : ITab
     
     public void Draw()
     {
-        ImGui.TextColored(ImGuiColors.DalamudRed, $"{Plugin.PluginInterface.Manifest.Name.ToString()} v{Plugin.PluginInterface.Manifest.AssemblyVersion.ToString()}");
+        ImGui.Dummy(new Vector2(0, 10));
+        Ui.CenteredTextWithLine($"{Plugin.PluginInterface.Manifest.Name}", ImGui.GetColorU32(ImGuiCol.TabActive));
+
+        var version = $"v{Plugin.PluginInterface.Manifest.AssemblyVersion.ToString()} made by {Plugin.PluginInterface.Manifest.Author}";
+        ImGuiHelpers.CenterCursorForText(version);
+        ImGui.TextColored(ImGuiColors.DalamudRed, $"v{Plugin.PluginInterface.Manifest.AssemblyVersion.ToString()}");
         ImGui.SameLine();
-        ImGui.Text("by Abyeon");
+        ImGui.Text($"made by {Plugin.PluginInterface.Manifest.Author}");
         
-        ImGui.TextColored(ImGuiColors.DalamudGrey, $"Database size on disk: {Plugin.Storage?.FileSize}");
+        ImGui.Dummy(new Vector2(0, 10));
         
         if (Plugin.PluginInterface.Manifest.Changelog != null)
         {
-            ImGui.Dummy(new Vector2(0, 10));
             ImGui.Text("Changelog: ");
             ImGui.TextWrapped(Plugin.PluginInterface.Manifest.Changelog.ToString());
+            ImGui.Dummy(new Vector2(0, 10));
         }
 
         DrawCommands();
         DrawLinks();
+        
+        ImGui.Dummy(new Vector2(0, 10));
+        ImGui.TextColored(ImGuiColors.DalamudGrey, $"Database size on disk: {Plugin.Storage?.FileSize}");
     }
 
     public static void DrawCommands()
