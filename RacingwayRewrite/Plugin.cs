@@ -30,6 +30,7 @@ public sealed class Plugin : IDalamudPlugin
     internal static TerritoryTools TerritoryTools { get; private set; } = null!;
     internal static RaceManager RaceManager { get; private set; } = null!;
     internal static VfxManager VfxManager { get; private set; } = null!;
+    internal static FontManager FontManager { get; private set; } = null!;
     internal static Chat Chat { get; private set; } = null!;
     internal static LifestreamIpcHandler LifestreamIpcHandler { get; private set; } = null!;
 
@@ -61,6 +62,7 @@ public sealed class Plugin : IDalamudPlugin
         TerritoryTools = new TerritoryTools(this);
         RaceManager = new RaceManager(this, Framework, ObjectTable, ClientState);
         VfxManager = new VfxManager(Framework);
+        FontManager = new FontManager();
         
         MainWindow = new MainWindow(this);
         EditWindow = new EditWindow(this);
@@ -76,6 +78,7 @@ public sealed class Plugin : IDalamudPlugin
         {
             EditWindow.IsOpen = true;
             MainWindow.IsOpen = true;
+            TimerWindow.IsOpen = true;
             //TimerWindow.IsOpen = true;
         }
         
@@ -95,6 +98,7 @@ public sealed class Plugin : IDalamudPlugin
         PictoService.Dispose();
         RaceManager.Dispose();
         VfxManager.Dispose();
+        FontManager.Dispose();
         Chat.Dispose();
 
         WindowSystem.RemoveAllWindows();

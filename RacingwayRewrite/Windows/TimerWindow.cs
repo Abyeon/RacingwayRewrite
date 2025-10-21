@@ -1,4 +1,6 @@
 ﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using RacingwayRewrite.Utils;
 using RacingwayRewrite.Utils.Interface;
@@ -10,21 +12,25 @@ public class TimerWindow : Window
     private Plugin Plugin;
     
     public TimerWindow(Plugin plugin)
-        : base("Timer##RacingwayRewrite", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
+        : base("Timer##RacingwayRewrite", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.AlwaysAutoResize)
     {
         Plugin = plugin;
     }
 
     public override void Draw()
     {
-        if (Plugin.ClientState.LocalPlayer == null) return;
+        Plugin.FontManager.PushFont();
         
-        ImGui.PushFont(ImGui.GetFont());
-        
-        var player = Plugin.RaceManager.GetPlayer(Plugin.ClientState.LocalPlayer.EntityId);
-        if (player == null) return;
+        var timerText = "00:00.000";
+        if (Plugin.ClientState.LocalPlayer is not null)
+        {
+            var player = Plugin.RaceManager.GetPlayer(Plugin.ClientState.LocalPlayer.EntityId);
+            if (player == null) return;
 
-        var pretty = Time.PrettyFormatTimeSpan(player.State.Timer.Elapsed);
-        ImGui.Text(pretty);
+            timerText = Time.PrettyFormatTimeSpan(player.State.Timer.Elapsed);
+        }
+        
+        ImGui.Text(timerText);
+        Plugin.FontManager.PopFont();
     }
 }
