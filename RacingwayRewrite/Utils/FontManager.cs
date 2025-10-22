@@ -53,48 +53,9 @@ public class FontManager : IDisposable
     
     public void Dispose()
     {
-        if (FontPushed) PopFont();
         FontHandle?.Dispose();
         GC.SuppressFinalize(this);
     }
-
-    public bool FontPushed = false;
+    
     public bool FontReady => FontHandle is { Available: true };
-
-    public void PushFont()
-    {
-        try
-        {
-            if (FontPushed)
-            {
-                throw new InvalidOperationException("Font has already been pushed.");
-            }
-
-            if (FontReady)
-            {
-                FontHandle!.Push();
-                FontPushed = true;
-            }
-        }
-        catch (Exception e)
-        {
-            Plugin.Log.Error(e.ToString());
-        }
-    }
-
-    public void PopFont()
-    {
-        try
-        {
-            if (FontPushed)
-            {
-                FontHandle!.Pop();
-                FontPushed = false;
-            }
-        }
-        catch (Exception e)
-        {
-            Plugin.Log.Error(e.ToString());
-        }
-    }
 }

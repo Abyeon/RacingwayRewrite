@@ -4,6 +4,7 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.FontIdentifier;
 using Dalamud.Interface.ImGuiFontChooserDialog;
+using Dalamud.Interface.ManagedFontAtlas;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Utility;
@@ -174,6 +175,33 @@ public static class Ui
         var col = ImGui.GetStyle().Colors[(int)idx];
         col.W *= ImGui.GetStyle().Alpha;
         return col;
+    }
+
+    public class PushFont : IDisposable
+    {
+        public IFontHandle? FontHandle { get; private set; }
+        private readonly bool pushed = false;
+
+        public PushFont(IFontHandle? fontHandle)
+        {
+            FontHandle = fontHandle;
+
+            if (FontHandle is { Available: true })
+            {
+                FontHandle.Push();
+                pushed = true;
+            }
+        }
+        
+        public void Dispose()
+        {
+            if (FontHandle is not null && pushed)
+            {
+                FontHandle.Pop();
+            }
+            
+            GC.SuppressFinalize(this);
+        }
     }
     
     /// <summary>

@@ -57,13 +57,14 @@ public class Settings(Plugin plugin) : ITab
         }
         
         Ui.CenteredTextWithLine("Timer Settings", ImGui.GetColorU32(ImGuiCol.TabActive));
-        // ImGui.Text("Font: ");
-        // ImGui.SameLine();
-        // if (ImGui.Button(Plugin.FontManager.FontName))
-        // {
-        //     DisplayFontSelector();
-        // }
+        TimerSettings(configuration);
+        
+        Ui.CenteredTextWithLine("Debug Settings", ImGui.GetColorU32(ImGuiCol.TabActive));
+        DebugSettings(configuration);
+    }
 
+    private void TimerSettings(Configuration configuration)
+    {
         ImGui.Text("Font:");
         var chooser = Ui.FontChooser(Plugin.FontManager.FontName, configuration.TimerFont, preview: "+00:12.345\n-00:67.890\nRacingway ftw!!!");
         chooser?.ResultTask.ContinueWith(r =>
@@ -71,6 +72,7 @@ public class Settings(Plugin plugin) : ITab
             if (r.IsCompletedSuccessfully && r.Result != configuration.TimerFont)
             {
                 configuration.TimerFont = r.Result;
+                settingsChanged = true;
                 Plugin.FontManager.FontHandle = Plugin.Configuration.TimerFont.CreateFontHandle(Plugin.PluginInterface.UiBuilder.FontAtlas);
             }
         });
@@ -80,46 +82,25 @@ public class Settings(Plugin plugin) : ITab
             Plugin.FontManager.ResetFont();
             settingsChanged = true;
         }
-        
-        Ui.CenteredTextWithLine("Debug Settings", ImGui.GetColorU32(ImGuiCol.TabActive));
-        var debugMode = configuration.DebugMode;
-        if (ImGui.Checkbox("Debug Mode", ref debugMode))
-        {
-            configuration.DebugMode = debugMode;
-            settingsChanged = true;
-            Plugin.MainWindow.UpdateTabs();
-        }
-        
-        if (debugMode) DebugSettings(configuration);
     }
 
     private void DebugSettings(Configuration configuration)
     {
+        var debugMode = configuration.DebugMode;
+        if (ImGui.Checkbox("Debug Mode", ref debugMode))
+        {
+            configuration.DebugMode = debugMode;
+            configuration.Save();
+            Plugin.MainWindow.UpdateTabs();
+        }
+
+        if (!debugMode) return;
+        
         var openWindows = configuration.OpenWindowsOnStartup;
         if (ImGui.Checkbox("Open Windows At Startup", ref openWindows))
         {
             configuration.OpenWindowsOnStartup = openWindows;
             settingsChanged = true;
         }
-    }
-    
-    private void DisplayFontSelector()
-    {
-        var chooser = SingleFontChooserDialog.CreateAuto((UiBuilder)Plugin.PluginInterface.UiBuilder);
-
-        if (Plugin.Configuration.TimerFont is SingleFontSpec font)
-        {
-            chooser.SelectedFont = font;
-        }
-        
-        chooser.SelectedFontSpecChanged += Chooser_SelectedFontSpecChanged;
-    }
-
-    private void Chooser_SelectedFontSpecChanged(SingleFontSpec font)
-    {
-        Plugin.Configuration.TimerFont = font;
-        Plugin.FontManager.FontHandle = Plugin.Configuration.TimerFont.CreateFontHandle(Plugin.PluginInterface.UiBuilder.FontAtlas);
-        Plugin.FontManager.FontName = Plugin.Configuration.TimerFont.ToLocalizedString(System.Globalization.CultureInfo.CurrentCulture.Name);
-        settingsChanged = true;
     }
 }
