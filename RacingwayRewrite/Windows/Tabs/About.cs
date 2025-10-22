@@ -31,6 +31,8 @@ public class About(Plugin plugin) : ITab
         ImGui.SameLine();
         ImGui.Text($"made by {Plugin.PluginInterface.Manifest.Author}");
         
+        DrawLinks();
+        
         ImGui.Dummy(new Vector2(0, 10));
         
         if (Plugin.PluginInterface.Manifest.Changelog != null)
@@ -41,7 +43,6 @@ public class About(Plugin plugin) : ITab
         }
 
         DrawCommands();
-        DrawLinks();
         
         ImGui.Dummy(new Vector2(0, 10));
         ImGui.TextColored(ImGuiColors.DalamudGrey, $"Database size on disk: {Plugin.Storage?.FileSize}");
@@ -77,37 +78,15 @@ public class About(Plugin plugin) : ITab
 
     public static void DrawLinks()
     {
-        if (ImGui.Button("GitHub"))
+        var group = new ImGuiHelpers.HorizontalButtonGroup()
         {
-            Util.OpenLink("https://github.com/Abyeon/Racingway");
-        }
-        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-        {
-            ImGui.SetTooltip("Wanna make fun of my code? Have a look!");
-        }
-        ImGui.SameLine();
-        if (ImGui.Button("Strange Housing"))
-        {
-            Util.OpenLink("https://strangehousing.ju.mp/");
-        }
-        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-        {
-            ImGui.SetTooltip("Want to experience more jump puzzles? Check out Strange Housing!");
-        }
-        ImGui.SameLine();
-        using (_ = ImRaii.PushFont(UiBuilder.IconFont))
-        {
-            using (_ = ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudRed))
-            {
-                if (ImGui.Button($"{FontAwesomeIcon.Heart.ToIconString()}"))
-                {
-                    Util.OpenLink("https://ko-fi.com/abyeon");
-                }
-            }
-        }
-        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-        {
-            ImGui.SetTooltip("Want to support the dev?");
-        }
+            IsCentered = true,
+            Height = ImGui.GetFrameHeight(),
+        };
+        
+        group.Add("Github", () => Util.OpenLink("https://github.com/Abyeon/Racingway"));
+        group.Add("Strange Housing", () => Util.OpenLink("https://strangehousing.ju.mp/"));
+        group.Add("Ko-Fi", () => Util.OpenLink("https://ko-fi.com/abyeon"));
+        group.Draw();
     }
 }
