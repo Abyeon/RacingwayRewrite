@@ -56,7 +56,7 @@ public static class Ui
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("Cancel"))
+            if (RightAlignedButton("Cancel"))
             {
                 Buf = "";
                 ImGui.CloseCurrentPopup();
@@ -65,6 +65,20 @@ public static class Ui
         }
 
         return false;
+    }
+
+    public static void RightAlignCursorForButton(ImU8String label)
+    {
+        var buttonSize = ImGui.CalcTextSize(label) + (ImGui.GetStyle().FramePadding * 2) + (ImGui.GetStyle().ItemSpacing * 2);
+        var space = ImGui.GetContentRegionAvail().X - buttonSize.X;
+        ImGui.Dummy(new Vector2(space, 0));
+        ImGui.SameLine();
+    }
+
+    public static bool RightAlignedButton(ImU8String label)
+    {
+        RightAlignCursorForButton(label);
+        return ImGui.Button(label);
     }
 
     public static bool CtrlButton(ImU8String label, string hoverLabel = "Hold Ctrl to enable.", Vector2 size = default)

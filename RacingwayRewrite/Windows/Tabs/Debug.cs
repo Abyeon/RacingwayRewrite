@@ -20,6 +20,7 @@ public class Debug(Plugin plugin) : ITab
     internal readonly Plugin Plugin = plugin;
 
     public void Dispose() { }
+    public void OnClose() { }
     
     public void Draw()
     {

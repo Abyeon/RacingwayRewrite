@@ -18,7 +18,8 @@ public class About(Plugin plugin) : ITab
     internal readonly Plugin Plugin = plugin;
     
     public void Dispose() { }
-    
+    public void OnClose() { }
+
     public void Draw()
     {
         ImGui.Dummy(new Vector2(0, 10));

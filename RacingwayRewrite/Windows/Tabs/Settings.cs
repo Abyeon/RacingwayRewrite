@@ -1,10 +1,9 @@
-﻿using Dalamud.Bindings.ImGui;
-using Dalamud.Interface;
+﻿using System.Numerics;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
-using Dalamud.Interface.FontIdentifier;
-using Dalamud.Interface.ImGuiFontChooserDialog;
+using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
-using Dalamud.Utility.Numerics;
+using Dalamud.Interface.Utility.Raii;
 using RacingwayRewrite.Utils.Interface;
 
 namespace RacingwayRewrite.Windows.Tabs;
@@ -16,29 +15,71 @@ public class Settings(Plugin plugin) : ITab
     private Plugin Plugin = plugin;
     
     public void Dispose() { }
+
+    public void OnClose()
+    {
+        if (settingsChanged)
+        {
+            Plugin.Chat.Warning("Unsaved changes in settings! These will be discarded if you do not save them.");
+        }
+    }
+    
+    private bool settingsChanged = false;
     
     public void Draw()
     {
-        DrawSettings();
-    }
-
-    private bool settingsChanged = false;
-    
-    private void DrawSettings()
-    {
         Configuration configuration = Plugin.Configuration;
+        
+        var regionMax = ImGui.GetContentRegionAvail();
+        var height = settingsChanged ? ImGui.GetFrameHeightWithSpacing() + ImGui.GetTextLineHeightWithSpacing() : ImGui.GetFrameHeightWithSpacing();
+        var size = regionMax with { Y = regionMax.Y - height};
+
+        using (var child = ImRaii.Child("SettingsChild", size))
+        {
+            if (child.Success)
+            {
+                DrawSettings(configuration);
+            }
+        }
         
         if (settingsChanged)
         {
             ImGui.TextColored(ImGuiColors.DalamudOrange, "You have unsaved changes!");
-            ImGui.SameLine();
-            if (ImGui.Button("Save Changes"))
-            {
-                configuration.Save();
-                settingsChanged = false;
-            }
         }
         
+        if (ImGui.Button("Save"))
+        {
+            configuration.Save();
+            settingsChanged = false;
+        }
+        
+        ImGui.SameLine();
+        if (ImGui.Button("Save and Close"))
+        {
+            configuration.Save();
+            settingsChanged = false;
+            Plugin.ToggleMainUI();
+        }
+
+        ImGui.SameLine();
+        if (ImGui.Button("Discard")) // I know this isn't smart.
+        {
+            DiscardChanges();
+        }
+
+        ImGui.SameLine();
+        Ui.RightAlignedButton("Reset");
+    }
+
+    private void DiscardChanges()
+    {
+        Plugin.Configuration = Plugin.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+        Plugin.FontManager.SetFont(Plugin.Configuration.TimerFont);
+        settingsChanged = false;
+    }
+    
+    private void DrawSettings(Configuration configuration)
+    {
         Ui.CenteredTextWithLine("Main Settings", ImGui.GetColorU32(ImGuiCol.TabActive));
         
         var trackOthers = configuration.TrackOthers;
@@ -77,9 +118,51 @@ public class Settings(Plugin plugin) : ITab
             }
         });
         ImGui.SameLine();
-        if (ImGui.Button("Reset"))
+        if (ImGui.Button("Reset##0"))
         {
             Plugin.FontManager.ResetFont();
+            settingsChanged = true;
+        }
+        
+        var color = configuration.TimerColor ?? Ui.GetColorVec4(ImGuiCol.Text);
+        if (ImGui.ColorEdit4("Text Color", ref color, ImGuiColorEditFlags.NoInputs))
+        {
+            if (color != Ui.GetColorVec4(ImGuiCol.Text))
+            {
+                configuration.TimerColor = color;
+                settingsChanged = true;
+            }
+            else
+            {
+                configuration.TimerColor = null;
+            }
+        }
+        
+        ImGui.SameLine();
+        if (ImGui.Button("Reset##1"))
+        {
+            configuration.TimerColor = null;
+            settingsChanged = true;
+        }
+        
+        var bgColor = configuration.TimerBackgroundColor ?? Ui.GetColorVec4(ImGuiCol.WindowBg);
+        if (ImGui.ColorEdit4("Background Color", ref bgColor, ImGuiColorEditFlags.NoInputs))
+        {
+            if (color != Ui.GetColorVec4(ImGuiCol.WindowBg))
+            {
+                configuration.TimerBackgroundColor = bgColor;
+                settingsChanged = true;
+            }
+            else
+            {
+                configuration.TimerBackgroundColor = null;
+            }
+        }
+        
+        ImGui.SameLine();
+        if (ImGui.Button("Reset##2"))
+        {
+            configuration.TimerBackgroundColor = null;
             settingsChanged = true;
         }
     }
@@ -90,8 +173,7 @@ public class Settings(Plugin plugin) : ITab
         if (ImGui.Checkbox("Debug Mode", ref debugMode))
         {
             configuration.DebugMode = debugMode;
-            configuration.Save();
-            Plugin.MainWindow.UpdateTabs();
+            settingsChanged = true;
         }
 
         if (!debugMode) return;

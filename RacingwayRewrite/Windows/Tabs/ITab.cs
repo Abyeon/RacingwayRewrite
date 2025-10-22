@@ -6,4 +6,5 @@ public interface ITab : IDisposable
 {
     string Name { get; }
     void Draw();
+    void OnClose();
 }

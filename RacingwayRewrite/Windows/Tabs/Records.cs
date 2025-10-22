@@ -13,6 +13,7 @@ public class Records : ITab
     public string Name => "Records";
     
     public void Dispose() { }
+    public void OnClose() { }
 
     private int seed = new Random().Next();
     

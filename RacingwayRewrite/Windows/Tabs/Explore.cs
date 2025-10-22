@@ -19,6 +19,7 @@ public class Explore(Plugin plugin) : ITab
     public Plugin Plugin = plugin;
     
     public void Dispose() { }
+    public void OnClose() { }
     
     public void Draw()
     {

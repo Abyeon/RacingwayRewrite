@@ -25,7 +25,7 @@ public class TimerWindow : Window
         draw.ChannelsSplit(2);
         draw.ChannelsSetCurrent(1);
 
-        var start = ImGui.GetCursorPos() + ImGui.GetWindowPos();
+        var start = ImGui.GetWindowPos();
         
         var timerText = "00:00.000";
         if (Plugin.ClientState.LocalPlayer is not null)
@@ -36,13 +36,15 @@ public class TimerWindow : Window
             timerText = Time.PrettyFormatTimeSpan(player.State.Timer.Elapsed);
         }
         
-        ImGui.Text(timerText);
+        var color = ImGui.ColorConvertFloat4ToU32(Plugin.Configuration.TimerColor ?? Ui.GetColorVec4(ImGuiCol.Text));
+        
+        ImGui.TextColored(color, timerText);
         draw.ChannelsSetCurrent(0);
         
-        var end = ImGui.GetCursorPos() + ImGui.GetWindowPos();
-        var color = ImGui.GetColorU32(ImGuiCol.WindowBg);
+        var end = ImGui.GetWindowPos() + ImGui.GetWindowSize();
+        var bgColor = ImGui.ColorConvertFloat4ToU32(Plugin.Configuration.TimerBackgroundColor ?? Ui.GetColorVec4(ImGuiCol.WindowBg));
         
-        draw.AddRectFilledMultiColor(start, end, 0U, 0U, color, color);
+        draw.AddRectFilledMultiColor(start, end, 0U, 0U, bgColor, bgColor);
         draw.ChannelsMerge();
     }
 }

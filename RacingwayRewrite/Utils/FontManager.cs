@@ -33,15 +33,8 @@ public class FontManager : IDisposable
         }
     }
 
-    public void ResetFont()
+    public void SetFont(SingleFontSpec font)
     {
-        Plugin.Configuration.TimerFont = new SingleFontSpec
-        {
-            FontId = new GameFontAndFamilyId(GameFontFamily.Axis),
-            SizePt = 34.0f
-        };
-
-        var font = Plugin.Configuration.TimerFont;
         FontHandle = font.CreateFontHandle(Plugin.PluginInterface.UiBuilder.FontAtlas);
         
         var locale = Plugin.ClientState.ClientLanguage.ToCode();
@@ -49,6 +42,17 @@ public class FontManager : IDisposable
         var fontStyle = font.FontId.GetLocalizedName(locale);
         fontStyle = fontStyle.Equals(fontFamily) ? "" : $" - {fontStyle}";
         FontName = $"{fontFamily}{fontStyle} ({font.SizePt}pt)";
+    }
+
+    public void ResetFont()
+    {
+        Plugin.Configuration.TimerFont = new SingleFontSpec
+        {
+            FontId = new GameFontAndFamilyId(GameFontFamily.Axis),
+            SizePt = 34.0f
+        };
+        
+        SetFont(Plugin.Configuration.TimerFont);
     }
     
     public void Dispose()

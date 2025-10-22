@@ -32,25 +32,13 @@ public class MainWindow : CustomWindow, IDisposable
         
         Plugin = plugin;
 
-        Tabs = [];
-        UpdateTabs();
-    }
-
-    public void UpdateTabs()
-    {
-        List<ITab> tabs = [
+        Tabs = [
             new Explore(Plugin),
             new Records(),
             new Settings(Plugin),
-            new About(Plugin)
+            new About(Plugin),
+            new Debug(Plugin)
         ];
-
-        if (Plugin.Configuration.DebugMode)
-        {
-            tabs.Add(new Debug(Plugin));
-        }
-        
-        Tabs = tabs.ToArray();
     }
 
     public void Dispose()
@@ -81,6 +69,12 @@ public class MainWindow : CustomWindow, IDisposable
             return ImRaii.TabItem(label, ref open, ImGuiTabItemFlags.SetSelected);
         }
         return ImRaii.TabItem(label);
+    }
+
+    public override void OnClose()
+    {
+        foreach (var tab in Tabs) tab.OnClose();
+        base.OnClose();
     }
 
     protected override void Render()
@@ -118,6 +112,7 @@ public class MainWindow : CustomWindow, IDisposable
         {
             foreach (var tab in Tabs)
             {
+                if (tab is Debug && !Plugin.Configuration.DebugMode) continue;
                 using var child = TabItem(tab.Name);
                 if (!child.Success) continue;
 
