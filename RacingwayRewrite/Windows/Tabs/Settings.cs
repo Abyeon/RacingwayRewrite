@@ -57,17 +57,28 @@ public class Settings(Plugin plugin) : ITab
         }
         
         Ui.CenteredTextWithLine("Timer Settings", ImGui.GetColorU32(ImGuiCol.TabActive));
-        ImGui.Text("Font: ");
-        ImGui.SameLine();
-        if (ImGui.Button(Plugin.FontManager.FontName))
-        {
-            DisplayFontSelector();
-        }
+        // ImGui.Text("Font: ");
+        // ImGui.SameLine();
+        // if (ImGui.Button(Plugin.FontManager.FontName))
+        // {
+        //     DisplayFontSelector();
+        // }
 
+        ImGui.Text("Font:");
+        var chooser = Ui.FontChooser(Plugin.FontManager.FontName, configuration.TimerFont, preview: "+00:12.345\n-00:67.890\nRacingway ftw!!!");
+        chooser?.ResultTask.ContinueWith(r =>
+        {
+            if (r.IsCompletedSuccessfully && r.Result != configuration.TimerFont)
+            {
+                configuration.TimerFont = r.Result;
+                Plugin.FontManager.FontHandle = Plugin.Configuration.TimerFont.CreateFontHandle(Plugin.PluginInterface.UiBuilder.FontAtlas);
+            }
+        });
         ImGui.SameLine();
         if (ImGui.Button("Reset"))
         {
             Plugin.FontManager.ResetFont();
+            settingsChanged = true;
         }
         
         Ui.CenteredTextWithLine("Debug Settings", ImGui.GetColorU32(ImGuiCol.TabActive));

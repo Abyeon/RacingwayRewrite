@@ -1,6 +1,7 @@
 ﻿using Dalamud.Configuration;
 using System;
 using Dalamud.Interface.FontIdentifier;
+using Dalamud.Interface.GameFonts;
 
 namespace RacingwayRewrite;
 
@@ -14,7 +15,11 @@ public class Configuration : IPluginConfiguration
     public bool AllowChat { get; set; } = true;
 
     /// --- Font Settings ---
-    public IFontSpec? TimerFont { get; set; } = null;
+    public SingleFontSpec TimerFont { get; set; } = new()
+    {
+        FontId = new GameFontAndFamilyId(GameFontFamily.Axis),
+        SizePt = 34.0f
+    };
     
     /// --- DEBUG SETTINGS ---    
     public bool DebugMode { get; set; } = false;

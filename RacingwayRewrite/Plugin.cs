@@ -122,4 +122,5 @@ public sealed class Plugin : IDalamudPlugin
     public void OpenConfigUI() => MainWindow.SelectTab("Settings");
     public void ToggleMainUI() => MainWindow.Toggle();
     public void ToggleEditUI() => EditWindow.Toggle();
+    public void ToggleTimerWindow() => TimerWindow.Toggle();
 }

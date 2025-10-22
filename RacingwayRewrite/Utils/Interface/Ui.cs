@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
+using Dalamud.Interface.FontIdentifier;
+using Dalamud.Interface.ImGuiFontChooserDialog;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Utility;
 
 namespace RacingwayRewrite.Utils.Interface;
 
@@ -120,36 +124,35 @@ public static class Ui
         draw.AddLine(rightOfText, rightOfText with { X = rightOfText.X + width }, lineColor);
     }
     
-    public static void CenteredTextWithLine(ImGuiCol textColor, ImU8String text, float padding = 5f)
-    {
-        var lineColor = ImGui.GetColorU32(ImGuiCol.Text);
-        var textColorU = ImGui.GetColorU32(textColor);
-        CenteredTextWithLine(textColorU, text, lineColor, padding);
-    }
-    
-    public static void CenteredTextWithLine(Vector4 textColor, ImU8String text, float padding = 5f)
-    {
-        var lineColor = ImGui.GetColorU32(ImGuiCol.Text);
-        var textU = ImGui.ColorConvertFloat4ToU32(textColor);
-        CenteredTextWithLine(textU, text, lineColor, padding);
-    }
-    
-    public static void CenteredTextWithLine(uint textColor, ImU8String text, float padding = 5f)
-    {
-        var lineColor = ImGui.GetColorU32(ImGuiCol.Text);
-        CenteredTextWithLine(textColor, text, lineColor, padding);
-    }
-    
     public static void CenteredTextWithLine(ImU8String text, uint lineColor, float padding = 5f)
     {
         var textColor = ImGui.GetColorU32(ImGuiCol.Text);
         CenteredTextWithLine(textColor, text, lineColor, padding);
     }
 
-    public static void CenteredTextWithLine(ImU8String text, float padding = 5f)
+    // Straight yoinked from Chat2
+    // https://github.com/Infiziert90/ChatTwo/blob/c54efe542012ec8891f71b87083a658c3aad9df9/ChatTwo/Util/ImGuiUtil.cs#L275
+    public static SingleFontChooserDialog? FontChooser( string label, SingleFontSpec font, Predicate<IFontFamilyId>? exclusion = null, string? preview = null)
     {
-        var color = ImGui.GetColorU32(ImGuiCol.Text);
-        CenteredTextWithLine(color, text, color, padding);
+        using var id = ImRaii.PushId(label);
+
+        var locale = Plugin.ClientState.ClientLanguage.ToCode();
+        var fontFamily = font.FontId.Family.GetLocalizedName(locale);
+        var fontStyle = font.FontId.GetLocalizedName(locale);
+        fontStyle = fontStyle.Equals(fontFamily) ? "" : $" - {fontStyle}";
+
+        var buttonText = $"{fontFamily}{fontStyle} ({font.SizePt}pt)";
+        if (!ImGui.Button($"{buttonText}##{label}"))
+            return null;
+
+        var chooser = SingleFontChooserDialog.CreateAuto((UiBuilder)Plugin.PluginInterface.UiBuilder);
+        chooser.SelectedFont = font;
+        if (exclusion is not null)
+            chooser.FontFamilyExcludeFilter = exclusion;
+        if (preview is not null)
+            chooser.PreviewText = preview;
+
+        return chooser;
     }
     
     private static unsafe void SetHovered(string id, bool hovered)

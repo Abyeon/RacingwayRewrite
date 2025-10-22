@@ -28,6 +28,11 @@ public class Debug(Plugin plugin) : ITab
             Plugin.ToggleEditUI();
         }
         
+        if (ImGui.Button("Show Timer Window"))
+        {
+            Plugin.ToggleTimerWindow();
+        }
+        
         if (ImGui.Button("Test chat functions"))
         {
             Plugin.Chat.Print("Printing example chats:");

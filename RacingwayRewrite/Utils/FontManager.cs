@@ -4,6 +4,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.FontIdentifier;
 using Dalamud.Interface.GameFonts;
 using Dalamud.Interface.ManagedFontAtlas;
+using Dalamud.Utility;
 
 namespace RacingwayRewrite.Utils;
 
@@ -16,19 +17,17 @@ public class FontManager : IDisposable
     {
         try
         {
-            if (Plugin.Configuration.TimerFont != null)
-            {
-                FontHandle = Plugin.Configuration.TimerFont.CreateFontHandle(Plugin.PluginInterface.UiBuilder.FontAtlas);
-                FontName = Plugin.Configuration.TimerFont.ToLocalizedString(System.Globalization.CultureInfo.CurrentCulture.Name);
-            }
-            else
-            {
-                ResetFont();
-            }
+            FontHandle = Plugin.Configuration.TimerFont.CreateFontHandle(Plugin.PluginInterface.UiBuilder.FontAtlas);
+            FontName = Plugin.Configuration.TimerFont.ToLocalizedString(Plugin.ClientState.ClientLanguage.ToCode());
         }
         catch (Exception e)
         {
-            Plugin.Configuration.TimerFont = null;
+            Plugin.Configuration.TimerFont = new SingleFontSpec
+            {
+                FontId = new GameFontAndFamilyId(GameFontFamily.Axis),
+                SizePt = 34.0f
+            };
+            
             Plugin.Chat.Error("Could not load font.");
             Plugin.Log.Error(e.ToString());
         }
@@ -36,14 +35,20 @@ public class FontManager : IDisposable
 
     public void ResetFont()
     {
-        var fontStyle = new GameFontStyle()
+        Plugin.Configuration.TimerFont = new SingleFontSpec
         {
-            SizePt = 34.0f,
-            FamilyAndSize = GameFontFamilyAndSize.Axis36
+            FontId = new GameFontAndFamilyId(GameFontFamily.Axis),
+            SizePt = 34.0f
         };
-                
-        FontHandle = Plugin.PluginInterface.UiBuilder.FontAtlas.NewGameFontHandle(fontStyle);
-        FontName = "Default";
+
+        var font = Plugin.Configuration.TimerFont;
+        FontHandle = font.CreateFontHandle(Plugin.PluginInterface.UiBuilder.FontAtlas);
+        
+        var locale = Plugin.ClientState.ClientLanguage.ToCode();
+        var fontFamily = font.FontId.Family.GetLocalizedName(locale);
+        var fontStyle = font.FontId.GetLocalizedName(locale);
+        fontStyle = fontStyle.Equals(fontFamily) ? "" : $" - {fontStyle}";
+        FontName = $"{fontFamily}{fontStyle} ({font.SizePt}pt)";
     }
     
     public void Dispose()
