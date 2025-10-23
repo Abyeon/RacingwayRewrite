@@ -165,6 +165,13 @@ public class Settings(Plugin plugin) : ITab
             configuration.TimerBackgroundColor = null;
             settingsChanged = true;
         }
+
+        var rounding = configuration.TimerRounding;
+        if (ImGui.DragFloat("Rounding", ref rounding, 0.1f, 0f, float.MaxValue))
+        {
+            configuration.TimerRounding = rounding;
+            settingsChanged = true;
+        }
     }
 
     private void DebugSettings(Configuration configuration)

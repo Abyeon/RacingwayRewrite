@@ -25,6 +25,7 @@ public class Configuration : IPluginConfiguration
 
     public Vector4? TimerColor { get; set; } = null;
     public Vector4? TimerBackgroundColor { get; set; } = null;
+    public float TimerRounding { get; set; }= 0f;
     
     // --- DEBUG SETTINGS ---    
     public bool DebugMode { get; set; } = false;
