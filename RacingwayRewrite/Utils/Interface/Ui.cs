@@ -120,10 +120,10 @@ public static class Ui
         var draw = ImGui.GetWindowDrawList();
         ImGuiHelpers.CenterCursorForText(text);
         
-        var leftOfText = ImGui.GetWindowPos() + new Vector2
+        var leftOfText = new Vector2
         {
-            X = ImGui.GetCursorPos().X - padding,
-            Y = ImGui.GetCursorPos().Y + (ImGui.GetTextLineHeight() * .5f)
+            X = ImGui.GetCursorScreenPos().X - padding,
+            Y = ImGui.GetCursorScreenPos().Y + (ImGui.GetTextLineHeight() * .5f)
         };
         
         ImGui.TextColored(textColor, text);
