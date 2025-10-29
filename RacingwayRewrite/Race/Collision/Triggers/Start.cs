@@ -31,6 +31,7 @@ public class Start : ITrigger
     public void OnEnter(Player player)
     {
         Plugin.Log.Verbose("Start entered");
+        player.State.SilentFail();
     }
 
     public void OnExit(Player player)
