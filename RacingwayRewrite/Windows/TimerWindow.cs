@@ -33,9 +33,9 @@ public class TimerWindow : Window
         using var _ = new Ui.PushFont(Plugin.FontManager.FontHandle);
         
         var timerText = "00:00.000";
-        if (Plugin.ClientState.LocalPlayer is not null)
+        if (Plugin.ObjectTable.LocalPlayer is not null)
         {
-            var player = Plugin.RaceManager.GetPlayer(Plugin.ClientState.LocalPlayer.EntityId);
+            var player = Plugin.RaceManager.GetPlayer(Plugin.ObjectTable.LocalPlayer.EntityId);
             if (player == null) return;
 
             timerText = Time.PrettyFormatTimeSpan(player.State.Timer.Elapsed);

@@ -10,9 +10,9 @@ public class Quit : ICommand
     public int DisplayOrder => 1;
     public void Execute(string command, string args)
     {
-        if (Plugin.ClientState.LocalPlayer == null) return;
+        if (Plugin.ObjectTable.LocalPlayer == null) return;
 
-        var player = Plugin.RaceManager.Players[Plugin.ClientState.LocalPlayer.EntityId];
+        var player = Plugin.RaceManager.Players[Plugin.ObjectTable.LocalPlayer.EntityId];
         if (player.State.InRace)
         {
             player.State.SilentFail();

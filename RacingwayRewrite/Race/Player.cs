@@ -28,7 +28,7 @@ public class Player
     {
         if (actor is IPlayerCharacter character)
         {
-            if (actor == Plugin.ClientState.LocalPlayer)
+            if (actor == Plugin.ObjectTable.LocalPlayer)
                 IsClient = true;
             
             Id = character.EntityId;

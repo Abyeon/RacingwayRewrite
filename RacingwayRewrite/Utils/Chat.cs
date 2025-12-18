@@ -139,7 +139,7 @@ public class Chat : IDisposable
         // Have to run on framework thread since we're checking for the local player
         Plugin.Framework.RunOnFrameworkThread(() =>
         {
-            if (Plugin.ClientState.LocalPlayer == null) return;
+            if (Plugin.ObjectTable.LocalPlayer == null) return;
 
             var sb = Tag()
                      .AddPlayer(player)

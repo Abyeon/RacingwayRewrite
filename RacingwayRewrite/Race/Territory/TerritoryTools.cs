@@ -17,6 +17,7 @@ public class TerritoryTools
     public event EventHandler<Address>? OnAddressChanged;
     internal readonly Plugin Plugin;
     internal readonly IClientState ClientState;
+    internal readonly IObjectTable ObjectTable;
     
     public unsafe delegate byte MoveToEntryDelegate(HousingManager* thisPtr);
 
@@ -27,6 +28,7 @@ public class TerritoryTools
     {
         Plugin = plugin;
         ClientState = Plugin.ClientState;
+        ObjectTable = Plugin.ObjectTable;
         
         Plugin.GameInteropProvider.InitializeFromAttributes(this);
         
@@ -159,7 +161,7 @@ public class TerritoryTools
                 return Plugin.ClientState.TerritoryType;
             }
     
-            var character = Plugin.ClientState.LocalPlayer;
+            var character = Plugin.ObjectTable.LocalPlayer;
             if (character != null && manager->CurrentTerritory != null)
             {
                 var territoryType = manager->IndoorTerritory != null
@@ -177,16 +179,16 @@ public class TerritoryTools
     {
         get
         {
-            if (ClientState.LocalPlayer == null)
+            if (ObjectTable.LocalPlayer == null)
                 throw new NullReferenceException("Tried to get the player's world while they do not exist!");
             
-            return ClientState.LocalPlayer.CurrentWorld.RowId;
+            return ObjectTable.LocalPlayer.CurrentWorld.RowId;
         }
     }
     
     private unsafe HouseInfo HousePoll()
     {
-        if (ClientState.LocalPlayer == null) return new HouseInfo(-1, -1, -1);
+        if (ObjectTable.LocalPlayer == null) return new HouseInfo(-1, -1, -1);
         
         var manager = HousingManager.Instance();
         var ward = manager->GetCurrentWard();
@@ -221,7 +223,7 @@ public class TerritoryTools
     {
         try
         {
-            bool playerOutside = await Plugin.Framework.PollForValue(() => ClientState.LocalPlayer != null, outside => outside, 50, 10000);
+            bool playerOutside = await Plugin.Framework.PollForValue(() => ObjectTable.LocalPlayer != null, outside => outside, 50, 10000);
 
             if (playerOutside)
             {

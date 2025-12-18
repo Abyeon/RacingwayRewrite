@@ -39,7 +39,7 @@ public class EditWindow : CustomWindow, IDisposable
     {
         RouteLoader loader = Plugin.RaceManager.RouteLoader;
 
-        if (Plugin.ClientState.LocalPlayer == null)
+        if (Plugin.ObjectTable.LocalPlayer == null)
         {
             ImGui.Text("Player currently not loaded into an area.");
             return;
@@ -71,7 +71,7 @@ public class EditWindow : CustomWindow, IDisposable
                     return;
                 }
                 
-                var newRoute = new Route(name, Plugin.ClientState.LocalPlayer.Name.ToString(), (Address)loader.CurrentAddress);
+                var newRoute = new Route(name, Plugin.ObjectTable.LocalPlayer.Name.ToString(), (Address)loader.CurrentAddress);
                 loader.LoadedRoutes.Add(newRoute);
                 loader.SaveRoutes();
             }
@@ -231,14 +231,14 @@ public class EditWindow : CustomWindow, IDisposable
 
     public void DrawTriggerSettings(RouteLoader loader)
     {
-        if (Plugin.ClientState.LocalPlayer == null) return;
+        if (Plugin.ObjectTable.LocalPlayer == null) return;
         if (loader.SelectedRoute == -1) return;
         
         Route route = loader.LoadedRoutes[loader.SelectedRoute];
         
         if (ImGui.Button("Add Trigger"))
         {
-            Shape shape = new Cube(Plugin.ClientState.LocalPlayer.Position - new Vector3(0, 0.01f, 0), Vector3.One, Vector3.Zero);
+            Shape shape = new Cube(Plugin.ObjectTable.LocalPlayer.Position - new Vector3(0, 0.01f, 0), Vector3.One, Vector3.Zero);
             route.Triggers.Add(new Checkpoint(shape));
         }
 
@@ -300,7 +300,7 @@ public class EditWindow : CustomWindow, IDisposable
                 ImGui.SameLine();
                 if (ImGuiComponents.IconButton("###RaceMove", FontAwesomeIcon.ArrowsToDot))
                 {
-                    trigger.Shape.Transform.Position = Plugin.ClientState.LocalPlayer.Position - new Vector3(0, 0.01f, 0);
+                    trigger.Shape.Transform.Position = Plugin.ObjectTable.LocalPlayer.Position - new Vector3(0, 0.01f, 0);
                     Plugin.Chat.Print("Moved trigger to player's feet.");
                 }
                 if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))

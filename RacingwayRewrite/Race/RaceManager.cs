@@ -30,7 +30,7 @@ public class RaceManager : IDisposable
     
     private void Update(IFramework framework)
     {
-        localPlayer = ClientState.LocalPlayer;
+        localPlayer = ObjectTable.LocalPlayer;
         if (localPlayer == null) return; // Return if the player is null
         if (ClientState.IsPvPExcludingDen) return; // Return if the player is in pvp
         

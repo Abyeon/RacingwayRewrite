@@ -64,8 +64,8 @@ public class Debug(Plugin plugin) : ITab
 
     public unsafe void DrawCharacterData()
     {
-        if (Plugin.ClientState.LocalPlayer == null) return;
-        var character = (BattleChara*)Plugin.ClientState.LocalPlayer.Address;
+        if (Plugin.ObjectTable.LocalPlayer == null) return;
+        var character = (BattleChara*)Plugin.ObjectTable.LocalPlayer.Address;
         
         ActorData data = new ActorData(character);
         ImGui.TextWrapped(data.Position.ToString());

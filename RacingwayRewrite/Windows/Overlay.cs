@@ -35,7 +35,7 @@ public class Overlay : Window, IDisposable
     public override void Draw()
     {
         if (!Plugin.Configuration.ShowOverlay) return;
-        if (Plugin.ClientState.LocalPlayer == null) return;
+        if (Plugin.ObjectTable.LocalPlayer == null) return;
         
         io = ImGui.GetIO();
         
