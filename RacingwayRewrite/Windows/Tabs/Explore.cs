@@ -93,6 +93,13 @@ public class Explore(Plugin plugin) : ITab
             ImGui.SetClipboardText(routeInfo.Address.ReadableName);
             ImGui.CloseCurrentPopup();
         }
+        
+        #if DEBUG
+        if (ImGui.Selectable("Copy DEBUG")) {
+            ImGui.SetClipboardText($"{routeInfo.Address.WorldId} {routeInfo.Address.TerritoryId} {routeInfo.Address.MapId} {routeInfo.Address.Ward} {routeInfo.Address.Plot} {routeInfo.Address.Room}");
+            ImGui.CloseCurrentPopup();
+        }
+        #endif
 
         if (ImGui.Selectable("Export to clipboard"))
         {
