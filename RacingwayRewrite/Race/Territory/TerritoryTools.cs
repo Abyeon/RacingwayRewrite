@@ -14,6 +14,7 @@ namespace RacingwayRewrite.Race.Territory;
 
 public class TerritoryTools
 {
+    public Address? CurrentAddress { get; set; }
     public event EventHandler<Address>? OnAddressChanged;
     internal readonly Plugin Plugin;
     internal readonly IClientState ClientState;
@@ -29,6 +30,7 @@ public class TerritoryTools
         Plugin = plugin;
         ClientState = Plugin.ClientState;
         ObjectTable = Plugin.ObjectTable;
+        CurrentAddress = null;
         
         Plugin.GameInteropProvider.InitializeFromAttributes(this);
         
@@ -197,6 +199,12 @@ public class TerritoryTools
         
         return new HouseInfo(ward, plot, room);
     }
+
+    private void AddressChanged(Address address)
+    {
+        CurrentAddress = address;
+        OnAddressChanged?.Invoke(this, address);
+    }
     
     private async void PollForPlot()
     {
@@ -205,7 +213,7 @@ public class TerritoryTools
             HouseInfo? result = await Plugin.Framework.PollForValue(HousePoll, (value) => value.Plot != -1, 50);
             if (result != null && result.Plot != -1)
             {
-                OnAddressChanged?.Invoke(this, new Address(World, CorrectedTerritoryTypeId, MapId, result.Ward, result.Plot, result.Room));
+                AddressChanged(new Address(World, CorrectedTerritoryTypeId, MapId, result.Ward, result.Plot, result.Room));
             }
             else
             {
@@ -227,7 +235,7 @@ public class TerritoryTools
 
             if (playerOutside)
             {
-                OnAddressChanged?.Invoke(this, new Address(World, CorrectedTerritoryTypeId, MapId));
+                AddressChanged(new Address(World, CorrectedTerritoryTypeId, MapId));
             }
         }
         catch (Exception e)
@@ -241,6 +249,8 @@ public class TerritoryTools
     {
         var manager = HousingManager.Instance();
         bool inside = manager->IsInside();
+
+        CurrentAddress = null;
 
         // Player is inside a house
         if (inside)

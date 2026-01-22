@@ -94,7 +94,7 @@ public class MainWindow : CustomWindow, IDisposable
                 var lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4Block);
                 var route = MessagePackSerializer.Deserialize<Route>(packed, lz4Options);
                 
-                Plugin.Storage.SaveRoute(route);
+                Plugin.Storage.SaveRoute(route, true);
             }
             catch (Exception e)
             {

@@ -28,6 +28,10 @@ public class RouteLoader : IDisposable
         TerritoryTools.OnAddressChanged += AddressChanged;
         ClientState.Logout += OnLogout;
         ClientState.EnterPvP += OnEnterPvp;
+        
+        // Reload current area
+        if (TerritoryTools.CurrentAddress != null)
+            LoadRoutes((Address)TerritoryTools.CurrentAddress);
     }
 
     private void OnEnterPvp() => UnloadRoutes();
@@ -37,7 +41,6 @@ public class RouteLoader : IDisposable
     {
         CurrentAddress = e;
         
-        UnloadRoutes();
         LoadRoutes(e);
     }
 
@@ -46,6 +49,8 @@ public class RouteLoader : IDisposable
         // Run off the main thread to avoid hangs when loading
         Task.Run(() =>
         {
+            UnloadRoutes();
+            
             if (Plugin.Storage == null)
             {
                 Plugin.Chat.Warning("Unable to load routes when Storage is null.");
@@ -91,7 +96,7 @@ public class RouteLoader : IDisposable
         });
     }
 
-    private void UnloadRoutes()
+    public void UnloadRoutes()
     {
         if (LoadedRoutes.Count == 0) return;
         SelectedRoute = -1;
@@ -100,6 +105,7 @@ public class RouteLoader : IDisposable
         Plugin.RaceManager.KickAllPlayers();
         
         SaveRoutes();
+        CurrentAddress = null;
         
         LoadedRoutes = [];
     }

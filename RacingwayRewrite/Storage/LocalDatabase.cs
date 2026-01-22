@@ -83,7 +83,7 @@ public class LocalDatabase : IDisposable
         return db.GetCollection<RecordInfo>("records");
     }
 
-    internal void SaveRoute(Route route)
+    internal void SaveRoute(Route route, bool reload = false)
     {
         var routeCollection = GetRouteCollection();
             
@@ -99,6 +99,20 @@ public class LocalDatabase : IDisposable
             // Update entry or insert a new one
             routeCollection.Upsert(route.Id, toSave);
             RouteCache = routeCollection.Query().ToArray();
+            
+            var currAddress = Plugin.TerritoryTools.CurrentAddress;
+            
+            // Add route to currently loaded routes
+            if (reload && currAddress != null && (Address)currAddress == route.Address)
+            {
+                var loader = Plugin.RaceManager.RouteLoader;
+                
+                // Update route in collection
+                loader.LoadedRoutes.RemoveAll(x => x.Id == route.Id);
+                loader.LoadedRoutes.Add(route);
+                
+                Plugin.Chat.Print($"Saved and loaded {route.Name}.");
+            }
         }
         catch (Exception e)
         {
