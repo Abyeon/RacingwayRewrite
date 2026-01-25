@@ -1,14 +1,9 @@
-﻿using System;
-using System.Globalization;
-using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Globalization;
 using Dalamud.Bindings.ImGui;
-using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Interface.Colors;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using Newtonsoft.Json.Serialization;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using RacingwayRewrite.Race;
 
 namespace RacingwayRewrite.Windows.Tabs;
@@ -59,31 +54,83 @@ public class Debug(Plugin plugin) : ITab
             Plugin.TerritoryTools.MoveToEntry();
         }
         
-        //DrawCharacterData();
+        DrawCharacterData();
+    }
+
+    private uint indexToEdit = 0;
+    private ushort animToPlay = 0;
+
+    private unsafe void ResetHighlight()
+    {
+        foreach (var obj in Plugin.ObjectTable.ClientObjects)
+        {
+            var battleChara = (BattleChara*)obj.Address;
+            battleChara->Highlight(ObjectHighlightColor.None);
+        }
     }
 
     public unsafe void DrawCharacterData()
-    {
+    { 
         if (Plugin.ObjectTable.LocalPlayer == null) return;
-        var character = (BattleChara*)Plugin.ObjectTable.LocalPlayer.Address;
+        var player = (BattleChara*)Plugin.ObjectTable.LocalPlayer.Address;
         
-        ActorData data = new ActorData(character);
+        var man  = ClientObjectManager.Instance();
+        if (ImGui.Button("Spawn Actor"))
+        {
+            indexToEdit = Plugin.RaceManager.ActorManager.ClonePlayer();
+            ResetHighlight();
+        }
+
+        if (ImGui.Button("Clear Actors"))
+        {
+            Plugin.RaceManager.ActorManager.ClearActors();
+            indexToEdit = 0;
+            ResetHighlight();
+        }
+
+        if (ImGui.Button("Reset Index"))
+        {
+            indexToEdit = 0;
+            ResetHighlight();
+        }
+
+        if (ImGui.InputUInt("Index", ref indexToEdit, 1, 1))
+        {
+            ResetHighlight();
+        }
+
+        var character = (BattleChara*)man->GetObjectByIndex((ushort)indexToEdit);
+        if (character == null) return;
+        
+        character->Highlight(ObjectHighlightColor.Blue);
+        
+        var data = new ActorData(character);
+        var playerData = new ActorData(player);
+        
+        if (ImGui.Button("TP To Player"))
+        {
+            character->SetPosition(player->Position.X, player->Position.Y, player->Position.Z);
+        }
+        
         ImGui.TextWrapped(data.Position.ToString());
         ImGui.TextWrapped(data.Yaw.ToString(CultureInfo.InvariantCulture));
         
-        //ImGui.TextWrapped(data.Effects.StatusEffects.ToString());
-        foreach (var property in data.Timeline.GetType().GetProperties())
+        ImGui.InputUShort("Anim To Play", ref animToPlay);
+        
+        if (ImGui.Button("Play animation"))
         {
-            try
-            {
-                ImGui.TextWrapped(property.Name);
-                //ImGui.SameLine();
-                //ImGui.TextWrapped(property.GetValue(data.Timeline)?.ToString());
-            }
-            catch
-            {
-                // ignored
-            }
+            character->SetMode(CharacterModes.AnimLock, 0);
+            character->Timeline.BaseOverride = animToPlay;
+            character->Timeline.TimelineSequencer.PlayTimeline(animToPlay);
+        }
+        
+        ImGui.TextWrapped(playerData.Effects.StatusEffects.ToString());
+        for (var i = 0; i < playerData.Timeline.TimelineSequencer.TimelineIds.Length; i++)
+        {
+            var id= playerData.Timeline.TimelineSequencer.TimelineIds[i];
+            var speed = playerData.Timeline.TimelineSequencer.TimelineSpeeds[i];
+            
+            ImGui.TextWrapped(id.ToString() + " " +  speed.ToString(CultureInfo.InvariantCulture));
         }
     }
 }

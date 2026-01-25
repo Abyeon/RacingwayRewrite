@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
+using RacingwayRewrite.Utils;
+using RacingwayRewrite.Utils.Structs;
 using ZLinq;
 
 namespace RacingwayRewrite.Race;
@@ -15,12 +17,16 @@ public class RaceManager : IDisposable
     internal readonly IFramework Framework;
     internal readonly IObjectTable ObjectTable;
     internal readonly IClientState ClientState;
+    internal readonly ActorManager ActorManager;
+    internal TimelineHook TimelineHook;
     
     public RaceManager(Plugin plugin, IFramework framework, IObjectTable objectTable, IClientState clientState)
     {
         Framework = framework;
         ObjectTable = objectTable;
         ClientState = clientState;
+        ActorManager = new ActorManager(clientState);
+        TimelineHook = new TimelineHook();
         
         Framework.Update += Update;
         RouteLoader = new RouteLoader(plugin, clientState);
@@ -149,6 +155,9 @@ public class RaceManager : IDisposable
     public void Dispose()
     {
         Framework.Update -= Update;
+        
+        ActorManager.Dispose();
+        TimelineHook.Dispose();
         
         Players.Clear();
         

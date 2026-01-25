@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Dalamud.Game.ClientState;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 
 namespace RacingwayRewrite.Utils;
@@ -8,30 +10,79 @@ namespace RacingwayRewrite.Utils;
 /// <summary>
 /// Handles spawning/deleting custom actors from the scene
 /// </summary>
-public class ActorManager : IDisposable
+public unsafe class ActorManager : IDisposable
 {
-    internal readonly IFramework Framework;
-    internal const uint MaxActors = 10;
+    private readonly IClientState ClientState;
+    private const uint MaxActors = 10;
 
-    public ActorManager(IFramework framework)
+    public ActorManager(IClientState clientState)
     {
-        Framework = framework;
-        Framework.Update += Update;
+        ClientState = clientState;
+        ClientState.ZoneInit += OnZoneInit;
     }
-    
-    private Stack<uint> ids = new Stack<uint>();
-    
-    // Probably want to implement a queue much like OrangeGuidanceTomestone's here
 
-    private unsafe void Update(IFramework framework)
+    private void OnZoneInit(ZoneInitEventArgs obj)
     {
-        var manager = ClientObjectManager.Instance();
+        ghosts.Clear();
+    }
+
+    private Queue<uint> ghosts = new Queue<uint>();
+
+    public uint ClonePlayer()
+    {
+        if (Plugin.ObjectTable.LocalPlayer == null) return 0;
+        var player = (BattleChara*)Plugin.ObjectTable.LocalPlayer.Address;
+
+        var man  = ClientObjectManager.Instance();
         
-        throw new NotImplementedException();
+        if (ghosts.Count >= MaxActors)
+        {
+            var first = ghosts.Dequeue();
+            man->DeleteObjectByIndex((ushort)first, 0);
+        }
+        
+        var index = man->CreateBattleCharacter();
+        var newActor = (BattleChara*)man->GetObjectByIndex((ushort)index);
+
+        const CharacterSetupContainer.CopyFlags flags = CharacterSetupContainer.CopyFlags.ClassJob |
+                                                        CharacterSetupContainer.CopyFlags.Position |
+                                                        CharacterSetupContainer.CopyFlags.Name |
+                                                        CharacterSetupContainer.CopyFlags.Ornament;
+            
+        newActor->Character.CharacterSetup.CopyFromCharacter((Character*)player, flags);
+        newActor->Character.TargetableStatus ^= ObjectTargetableFlags.IsTargetable;
+            
+        if (newActor->IsReadyToDraw())
+        {
+            newActor->EnableDraw();
+        }
+            
+        ghosts.Enqueue(index);
+        return index;
+    }
+
+    public void ClearActors()
+    {
+        var man = ClientObjectManager.Instance();
+
+        try
+        {
+            while (ghosts.Count > 0)
+            {
+                var index = ghosts.Dequeue();
+                man->DeleteObjectByIndex((ushort)index, 0);
+            }
+        }
+        catch (Exception e)
+        {
+            Plugin.Log.Error(e, "Error while clearing actors.");
+        }
     }
 
     public void Dispose()
     {
-        Framework.Update -= Update;
+        ClearActors();
+        
+        ClientState.ZoneInit -= OnZoneInit;
     }
 }

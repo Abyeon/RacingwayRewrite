@@ -20,11 +20,6 @@ public class TerritoryTools
     internal readonly IClientState ClientState;
     internal readonly IObjectTable ObjectTable;
     
-    public unsafe delegate byte MoveToEntryDelegate(HousingManager* thisPtr);
-
-    [Signature("E8 ?? ?? ?? ?? 84 C0 75 ?? 45 32 F6 E9")] // Thanks to Haselnussbomber for the MoveToEntry sig
-    private readonly MoveToEntryDelegate? moveToEntry = null;
-    
     public TerritoryTools(Plugin plugin)
     {
         Plugin = plugin;
@@ -32,7 +27,7 @@ public class TerritoryTools
         ObjectTable = Plugin.ObjectTable;
         CurrentAddress = null;
         
-        Plugin.GameInteropProvider.InitializeFromAttributes(this);
+        // Plugin.GameInteropProvider.InitializeFromAttributes(this);
         
         //ClientState.TerritoryChanged += TerritoryChanged;
         ClientState.ZoneInit += ZoneInit;
@@ -40,11 +35,6 @@ public class TerritoryTools
         if (ClientState.IsLoggedIn)
             CheckLocation();
     }
-    
-    // private void TerritoryChanged(ushort id)
-    // {
-    //     CheckLocation();
-    // }
 
     private void ZoneInit(ZoneInitEventArgs args)
     {
@@ -133,19 +123,10 @@ public class TerritoryTools
             
                 lastExecution = DateTime.Now;
 
-                if (moveToEntry == null)
-                {
-                    Plugin.Log.Error("Could not find move to entry sig!");
-                    return;
-                }
-
                 var manager = HousingManager.Instance();
-                if (manager->IsInside())
-                {
-                    moveToEntry.Invoke(manager);
-                    return;
-                }
+                var success = manager->MoveToEntry();
                 
+                if (success) return;
                 Plugin.Chat.Warning("Unable to move to entry, not currently inside a house!");
             }
         });
