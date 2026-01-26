@@ -48,8 +48,11 @@ public unsafe class ActorManager : IDisposable
                                                         CharacterSetupContainer.CopyFlags.Position |
                                                         CharacterSetupContainer.CopyFlags.Name |
                                                         CharacterSetupContainer.CopyFlags.Ornament;
-            
+
         newActor->Character.CharacterSetup.CopyFromCharacter((Character*)player, flags);
+        //newActor->DrawData.CustomizeData.BodyType = 2;
+        //newActor->DrawData.CustomizeData.Sex = 1;
+        
         newActor->Character.TargetableStatus ^= ObjectTargetableFlags.IsTargetable;
             
         if (newActor->IsReadyToDraw())

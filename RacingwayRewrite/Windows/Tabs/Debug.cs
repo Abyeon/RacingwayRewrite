@@ -132,6 +132,12 @@ public class Debug(Plugin plugin) : ITab
             character->Timeline.BaseOverride = animToPlay;
             character->Timeline.TimelineSequencer.PlayTimeline(animToPlay);
         }
+
+        var alpha = character->Alpha;
+        if (ImGui.SliderFloat("Change Alpha", ref alpha, 0f, 1f))
+        {
+            character->Alpha = alpha;
+        }
         
         ImGui.TextWrapped(playerData.Effects.StatusEffects.ToString());
         for (var i = 0; i < playerData.Timeline.TimelineSequencer.TimelineIds.Length; i++)
