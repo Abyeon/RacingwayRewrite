@@ -69,6 +69,8 @@ public class Debug(Plugin plugin) : ITab
         }
     }
 
+    private bool tpToPlayer = false;
+
     public unsafe void DrawCharacterData()
     { 
         if (Plugin.ObjectTable.LocalPlayer == null) return;
@@ -110,6 +112,13 @@ public class Debug(Plugin plugin) : ITab
         if (ImGui.Button("TP To Player"))
         {
             character->SetPosition(player->Position.X, player->Position.Y, player->Position.Z);
+        }
+
+        ImGui.Checkbox("Tp To Player", ref tpToPlayer);
+        if (tpToPlayer)
+        {
+            character->SetPosition(player->Position.X, player->Position.Y, player->Position.Z);
+            character->SetRotation(player->Rotation);
         }
         
         ImGui.TextWrapped(data.Position.ToString());

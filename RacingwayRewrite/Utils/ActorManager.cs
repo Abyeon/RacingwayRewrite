@@ -13,7 +13,7 @@ namespace RacingwayRewrite.Utils;
 public unsafe class ActorManager : IDisposable
 {
     private readonly IClientState ClientState;
-    private const uint MaxActors = 10;
+    private const uint MaxActors = 500;
 
     public ActorManager(IClientState clientState)
     {
