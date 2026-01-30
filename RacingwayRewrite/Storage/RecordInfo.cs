@@ -6,6 +6,7 @@ namespace RacingwayRewrite.Storage;
 public struct RecordInfo
 {
     public required ObjectId Id { get; set; }
+    public required ObjectId AppearanceId { get; set; }
     public required string Name { get; set; }
     public required string World { get; set; }
     public required DateTime Created { get; set; }

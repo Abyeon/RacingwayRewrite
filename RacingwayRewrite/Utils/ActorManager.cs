@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dalamud.Game.ClientState;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using RacingwayRewrite.Race.Appearance;
+using RacingwayRewrite.Utils.Structs;
 
 namespace RacingwayRewrite.Utils;
 
@@ -26,7 +29,70 @@ public unsafe class ActorManager : IDisposable
         ghosts.Clear();
     }
 
-    private Queue<uint> ghosts = new Queue<uint>();
+    private readonly Queue<uint> ghosts = new Queue<uint>();
+
+    public uint SpawnWithAppearance(PlayerAppearance appearance)
+    {
+        if (Plugin.ObjectTable.LocalPlayer == null) return 0;
+        var player = (Character*)Plugin.ObjectTable.LocalPlayer.Address;
+        
+        var man = ClientObjectManager.Instance();
+        
+        if (ghosts.Count >= MaxActors)
+        {
+            var first = ghosts.Dequeue();
+            man->DeleteObjectByIndex((ushort)first, 0);
+        }
+        
+        var index = man->CreateBattleCharacter();
+        var newActor = (BattleChara*)man->GetObjectByIndex((ushort)index);
+
+        const string name = "Racingway Player";
+        for (int i = 0; i < name.Length; i++)
+        {
+            newActor->Name[i] = (byte)name[i];
+        }
+        newActor->Name[name.Length] = 0;
+        
+        newActor->Character.TargetableStatus ^= ObjectTargetableFlags.IsTargetable;
+        
+        newActor->CharacterSetup.CopyFromCharacter(player, 0);
+        newActor->CharacterSetup.CopyFromCharacter((Character*)newActor, CharacterSetupContainer.CopyFlags.None);
+        
+        *(ActorCustomize*)&newActor->DrawData.CustomizeData = appearance.GetCustomizeData();
+        for (var i = 0; i < appearance.EquipmentModels.Length; i++)
+        {
+            var slot = (DrawDataContainer.EquipmentSlot)i;
+            var model = appearance.EquipmentModels[i];
+            var modelPtr = &model;
+            newActor->DrawData.LoadEquipment(slot, modelPtr, true);
+        }
+
+        var firstJob = appearance.WeaponDictionary.Keys.First();
+        newActor->ClassJob = firstJob;
+        
+        var firstWeapon = appearance.WeaponDictionary[firstJob];
+        foreach (var data in firstWeapon)
+        {
+            data.LoadToCharacter(newActor);
+        }
+
+        newActor->DrawData.GlassesIds[0] = appearance.Facewear;
+        newActor->DrawData.IsHatHidden = appearance.IsHatHidden;
+        newActor->DrawData.IsVisorToggled = appearance.IsVisorToggled;
+        newActor->DrawData.VieraEarsHidden = appearance.IsVieraEarsHidden;
+        newActor->DrawData.IsWeaponHidden = appearance.IsWeaponHidden;
+        
+        newActor->Position = Plugin.ObjectTable.LocalPlayer.Position;
+        
+        if (newActor->IsReadyToDraw())
+        {
+            newActor->EnableDraw();
+        }
+        
+        ghosts.Enqueue(index);
+        return index;
+    }
 
     public uint ClonePlayer()
     {

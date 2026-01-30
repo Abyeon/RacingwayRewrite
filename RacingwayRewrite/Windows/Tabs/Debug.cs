@@ -1,10 +1,13 @@
 ﻿using System.Globalization;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Interface.Colors;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using RacingwayRewrite.Race;
+using RacingwayRewrite.Race.Appearance;
+using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
 namespace RacingwayRewrite.Windows.Tabs;
 
@@ -70,18 +73,42 @@ public class Debug(Plugin plugin) : ITab
     }
 
     private bool tpToPlayer = false;
+    private PlayerAppearance? appearance;
 
     public unsafe void DrawCharacterData()
     { 
         if (Plugin.ObjectTable.LocalPlayer == null) return;
         var player = (BattleChara*)Plugin.ObjectTable.LocalPlayer.Address;
+
+        if (ImGui.Button("Copy Appearance"))
+        {
+            Plugin.Framework.RunOnFrameworkThread(() =>
+            {
+                var toSave = player;
+                if (Plugin.TargetManager.Target is IBattleChara target)
+                {
+                    toSave = (BattleChara*)target.Address;
+                }
+            
+                appearance = new PlayerAppearance(toSave);
+            });
+        }
+        
+        if (appearance != null)
+        {
+            if (ImGui.Button("Spawn Appearance"))
+            {
+                indexToEdit = Plugin.RaceManager.ActorManager.SpawnWithAppearance(appearance);
+                ResetHighlight();
+            }
+        };
         
         var man  = ClientObjectManager.Instance();
-        if (ImGui.Button("Spawn Actor"))
-        {
-            indexToEdit = Plugin.RaceManager.ActorManager.ClonePlayer();
-            ResetHighlight();
-        }
+        // if (ImGui.Button("Spawn Actor"))
+        // {
+        //     indexToEdit = Plugin.RaceManager.ActorManager.ClonePlayer();
+        //     ResetHighlight();
+        // }
 
         if (ImGui.Button("Clear Actors"))
         {
@@ -139,11 +166,10 @@ public class Debug(Plugin plugin) : ITab
             character->Alpha = alpha;
         }
         
-        ImGui.TextWrapped(playerData.Effects.StatusEffects.ToString());
-        for (var i = 0; i < playerData.Timeline.TimelineSequencer.TimelineIds.Length; i++)
+        for (var i = 0; i < player->Timeline.TimelineSequencer.TimelineIds.Length; i++)
         {
-            var id= playerData.Timeline.TimelineSequencer.TimelineIds[i];
-            var speed = playerData.Timeline.TimelineSequencer.TimelineSpeeds[i];
+            var id= player->Timeline.TimelineSequencer.TimelineIds[i];
+            var speed = player->Timeline.TimelineSequencer.TimelineSpeeds[i];
             
             ImGui.TextWrapped(id.ToString() + " " +  speed.ToString(CultureInfo.InvariantCulture));
         }
