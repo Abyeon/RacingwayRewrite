@@ -7,6 +7,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using RacingwayRewrite.Race;
 using RacingwayRewrite.Race.Appearance;
+using RacingwayRewrite.Race.Replay;
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
 namespace RacingwayRewrite.Windows.Tabs;

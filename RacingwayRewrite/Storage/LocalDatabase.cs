@@ -30,6 +30,8 @@ public class LocalDatabase : IDisposable
         routeCollection.EnsureIndex(x => x.Address);
         routeCollection.EnsureIndex(x => x.Name);
         
+        var appearanceCollection = GetRecordCollection();
+        
         var recordCollection = GetRecordCollection();
         recordCollection.EnsureIndex(x => x.Time);
         recordCollection.EnsureIndex(x => x.Created);
@@ -78,9 +80,35 @@ public class LocalDatabase : IDisposable
         return collection;
     }
 
+    internal ILiteCollection<AppearanceInfo> GetAppearanceCollection()
+    {
+        return db.GetCollection<AppearanceInfo>("appearances");
+    }
+
     internal ILiteCollection<RecordInfo> GetRecordCollection()
     {
         return db.GetCollection<RecordInfo>("records");
+    }
+
+    internal void SaveRecord(Record record)
+    {
+        // var recordCollection = GetRecordCollection();
+        // var appearanceCollection = GetAppearanceCollection();
+        //
+        // var exists = appearanceCollection.Query().Where(x => x.ContentId == record.ContentId);
+        //
+        // if (exists.Count() == 0)
+        // {
+        //     Plugin.Chat.Error("Error saving record, player appearance not found! This is weird...");
+        //     return;
+        // }
+        //
+        // var lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4Block);
+        // byte[] packed = MessagePackSerializer.Serialize(record, lz4Options);
+        // var toSave = new RecordInfo(record.)
+        // {
+        //     
+        // }
     }
 
     internal void SaveRoute(Route route, bool reload = false)

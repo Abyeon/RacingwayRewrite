@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
+using RacingwayRewrite.Race.Replay;
 using RacingwayRewrite.Utils;
 
 namespace RacingwayRewrite.Race;
@@ -14,6 +17,7 @@ public class RaceState(Player player)
     public uint Checkpoint { get; set; }
     public uint Lap { get; set; }
     public Stopwatch Timer { get; set; } = new();
+    public Queue<MomentData> Moments { get; set; } = new();
 
     /// <summary>
     /// Start's the timer for the player
@@ -35,6 +39,8 @@ public class RaceState(Player player)
                                 "Please check that each checkpoint position increments by one or matches that of another checkpoint (this allows for branching paths.)");
             return;
         }
+        
+        Moments.Clear();
 
         Checkpoint = 0;
         Lap = 0;
@@ -71,6 +77,8 @@ public class RaceState(Player player)
     public void SilentFail()
     {
         if (!InRace) return;
+
+        Moments.Clear();
         
         Timer.Reset();
         Checkpoint = 0;

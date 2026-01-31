@@ -5,6 +5,7 @@ using Dalamud.Game.ClientState;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using FFXIVClientStructs.FFXIV.Common.Math;
 using RacingwayRewrite.Race.Appearance;
 using RacingwayRewrite.Utils.Interop.Structs;
 
