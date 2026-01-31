@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace RacingwayRewrite.Utils.Structs;
+namespace RacingwayRewrite.Utils.Interop.Structs;
 
 // semi yoinked from brio https://github.com/Etheirys/Brio/blob/main/Brio/Game/Actor/Appearance/ActorCustomize.cs#L6
 

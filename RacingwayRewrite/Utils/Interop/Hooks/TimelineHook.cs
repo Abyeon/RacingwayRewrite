@@ -2,7 +2,7 @@
 using Dalamud.Hooking;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 
-namespace RacingwayRewrite.Utils.Structs;
+namespace RacingwayRewrite.Utils.Interop.Hooks;
 
 using PlayTimelineDelegate = ActionTimelineSequencer.Delegates.PlayTimeline;
 using SetSlotDelegate = ActionTimelineSequencer.Delegates.SetSlotTimeline;

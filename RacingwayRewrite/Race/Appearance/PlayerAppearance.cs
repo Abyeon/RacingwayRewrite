@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using MessagePack;
-using RacingwayRewrite.Utils.Structs;
+using RacingwayRewrite.Utils.Interop.Structs;
 
 namespace RacingwayRewrite.Race.Appearance;
 

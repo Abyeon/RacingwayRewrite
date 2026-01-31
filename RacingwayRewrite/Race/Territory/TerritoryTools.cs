@@ -7,7 +7,7 @@ using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using RacingwayRewrite.Utils;
-using RacingwayRewrite.Utils.Structs;
+using RacingwayRewrite.Utils.Interop.Structs;
 using Sheet = Lumina.Excel.Sheets;
 
 namespace RacingwayRewrite.Race.Territory;

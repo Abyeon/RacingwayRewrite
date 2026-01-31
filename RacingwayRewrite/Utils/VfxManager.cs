@@ -5,6 +5,7 @@ using System.Numerics;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Plugin.Services;
 using Pictomancy;
+using RacingwayRewrite.Utils.Interop;
 
 namespace RacingwayRewrite.Utils;
 
@@ -15,12 +16,14 @@ namespace RacingwayRewrite.Utils;
 public class VfxManager : IDisposable
 {
     internal readonly IFramework Framework;
+    internal readonly VfxFunctions Functions;
     internal const uint MaxVfx = 60;
 
     public VfxManager(IFramework framework)
     {
         Framework = framework;
         Framework.Update += Update;
+        Functions = new VfxFunctions();
     }
 
     private Dictionary<Vfx, DateTime> currentVfx = new();

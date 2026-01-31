@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using RacingwayRewrite.Utils;
-using RacingwayRewrite.Utils.Structs;
+using RacingwayRewrite.Utils.Interop.Hooks;
+using RacingwayRewrite.Utils.Interop.Structs;
 using ZLinq;
 
 namespace RacingwayRewrite.Race;

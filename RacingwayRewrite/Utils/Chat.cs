@@ -5,7 +5,7 @@ using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using RacingwayRewrite.Race;
-using RacingwayRewrite.Utils.Hooks;
+using RacingwayRewrite.Utils.Interop.Hooks;
 
 namespace RacingwayRewrite.Utils;
 

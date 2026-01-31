@@ -6,7 +6,7 @@ using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using RacingwayRewrite.Race.Appearance;
-using RacingwayRewrite.Utils.Structs;
+using RacingwayRewrite.Utils.Interop.Structs;
 
 namespace RacingwayRewrite.Utils;
 
@@ -70,6 +70,8 @@ public unsafe class ActorManager : IDisposable
 
         var firstJob = appearance.WeaponDictionary.Keys.First();
         newActor->ClassJob = firstJob;
+        
+        Plugin.VfxManager.Functions.CreateGameObjectVfx("vfx/common/eff/wks_e008_c0c.avfx", (nint)newActor, (nint)player);
         
         var firstWeapon = appearance.WeaponDictionary[firstJob];
         foreach (var data in firstWeapon)

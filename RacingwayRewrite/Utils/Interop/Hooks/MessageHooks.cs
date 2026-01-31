@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Dalamud.Game.Text;
 using Dalamud.Hooking;
 using FFXIVClientStructs.FFXIV.Client.System.String;
@@ -10,7 +9,7 @@ using Lumina.Text.ReadOnly;
 using SeString = Dalamud.Game.Text.SeStringHandling.SeString;
 using LSeStringBuilder = Lumina.Text.SeStringBuilder;
 
-namespace RacingwayRewrite.Utils.Hooks;
+namespace RacingwayRewrite.Utils.Interop.Hooks;
 
 using FormatLogMessage = RaptureLogModule.Delegates.FormatLogMessage;
 
