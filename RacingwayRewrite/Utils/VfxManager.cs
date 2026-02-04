@@ -45,7 +45,6 @@ public class VfxManager : IDisposable
             
             item = next;
         }
-        foreach (var vfx in trackedVfx) vfx.CheckForRefresh();
     }
 
     private void ClientStateOnLogout(int type, int code)
