@@ -7,7 +7,7 @@ using RacingwayRewrite.Utils.Interop;
 namespace RacingwayRewrite.Utils;
 
 /// <summary>
-/// Smarter Vfx Manager. This should handle disposing without interframe tracking.
+/// Smarter Vfx Manager.. Still uses inter-frame tracking, but whatev
 /// </summary>
 public class VfxManager : IDisposable
 {
