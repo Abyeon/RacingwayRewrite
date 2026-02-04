@@ -10,6 +10,7 @@ using RacingwayRewrite.Race.Territory;
 using RacingwayRewrite.Storage;
 using RacingwayRewrite.Utils;
 using RacingwayRewrite.Utils.Interop;
+using RacingwayRewrite.Utils.Interop.Structs;
 using RacingwayRewrite.Windows;
 
 namespace RacingwayRewrite;

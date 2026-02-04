@@ -2,11 +2,8 @@
 using System.Text;
 using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Common.Math;
-using RacingwayRewrite.Utils.Interop.Structs;
-using VfxData = RacingwayRewrite.Utils.Interop.Structs.VfxData;
-using VfxResourceInstance = RacingwayRewrite.Utils.Interop.Structs.VfxResourceInstance;
 
-namespace RacingwayRewrite.Utils.Interop;
+namespace RacingwayRewrite.Utils.Interop.Structs;
 
 // Mostly yoinked from Pictomancy. https://github.com/sourpuh/ffxiv_pictomancy/blob/master/Pictomancy/VfxDraw/VfxFunctions.cs
 // Going to move from using their service for these because I don't like their per-frame vfx handling api.
