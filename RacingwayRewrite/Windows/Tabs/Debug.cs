@@ -23,16 +23,28 @@ public class Debug(Plugin plugin) : ITab
 
     public void Dispose() { }
     public void OnClose() { }
+
+    private string path = "vfx/common/eff/itm_tape_01c.avfx";
     
     public void Draw()
     {
-        if (ImGui.Button("Spawn VFX"))
+        ImGui.InputText("Vfx Path", ref path, 1024);
+        
+        if (ImGui.Button("Spawn VFX at Player Feet"))
         {
             if (Plugin.ObjectTable.LocalPlayer != null)
             {
                 var player = Plugin.ObjectTable.LocalPlayer;
-                //Plugin.VfxManager2.AddVfx(new Vfx("vfx/common/eff/itm_tape_01c.avfx", player.Position, Vector3.One, 0f));
-                Plugin.VfxManager.AddVfx(new ObjectVfx("vfx/common/eff/itm_tape_01c.avfx", player, player, TimeSpan.FromSeconds(3)));
+                Plugin.VfxManager.AddVfx(new Vfx(path, player.Position, Vector3.One, 0f));
+            }
+        }
+        
+        if (ImGui.Button("Spawn VFX Attached to Player"))
+        {
+            if (Plugin.ObjectTable.LocalPlayer != null)
+            {
+                var player = Plugin.ObjectTable.LocalPlayer;
+                Plugin.VfxManager.AddVfx(new ObjectVfx(path, player, player, TimeSpan.FromSeconds(3)));
             }
         }
 

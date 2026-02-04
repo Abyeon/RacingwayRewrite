@@ -13,13 +13,22 @@ public unsafe class Vfx : BaseVfx
     public Vector3 Size;
     public float Rotation;
     
-    public Vfx(string path, Vector3 position, Vector3 size, float rotation)
+    public Vfx(string path, Vector3 position, Vector3 size, float rotation, TimeSpan? expiration = null)
     {
         if (Plugin.VfxFunctions == null) throw new NullReferenceException("Vfx functions are not initialized");
         
         Position = position;
         Size = size;
         Rotation = rotation;
+        
+        if (expiration.HasValue)
+        {
+            Expires = DateTime.UtcNow + expiration.Value;
+        }
+        else
+        {
+            Loop = true;
+        }
         
         Plugin.Framework.RunOnFrameworkThread(() =>
         {

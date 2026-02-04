@@ -7,7 +7,7 @@ public abstract unsafe class BaseVfx : IDisposable
 {
     public string Path = "";
     public DateTime Expires;
-    public bool Loop;
+    public bool Loop = false;
     
     public VfxData* Data;
     public bool IsValid => Data != null && Data->Instance != null;
