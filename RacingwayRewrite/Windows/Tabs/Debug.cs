@@ -39,12 +39,22 @@ public class Debug(Plugin plugin) : ITab
             }
         }
         
-        if (ImGui.Button("Spawn VFX Attached to Player"))
+        if (ImGui.Button("Spawn VFX Attached to Target/Player"))
         {
             if (Plugin.ObjectTable.LocalPlayer != null)
             {
                 var player = Plugin.ObjectTable.LocalPlayer;
-                Plugin.VfxManager.AddVfx(new ObjectVfx(path, player, player, TimeSpan.FromSeconds(3)));
+                
+                Plugin.Framework.RunOnFrameworkThread(() =>
+                {
+                    var toAttach = (IGameObject)player;
+                    if (Plugin.TargetManager.Target is { } target)
+                    {
+                        toAttach = target;
+                    }
+                    
+                    Plugin.VfxManager.AddVfx(new ObjectVfx(path, toAttach, toAttach, TimeSpan.FromSeconds(3)));
+                });
             }
         }
 
