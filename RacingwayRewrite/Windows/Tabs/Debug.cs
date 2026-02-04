@@ -35,6 +35,20 @@ public class Debug(Plugin plugin) : ITab
                 Plugin.VfxManager.AddVfx(new ObjectVfx("vfx/common/eff/itm_tape_01c.avfx", player, player, TimeSpan.FromSeconds(3)));
             }
         }
+
+        if (ImGui.Button("Make player glooowwwww"))
+        {
+            if (Plugin.ObjectTable.LocalPlayer != null)
+            {
+                var player = Plugin.ObjectTable.LocalPlayer;
+                Plugin.VfxManager.AddVfx(new ObjectVfx("vfx/common/eff/wks_e008_c0c.avfx", player, player));
+            }
+        }
+
+        if (ImGui.Button("Clear VFX"))
+        {
+            Plugin.VfxManager.ClearVfx();
+        }
         
         if (ImGui.Button("Show Edit Window"))
         {

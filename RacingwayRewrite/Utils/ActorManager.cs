@@ -7,6 +7,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using RacingwayRewrite.Race.Appearance;
+using RacingwayRewrite.Utils.Interop;
 using RacingwayRewrite.Utils.Interop.Structs;
 
 namespace RacingwayRewrite.Utils;
@@ -72,7 +73,8 @@ public unsafe class ActorManager : IDisposable
         var firstJob = appearance.WeaponDictionary.Keys.First();
         newActor->ClassJob = firstJob;
         
-        // var vfx = Plugin.VfxManager.Functions.CreateGameObjectVfx("vfx/common/eff/wks_e008_c0c.avfx", (nint)newActor, (nint)player);
+        //Plugin.VfxManager.AddVfx(new ObjectVfx());
+        Plugin.VfxFunctions.CreateGameObjectVfx("vfx/common/eff/wks_e008_c0c.avfx", (nint)newActor, (nint)player);
         // Plugin.Log.Debug($"VFX Pointer: {new IntPtr(vfx->Instance)}");
         
         var firstWeapon = appearance.WeaponDictionary[firstJob];

@@ -76,9 +76,10 @@ public class VfxManager : IDisposable
 
     public void ClearVfx()
     {
-        for (var item= trackedVfx.First; item != null;)
+        for (var item = trackedVfx.First; item != null;)
         {
             var next = item.Next;
+            item.Value.Dispose();
             trackedVfx.Remove(item);
             item = next;
         }
