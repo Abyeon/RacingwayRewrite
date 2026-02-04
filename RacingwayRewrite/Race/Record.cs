@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Numerics;
+using LiteDB;
 using MessagePack;
 using RacingwayRewrite.Race.Replay;
 
@@ -8,6 +9,7 @@ namespace RacingwayRewrite.Race;
 [MessagePackObject]
 public class Record(ulong contentId, string name, string world, DateTime created, TimeSpan time, MomentData[] moments)
 {
+    [IgnoreMember] public ObjectId Id { get; set; } = ObjectId.NewObjectId();
     [Key(0)] public ulong ContentId { get; set; } = contentId;
     [Key(1)] public string Name { get; set; } = name;
     [Key(2)] public string World { get; set; } = world;

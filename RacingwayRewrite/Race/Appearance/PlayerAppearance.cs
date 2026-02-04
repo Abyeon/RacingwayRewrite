@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using LiteDB;
 using MessagePack;
 using RacingwayRewrite.Utils.Interop.Structs;
 
@@ -9,17 +10,21 @@ namespace RacingwayRewrite.Race.Appearance;
 [MessagePackObject]
 public class PlayerAppearance
 {
-    [Key(0)] public readonly byte[] Customize;
-    [Key(1)] public readonly EquipmentModelId[] EquipmentModels;
-    [Key(2)] public readonly Dictionary<byte, WeaponData[]> WeaponDictionary = new();
-    [Key(3)] public readonly ushort Facewear;
-    [Key(4)] public readonly bool IsHatHidden;
-    [Key(5)] public readonly bool IsVisorToggled;
-    [Key(6)] public readonly bool IsVieraEarsHidden;
-    [Key(7)] public readonly bool IsWeaponHidden;
+    [IgnoreMember] public ObjectId Id { get; set; }
+    [Key(0)] public readonly ulong ContentId;
+    [Key(1)] public readonly byte[] Customize;
+    [Key(2)] public readonly EquipmentModelId[] EquipmentModels;
+    [Key(3)] public readonly Dictionary<byte, WeaponData[]> WeaponDictionary = new();
+    [Key(4)] public readonly ushort Facewear;
+    [Key(5)] public readonly bool IsHatHidden;
+    [Key(6)] public readonly bool IsVisorToggled;
+    [Key(7)] public readonly bool IsVieraEarsHidden;
+    [Key(8)] public readonly bool IsWeaponHidden;
 
     public unsafe PlayerAppearance(BattleChara* character)
     {
+        Id = ObjectId.NewObjectId();
+        ContentId = character->ContentId;
         Customize = character->DrawData.CustomizeData.Data.ToArray();
         EquipmentModels = character->DrawData.EquipmentModelIds.ToArray();
         
@@ -33,8 +38,10 @@ public class PlayerAppearance
     }
 
     public PlayerAppearance(
-        byte[] customizeData, EquipmentModelId[] equipmentModels, Dictionary<byte, WeaponData[]> weaponDictionary, ushort facewear, bool isHatHidden, bool isVisorToggled, bool isVieraEarsHidden, bool isWeaponHidden)
+        ulong contentId, byte[] customizeData, EquipmentModelId[] equipmentModels, Dictionary<byte, WeaponData[]> weaponDictionary, ushort facewear, bool isHatHidden, bool isVisorToggled, bool isVieraEarsHidden, bool isWeaponHidden)
     {
+        Id = ObjectId.NewObjectId();
+        ContentId = contentId;
         Customize = customizeData;
         EquipmentModels = equipmentModels;
         WeaponDictionary = weaponDictionary;

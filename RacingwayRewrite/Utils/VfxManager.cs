@@ -1,78 +1,93 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.ClientState;
 using Dalamud.Plugin.Services;
-using Pictomancy;
 using RacingwayRewrite.Utils.Interop;
 
 namespace RacingwayRewrite.Utils;
 
-// Eventually want to move from Pictomancy to something more custom for this. For now works fine though.
 /// <summary>
-/// Handles spawning/deleting custom VFX from the scene
+/// Smarter Vfx Manager. This should handle disposing without interframe tracking.
 /// </summary>
 public class VfxManager : IDisposable
 {
-    internal readonly IFramework Framework;
-    internal readonly VfxFunctions Functions;
-    internal const uint MaxVfx = 60;
+    private IClientState ClientState;
+    private IFramework Framework;
+    public const int MaxVfx = 60;
+    
+    private readonly LinkedList<BaseVfx> trackedVfx = new();
 
-    public VfxManager(IFramework framework)
+    public VfxManager(IClientState clientState, IFramework framework)
     {
-        Framework = framework;
-        Framework.Update += Update;
-        Functions = new VfxFunctions();
-    }
-
-    private Dictionary<Vfx, DateTime> currentVfx = new();
-
-    public void AddVfx(Vfx vfx, int timeoutMs)
-    {
-        // Remove first vfx if over the max vfx count
-        if (currentVfx.Count + 1 > MaxVfx)
-        {
-            var first = currentVfx.OrderBy(x => x.Value).First();
-            currentVfx.Remove(first.Key);
-        }
+        ClientState = clientState;
+        ClientState.ZoneInit += ClientStateOnZoneInit;
+        ClientState.Logout += ClientStateOnLogout;
         
-        currentVfx.Add(vfx, DateTime.Now.AddMilliseconds(timeoutMs));
+        Framework = framework;
+        Framework.Update += FrameworkOnUpdate;
     }
 
-    private void Update(IFramework framework)
+    private void FrameworkOnUpdate(IFramework framework)
     {
-        try
+        for (var item= trackedVfx.First; item != null;)
         {
-            foreach (var vfx in currentVfx)
-            {
-                if (vfx.Value < DateTime.Now || vfx.Key.Target == null)
-                {
-                    currentVfx.Remove(vfx.Key);
-                    continue;
-                }
+            var next = item.Next;
 
-                PictoService.VfxRenderer.AddCommon(vfx.Key.Id, vfx.Key.Name, vfx.Key.Target, vfx.Key.Scale, vfx.Key.Color);
+            if (!item.Value.Loop && DateTime.UtcNow >= item.Value.Expires)
+            {
+                item.Value.Dispose();
+                trackedVfx.Remove(item);
             }
+            else
+            {
+                item.Value.CheckForRefresh();
+            }
+            
+            item = next;
         }
-        catch (Exception ex)
-        {
-            Plugin.Log.Error(ex.ToString());
-        }
+        foreach (var vfx in trackedVfx) vfx.CheckForRefresh();
     }
 
+    private void ClientStateOnLogout(int type, int code)
+    {
+        ClearVfx();
+    }
+
+    private void ClientStateOnZoneInit(ZoneInitEventArgs obj)
+    {
+        ClearVfx();
+    }
+
+    /// <summary>
+    /// Add a new Vfx to the game.
+    /// </summary>
+    /// <param name="vfx"></param>
+    public void AddVfx(BaseVfx vfx)
+    {
+        // If we hit the max threshold, remove one vfx
+        if (trackedVfx.Count == MaxVfx)
+        {
+            var first = trackedVfx.First;
+            first?.Value.Dispose();
+            trackedVfx.RemoveFirst();
+        }
+
+        trackedVfx.AddLast(vfx);
+    }
+
+    public void ClearVfx()
+    {
+        for (var item= trackedVfx.First; item != null;)
+        {
+            var next = item.Next;
+            trackedVfx.Remove(item);
+            item = next;
+        }
+    }
+    
     public void Dispose()
     {
-        currentVfx = [];
-        Framework.Update -= Update;
+        ClearVfx();
         GC.SuppressFinalize(this);
     }
-}
-
-public record struct Vfx(string Id, string Name, IPlayerCharacter? Target, Vector3? Scale = null, Vector4? Color = null)
-{
-    public readonly string Id = Id, Name = Name;
-    public readonly IPlayerCharacter? Target = Target;
-    public readonly Vector3? Scale = Scale;
-    public readonly Vector4? Color = Color;
 }

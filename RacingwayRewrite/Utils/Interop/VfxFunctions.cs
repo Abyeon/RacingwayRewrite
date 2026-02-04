@@ -67,6 +67,14 @@ public unsafe class VfxFunctions
         }
     }
 
+    public void DestroyVfx(VfxData* self)
+    {
+        if (DestroyVfxInternal == null)
+            throw new InvalidOperationException("DestroyVfx sig was not found!");
+        
+        DestroyVfxInternal(self);
+    }
+
     public VfxData* CreateGameObjectVfx(string path, nint target, nint source)
     {
         if (CreateGameObjectVfxInternal == null)

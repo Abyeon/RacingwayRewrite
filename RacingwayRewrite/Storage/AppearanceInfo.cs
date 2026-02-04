@@ -2,9 +2,9 @@
 
 namespace RacingwayRewrite.Storage;
 
-public struct AppearanceInfo
+public struct AppearanceInfo (ulong contentId, byte[] packedAppearance)
 {
-    public ObjectId Id { get; set; }
-    public required ulong ContentId { get; set; }
-    public byte[] PackedAppearance { get; set; }
+    public ObjectId Id { get; set; } = ObjectId.NewObjectId();
+    public ulong ContentId { get; set; } = contentId;
+    public byte[] PackedAppearance { get; set; } = packedAppearance;
 }

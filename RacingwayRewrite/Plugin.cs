@@ -9,6 +9,7 @@ using RacingwayRewrite.Race;
 using RacingwayRewrite.Race.Territory;
 using RacingwayRewrite.Storage;
 using RacingwayRewrite.Utils;
+using RacingwayRewrite.Utils.Interop;
 using RacingwayRewrite.Windows;
 
 namespace RacingwayRewrite;
@@ -30,6 +31,7 @@ public sealed class Plugin : IDalamudPlugin
     internal static CommandHandler CommandHandler { get; private set; } = null!;
     internal static TerritoryTools TerritoryTools { get; private set; } = null!;
     internal static RaceManager RaceManager { get; private set; } = null!;
+    internal static VfxFunctions VfxFunctions { get; private set; } = null!;
     internal static VfxManager VfxManager { get; private set; } = null!;
     internal static FontManager FontManager { get; private set; } = null!;
     internal static Chat Chat { get; private set; } = null!;
@@ -62,7 +64,8 @@ public sealed class Plugin : IDalamudPlugin
         PictoService.Initialize(PluginInterface);
         TerritoryTools = new TerritoryTools(this);
         RaceManager = new RaceManager(this, Framework, ObjectTable, ClientState);
-        VfxManager = new VfxManager(Framework);
+        VfxFunctions = new VfxFunctions();
+        VfxManager = new VfxManager(ClientState, Framework);
         FontManager = new FontManager();
         
         MainWindow = new MainWindow(this);

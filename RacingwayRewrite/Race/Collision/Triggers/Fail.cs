@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using Dalamud.Game.ClientState.Objects.Types;
+using Lumina.Excel.Sheets;
 using MessagePack;
 using RacingwayRewrite.Race.Collision.Shapes;
-using RacingwayRewrite.Utils;
+using RacingwayRewrite.Utils.Interop;
 
 namespace RacingwayRewrite.Race.Collision.Triggers;
 
@@ -29,20 +31,7 @@ public class Fail : ITrigger
 
     public void OnEnter(Player player)
     {
-        Guid guid = Guid.NewGuid();
-        if (player.LastVelocity.Y < -30)
-        {
-            Plugin.VfxManager.AddVfx(new Vfx(guid.ToString(), "crgim_dumf0c", player.Character), 1000);
-        }
-        else
-        {
-            // X marker over player
-            // vfx/monster/gimmick2/eff/e3d2_b2_g05t0x.avfx
-            // Check mark over player
-            // vfx/monster/gimmick2/eff/e3d2_b2_g04t0x.avfx
-            
-            Plugin.VfxManager.AddVfx(new Vfx(guid.ToString(), "dk05th_stdn0t", player.Character), 2000);
-        }
+        Plugin.VfxManager.AddVfx(new ObjectVfx("vfx/monster/gimmick2/eff/e3d2_b2_g05t0x.avfx", player.Character!, player.Character!, TimeSpan.FromSeconds(2)));
 
         player.State.Fail();
         

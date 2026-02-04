@@ -1,13 +1,16 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Interface.Colors;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using FFXIVClientStructs.FFXIV.Common.Math;
 using RacingwayRewrite.Race;
 using RacingwayRewrite.Race.Appearance;
 using RacingwayRewrite.Race.Replay;
+using RacingwayRewrite.Utils.Interop;
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
 namespace RacingwayRewrite.Windows.Tabs;
@@ -23,6 +26,16 @@ public class Debug(Plugin plugin) : ITab
     
     public void Draw()
     {
+        if (ImGui.Button("Spawn VFX"))
+        {
+            if (Plugin.ObjectTable.LocalPlayer != null)
+            {
+                var player = Plugin.ObjectTable.LocalPlayer;
+                //Plugin.VfxManager2.AddVfx(new Vfx("vfx/common/eff/itm_tape_01c.avfx", player.Position, Vector3.One, 0f));
+                Plugin.VfxManager.AddVfx(new ObjectVfx("vfx/common/eff/itm_tape_01c.avfx", player, player, TimeSpan.FromSeconds(3)));
+            }
+        }
+        
         if (ImGui.Button("Show Edit Window"))
         {
             Plugin.ToggleEditUI();

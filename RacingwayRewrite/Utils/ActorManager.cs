@@ -72,7 +72,8 @@ public unsafe class ActorManager : IDisposable
         var firstJob = appearance.WeaponDictionary.Keys.First();
         newActor->ClassJob = firstJob;
         
-        Plugin.VfxManager.Functions.CreateGameObjectVfx("vfx/common/eff/wks_e008_c0c.avfx", (nint)newActor, (nint)player);
+        // var vfx = Plugin.VfxManager.Functions.CreateGameObjectVfx("vfx/common/eff/wks_e008_c0c.avfx", (nint)newActor, (nint)player);
+        // Plugin.Log.Debug($"VFX Pointer: {new IntPtr(vfx->Instance)}");
         
         var firstWeapon = appearance.WeaponDictionary[firstJob];
         foreach (var data in firstWeapon)

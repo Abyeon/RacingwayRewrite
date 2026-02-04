@@ -4,6 +4,7 @@ using System.Linq;
 using LiteDB;
 using MessagePack;
 using RacingwayRewrite.Race;
+using RacingwayRewrite.Race.Appearance;
 using RacingwayRewrite.Race.Territory;
 
 namespace RacingwayRewrite.Storage;
@@ -30,7 +31,8 @@ public class LocalDatabase : IDisposable
         routeCollection.EnsureIndex(x => x.Address);
         routeCollection.EnsureIndex(x => x.Name);
         
-        var appearanceCollection = GetRecordCollection();
+        var appearanceCollection = GetAppearanceCollection();
+        appearanceCollection.EnsureIndex(x => x.ContentId);
         
         var recordCollection = GetRecordCollection();
         recordCollection.EnsureIndex(x => x.Time);
@@ -51,7 +53,7 @@ public class LocalDatabase : IDisposable
             try
             {
                 var info = new FileInfo(dbPath);
-                string[] suffixes = { "B", "KB", "MB", "GB", "TB" };
+                string[] suffixes = ["B", "KB", "MB", "GB", "TB"];
 
                 int i = 0;
                 decimal dValue = info.Length;
@@ -89,26 +91,40 @@ public class LocalDatabase : IDisposable
     {
         return db.GetCollection<RecordInfo>("records");
     }
+    
+    internal void SaveAppearance(PlayerAppearance appearance)
+    {
+        var appearanceCollection = GetAppearanceCollection();
+        
+        var lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4Block);
+        byte[] packed = MessagePackSerializer.Serialize(appearance, lz4Options);
+        var toSave = new AppearanceInfo(appearance.ContentId, packed)
+        {
+            Id = appearance.Id
+        };
+    }
 
     internal void SaveRecord(Record record)
     {
-        // var recordCollection = GetRecordCollection();
-        // var appearanceCollection = GetAppearanceCollection();
-        //
-        // var exists = appearanceCollection.Query().Where(x => x.ContentId == record.ContentId);
-        //
-        // if (exists.Count() == 0)
+        var recordCollection = GetRecordCollection();
+        var appearanceCollection = GetAppearanceCollection();
+        
+        var exists = appearanceCollection.Query().Where(x => x.ContentId == record.ContentId);
+        
+        if (exists.Count() == 0)
+        {
+            Plugin.Chat.Error("Error saving record, player appearance not found! This is weird...");
+            return;
+        }
+        
+        var appearance = exists.First();
+        
+        var lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4Block);
+        byte[] packed = MessagePackSerializer.Serialize(record, lz4Options);
+        // var toSave = new RecordInfo(appearance, record.Name, record.World, record.Created, record.Time, packed)
         // {
-        //     Plugin.Chat.Error("Error saving record, player appearance not found! This is weird...");
-        //     return;
-        // }
-        //
-        // var lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4Block);
-        // byte[] packed = MessagePackSerializer.Serialize(record, lz4Options);
-        // var toSave = new RecordInfo(record.)
-        // {
-        //     
-        // }
+        //     Id = record
+        // };
     }
 
     internal void SaveRoute(Route route, bool reload = false)
