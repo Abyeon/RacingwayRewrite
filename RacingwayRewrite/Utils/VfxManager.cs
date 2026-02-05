@@ -34,11 +34,11 @@ public class VfxManager : IDisposable
         for (var item = TrackedVfx.First; item != null;)
         {
             var next = item.Next;
-
+            
             if (!item.Value.Loop && DateTime.UtcNow >= item.Value.Expires)
             {
                 item.Value.Dispose();
-                TrackedVfx.Remove(item);
+                //TrackedVfx.Remove(item); no need to remove, disposing should trigger the detour and that will remove this for us
             }
             else
             {
