@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Dalamud.Game.ClientState;
 using Dalamud.Plugin.Services;
-using Lumina.Excel.Sheets;
 using RacingwayRewrite.Utils.Interop;
 
 namespace RacingwayRewrite.Utils;
@@ -72,7 +70,6 @@ public class VfxManager : IDisposable
             {
                 var first = TrackedVfx.First;
                 first?.Value.Dispose();
-                TrackedVfx.RemoveFirst();
             }
 
             TrackedVfx.AddLast(vfx);
@@ -119,9 +116,5 @@ public class VfxManager : IDisposable
         }
     }
     
-    public void Dispose()
-    {
-        ClearVfx();
-        GC.SuppressFinalize(this);
-    }
+    public void Dispose() => ClearVfx();
 }
