@@ -27,7 +27,8 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IObjectTable ObjectTable { get; private set; } = null!;
     [PluginService] internal static ITargetManager TargetManager { get; private set; } = null!;
     [PluginService] internal static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
-    
+    [PluginService] internal static ISigScanner SigScanner { get; private set; } = null!;
+
     internal LocalDatabase? Storage { get; private set; }
     internal static CommandHandler CommandHandler { get; private set; } = null!;
     internal static TerritoryTools TerritoryTools { get; private set; } = null!;

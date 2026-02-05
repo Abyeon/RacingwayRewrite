@@ -158,7 +158,7 @@ public class RaceState(Player player)
         
         var guid = Guid.NewGuid();
         // Plugin.VfxManager.AddVfx(new Vfx(guid.ToString(), "itm_tape_01c", player.Character), 3000);
-        Plugin.VfxManager.AddVfx(new ObjectVfx("vfx/common/eff/itm_tape_01c.avfx", player.Character!, player.Character!, TimeSpan.FromSeconds(3)));
+        Plugin.VfxManager.AddVfx(new ActorVfx("vfx/common/eff/itm_tape_01c.avfx", player.Character!, player.Character!, TimeSpan.FromSeconds(3)));
         
         Checkpoint = 0;
         Lap = 0;

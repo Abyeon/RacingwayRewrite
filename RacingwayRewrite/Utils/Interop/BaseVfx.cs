@@ -9,28 +9,29 @@ public abstract unsafe class BaseVfx : IDisposable
     public DateTime Expires;
     public bool Loop = false;
     
-    public VfxData* Data;
-    public bool IsValid => Data != null && Data->Instance != null;
+    public VfxStruct* Vfx;
+    public bool IsValid => Vfx != null && (IntPtr)Vfx != IntPtr.Zero;
 
-    protected abstract void Refresh();
+    public abstract void Refresh();
+    protected abstract void Remove();
 
     public void CheckForRefresh()
     {
-        if (!IsValid) Refresh();
+        if (!IsValid || (DateTime.Now >= Expires && Loop)) Refresh();
     }
     
     public void Dispose()
     {
-        if (Plugin.VfxFunctions == null) throw new NullReferenceException("Vfx functions are not initialized");
-
-        Plugin.Framework.RunOnFrameworkThread(() =>
+        try
         {
-            if (IsValid)
-            {
-                Plugin.VfxFunctions.DestroyVfx(Data);
-                Data = null;
-            }
-        });
+            if (Plugin.VfxFunctions == null) throw new NullReferenceException("Vfx functions are not initialized");
+            if (IsValid) Remove();
+            Vfx = null;
+        }
+        catch (Exception e)
+        {
+            Plugin.Log.Error(e, $"Error while trying to dispose {Path}");
+        }
         
         GC.SuppressFinalize(this);
     }

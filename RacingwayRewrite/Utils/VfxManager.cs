@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dalamud.Game.ClientState;
 using Dalamud.Plugin.Services;
+using Lumina.Excel.Sheets;
 using RacingwayRewrite.Utils.Interop;
 
 namespace RacingwayRewrite.Utils;
 
 /// <summary>
-/// Smarter Vfx Manager.. Still uses inter-frame tracking, but whatev
+/// Highly inspired from Dalamud-VfxEditor. Should be somewhat more convenient, though.
 /// </summary>
 public class VfxManager : IDisposable
 {
@@ -15,7 +17,7 @@ public class VfxManager : IDisposable
     private IFramework Framework;
     public const int MaxVfx = 60;
     
-    private readonly LinkedList<BaseVfx> trackedVfx = new();
+    public readonly LinkedList<BaseVfx> TrackedVfx = [];
 
     public VfxManager(IClientState clientState, IFramework framework)
     {
@@ -29,14 +31,14 @@ public class VfxManager : IDisposable
 
     private void FrameworkOnUpdate(IFramework framework)
     {
-        for (var item= trackedVfx.First; item != null;)
+        for (var item = TrackedVfx.First; item != null;)
         {
             var next = item.Next;
 
             if (!item.Value.Loop && DateTime.UtcNow >= item.Value.Expires)
             {
                 item.Value.Dispose();
-                trackedVfx.Remove(item);
+                TrackedVfx.Remove(item);
             }
             else
             {
@@ -63,24 +65,56 @@ public class VfxManager : IDisposable
     /// <param name="vfx"></param>
     public void AddVfx(BaseVfx vfx)
     {
-        // If we hit the max threshold, remove one vfx
-        if (trackedVfx.Count == MaxVfx)
+        Plugin.Framework.RunOnFrameworkThread(() =>
         {
-            var first = trackedVfx.First;
-            first?.Value.Dispose();
-            trackedVfx.RemoveFirst();
-        }
+            // If we hit the max threshold, remove one vfx
+            if (TrackedVfx.Count == MaxVfx)
+            {
+                var first = TrackedVfx.First;
+                first?.Value.Dispose();
+                TrackedVfx.RemoveFirst();
+            }
 
-        trackedVfx.AddLast(vfx);
+            TrackedVfx.AddLast(vfx);
+        });
     }
 
+    /// <summary>
+    /// Dispose all currently tracked vfx.
+    /// </summary>
     public void ClearVfx()
     {
-        for (var item = trackedVfx.First; item != null;)
+        Plugin.Framework.RunOnFrameworkThread(() =>
+        {
+            for (var item = TrackedVfx.First; item != null;)
+            {
+                var next = item.Next;
+                TrackedVfx.Remove(item);
+                item.Value.Dispose();
+                item = next;
+            }
+        });
+    }
+
+    public unsafe void InteropRemoved(IntPtr pointer)
+    {
+        for (var item = TrackedVfx.First; item != null;)
         {
             var next = item.Next;
-            item.Value.Dispose();
-            trackedVfx.Remove(item);
+
+            if ((IntPtr)item.Value.Vfx == pointer)
+            {
+                if (item.Value.Loop)
+                {
+                    item.Value.Refresh();
+                }
+                else
+                {
+                    TrackedVfx.Remove(item);
+                }
+                break;
+            }
+            
             item = next;
         }
     }

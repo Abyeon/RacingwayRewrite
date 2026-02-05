@@ -5,10 +5,12 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Interface.Colors;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using FFXIVClientStructs.FFXIV.Client.Game.Network;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using RacingwayRewrite.Race;
 using RacingwayRewrite.Race.Appearance;
+using RacingwayRewrite.Race.Collision.Triggers;
 using RacingwayRewrite.Race.Replay;
 using RacingwayRewrite.Utils.Interop;
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
@@ -29,13 +31,25 @@ public class Debug(Plugin plugin) : ITab
     public void Draw()
     {
         ImGui.InputText("Vfx Path", ref path, 1024);
+
+        // int id = 0;
+        // foreach (var vfx in Plugin.VfxManager.trackedVfx)
+        // {
+        //     var vfxAddress = ((IntPtr)vfx.Vfx).ToString("X8");
+        //     ImGui.PushID(id);
+        //     ImGui.InputText(vfx.Path, ref vfxAddress, 1024, ImGuiInputTextFlags.ReadOnly);
+        //     
+        //     // ImGui.InputByte("Red",)
+        //     
+        //     id++;
+        // }
         
         if (ImGui.Button("Spawn VFX at Player Feet"))
         {
             if (Plugin.ObjectTable.LocalPlayer != null)
             {
                 var player = Plugin.ObjectTable.LocalPlayer;
-                Plugin.VfxManager.AddVfx(new Vfx(path, player.Position, Vector3.One, 0f));
+                Plugin.VfxManager.AddVfx(new StaticVfx(path, player.Position, Vector3.One, 0f, TimeSpan.FromSeconds(3), true));
             }
         }
         
@@ -53,7 +67,7 @@ public class Debug(Plugin plugin) : ITab
                         toAttach = target;
                     }
                     
-                    Plugin.VfxManager.AddVfx(new ObjectVfx(path, toAttach, toAttach, TimeSpan.FromSeconds(3)));
+                    Plugin.VfxManager.AddVfx(new ActorVfx(path, toAttach, toAttach, TimeSpan.FromSeconds(3), true));
                 });
             }
         }
@@ -63,7 +77,7 @@ public class Debug(Plugin plugin) : ITab
             if (Plugin.ObjectTable.LocalPlayer != null)
             {
                 var player = Plugin.ObjectTable.LocalPlayer;
-                Plugin.VfxManager.AddVfx(new ObjectVfx("vfx/common/eff/wks_e008_c0c.avfx", player, player));
+                Plugin.VfxManager.AddVfx(new ActorVfx("vfx/common/eff/wks_e008_c0c.avfx", player, player));
             }
         }
 
