@@ -15,6 +15,7 @@ public unsafe class StaticVfx : BaseVfx
 
     public StaticVfx(string path, Vector3 position, Vector3 scale, float rotation, TimeSpan? expiration = null, bool loop = false)
     {
+        Plugin.Log.Verbose($"Creating StaticVfx {path}");
         if (Plugin.VfxFunctions == null) throw new NullReferenceException("Vfx functions are not initialized");
 
         Path = path;
@@ -47,6 +48,7 @@ public unsafe class StaticVfx : BaseVfx
     {
         try
         {
+            // if (IsValid) Plugin.VfxFunctions.StaticVfxRemove(Vfx);
             Vfx = Plugin.VfxFunctions.StaticVfxCreate(Path);
             Plugin.VfxFunctions.StaticVfxRun(Vfx);
                 

@@ -15,6 +15,7 @@ public unsafe class ActorVfx : BaseVfx
     
     public ActorVfx(string path, IGameObject target, IGameObject source, TimeSpan? expiration = null, bool loop = false)
     {
+        Plugin.Log.Verbose($"Creating ActorVfx {path}");
         if (Plugin.VfxFunctions == null) throw new NullReferenceException("Vfx functions are not initialized");
         
         Path = path;
@@ -35,6 +36,7 @@ public unsafe class ActorVfx : BaseVfx
 
     public override void Refresh()
     {
+        // if (IsValid) Plugin.VfxFunctions.ActorVfxRemove(Vfx);
         Vfx = Plugin.VfxFunctions.ActorVfxCreate(Path, Source.Address, Target.Address);
     }
 

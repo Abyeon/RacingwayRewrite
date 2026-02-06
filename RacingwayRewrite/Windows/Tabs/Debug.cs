@@ -7,12 +7,15 @@ using Dalamud.Interface.Colors;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Network;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
+using FFXIVClientStructs.FFXIV.Client.LayoutEngine.Layer;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using RacingwayRewrite.Race;
 using RacingwayRewrite.Race.Appearance;
 using RacingwayRewrite.Race.Collision.Triggers;
 using RacingwayRewrite.Race.Replay;
 using RacingwayRewrite.Utils.Interop;
+using RacingwayRewrite.Utils.Interop.Structs;
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
 namespace RacingwayRewrite.Windows.Tabs;
@@ -28,21 +31,21 @@ public class Debug(Plugin plugin) : ITab
 
     private string path = "vfx/common/eff/itm_tape_01c.avfx";
     
-    public void Draw()
+    public unsafe void Draw()
     {
         ImGui.InputText("Vfx Path", ref path, 1024);
 
-        // int id = 0;
-        // foreach (var vfx in Plugin.VfxManager.trackedVfx)
-        // {
-        //     var vfxAddress = ((IntPtr)vfx.Vfx).ToString("X8");
-        //     ImGui.PushID(id);
-        //     ImGui.InputText(vfx.Path, ref vfxAddress, 1024, ImGuiInputTextFlags.ReadOnly);
-        //     
-        //     // ImGui.InputByte("Red",)
-        //     
-        //     id++;
-        // }
+        if (ImGui.Button("Spawn BgObject at Player Feet"))
+        {
+            if (Plugin.ObjectTable.LocalPlayer != null)
+            {
+                var player = Plugin.ObjectTable.LocalPlayer;
+                var obj = Plugin.VfxFunctions.BgObjectCreate(path);
+                obj->Position = player.Position;
+                obj->DrawObject.Position = player.Position;
+                obj->DrawObject.IsVisible = true;
+            }
+        }
         
         if (ImGui.Button("Spawn VFX at Player Feet"))
         {
@@ -70,6 +73,18 @@ public class Debug(Plugin plugin) : ITab
                     Plugin.VfxManager.AddVfx(new ActorVfx(path, toAttach, toAttach, TimeSpan.FromSeconds(3), true));
                 });
             }
+        }
+        
+        int id = 0;
+        foreach (var vfx in Plugin.VfxManager.TrackedVfx)
+        {
+            var vfxAddress = ((IntPtr)vfx.Vfx).ToString("X8");
+            ImGui.PushID(id);
+            ImGui.InputText(vfx.Path, ref vfxAddress, 1024, ImGuiInputTextFlags.ReadOnly);
+            
+            // ImGui.InputByte("Red",)
+            
+            id++;
         }
 
         if (ImGui.Button("Make player glooowwwww"))

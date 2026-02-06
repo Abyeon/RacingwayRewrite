@@ -35,8 +35,7 @@ public class VfxManager : IDisposable
             
             if (!item.Value.Loop && DateTime.UtcNow >= item.Value.Expires)
             {
-                item.Value.Dispose();
-                //TrackedVfx.Remove(item); no need to remove, disposing should trigger the detour and that will remove this for us
+                item.Value.Dispose(); // triggers the detour, removing it from the list
             }
             else
             {
@@ -109,6 +108,7 @@ public class VfxManager : IDisposable
                 {
                     TrackedVfx.Remove(item);
                 }
+                
                 break;
             }
             

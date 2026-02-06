@@ -17,11 +17,18 @@ public abstract unsafe class BaseVfx : IDisposable
 
     public void CheckForRefresh()
     {
-        if (!IsValid || (DateTime.Now >= Expires && Loop)) Refresh();
+        if (DateTime.Now >= Expires && Loop)
+        {
+            Plugin.Log.Verbose($"Refreshing Vfx {Path}");
+            if (IsValid) Remove();
+            Refresh();
+        }
     }
     
     public void Dispose()
     {
+        Plugin.Log.Verbose($"Disposing Vfx {Path}");
+        
         try
         {
             if (Plugin.VfxFunctions == null) throw new NullReferenceException("Vfx functions are not initialized");
