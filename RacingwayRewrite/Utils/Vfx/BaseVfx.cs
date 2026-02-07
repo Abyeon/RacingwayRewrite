@@ -1,7 +1,7 @@
 ﻿using System;
 using RacingwayRewrite.Utils.Interop.Structs;
 
-namespace RacingwayRewrite.Utils.Interop;
+namespace RacingwayRewrite.Utils.Vfx;
 
 public abstract unsafe class BaseVfx : IDisposable
 {

@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using Dalamud.Game.ClientState;
 using Dalamud.Plugin.Services;
-using RacingwayRewrite.Utils.Interop;
 
-namespace RacingwayRewrite.Utils;
+namespace RacingwayRewrite.Utils.Vfx;
 
 /// <summary>
 /// Highly inspired from Dalamud-VfxEditor. Should be somewhat more convenient, though.

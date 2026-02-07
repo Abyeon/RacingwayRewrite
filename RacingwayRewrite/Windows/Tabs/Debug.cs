@@ -5,18 +5,12 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Interface.Colors;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using FFXIVClientStructs.FFXIV.Client.Game.Network;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
-using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
-using FFXIVClientStructs.FFXIV.Client.LayoutEngine.Layer;
 using FFXIVClientStructs.FFXIV.Common.Math;
-using RacingwayRewrite.Race;
 using RacingwayRewrite.Race.Appearance;
-using RacingwayRewrite.Race.Collision.Triggers;
 using RacingwayRewrite.Race.Replay;
-using RacingwayRewrite.Utils.Interop;
-using RacingwayRewrite.Utils.Interop.Structs;
-using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
+using RacingwayRewrite.Utils.Props;
+using RacingwayRewrite.Utils.Vfx;
 
 namespace RacingwayRewrite.Windows.Tabs;
 
@@ -33,18 +27,34 @@ public class Debug(Plugin plugin) : ITab
     
     public unsafe void Draw()
     {
-        ImGui.InputText("Vfx Path", ref path, 1024);
+        ImGui.InputText("Path", ref path, 1024);
 
         if (ImGui.Button("Spawn BgObject at Player Feet"))
         {
-            if (Plugin.ObjectTable.LocalPlayer != null)
+            Plugin.Framework.RunOnFrameworkThread(() =>
             {
-                var player = Plugin.ObjectTable.LocalPlayer;
-                var obj = Plugin.VfxFunctions.BgObjectCreate(path);
-                obj->Position = player.Position;
-                obj->DrawObject.Position = player.Position;
-                obj->DrawObject.IsVisible = true;
-            }
+                if (Plugin.ObjectTable.LocalPlayer != null)
+                {
+                    var player = Plugin.ObjectTable.LocalPlayer;
+                    Plugin.PropManager.AddProp(new Prop(path, player.Position));
+                }
+            });
+        }
+
+        if (ImGui.Button("Update highlights lol"))
+        {
+            Plugin.Framework.RunOnFrameworkThread(() =>
+            {
+                foreach (var prop in Plugin.PropManager.Props)
+                {
+                    prop.SetAlpha(127);
+                }
+            });
+        }
+
+        if (ImGui.Button("Clear Props"))
+        {
+            Plugin.PropManager.ClearProps();
         }
         
         if (ImGui.Button("Spawn VFX at Player Feet"))

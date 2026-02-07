@@ -5,6 +5,7 @@ using Lumina.Excel.Sheets;
 using MessagePack;
 using RacingwayRewrite.Race.Collision.Shapes;
 using RacingwayRewrite.Utils.Interop;
+using RacingwayRewrite.Utils.Vfx;
 
 namespace RacingwayRewrite.Race.Collision.Triggers;
 

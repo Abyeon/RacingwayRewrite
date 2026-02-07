@@ -18,9 +18,6 @@ public unsafe class VfxFunctions
     
     public delegate VfxStruct* ActorVfxCreateDelegate(string path, IntPtr caster, IntPtr target, float a4, char a5, ushort a6, char a7);
     public delegate VfxStruct* ActorVfxRemoveDelegate(IntPtr vfx, char a2);
-
-    public delegate BgObject* BgObjectCreateDelegate(string path, string pool, nint a3);
-    public delegate ulong BgObjectRemoveDelegate(Object* obj);
     
     // Funcs
     [Signature("E8 ?? ?? ?? ?? F3 0F 10 35 ?? ?? ?? ?? 48 89 43 08")]
@@ -35,9 +32,6 @@ public unsafe class VfxFunctions
     public ActorVfxCreateDelegate? ActorVfxCreateInternal = null;
     
     public ActorVfxRemoveDelegate? ActorVfxRemoveInternal; // Sig applied in ctor
-
-    [Signature("48 89 5C 24 ?? 57 48 83 EC ?? 49 8B D8 48 8B F9 4D 85 C0 75 ?? 48 8B 05")]
-    public BgObjectCreateDelegate? BgObjectCreateInternal = null;
     
     // Hooks
     public Hook<StaticVfxRemoveDelegate> StaticVfxRemoveHook;
@@ -76,15 +70,6 @@ public unsafe class VfxFunctions
     {
         Plugin.VfxManager.InteropRemoved(vfx);
         return ActorVfxRemoveHook.Original(vfx, a2);
-    }
-
-    public BgObject* BgObjectCreate(string path)
-    {
-        if (BgObjectCreateInternal == null)
-            throw new InvalidOperationException($"BgObjectCreate sig was not found!");
-        
-        return BgObjectCreateInternal(path, "Client.LayoutEngine.Layer.BgPartsLayoutInstance", 0);
-        // return BgObjectCreateInternal(path, "Client.System.Scheduler.Instance.BgObject", 0);
     }
 
     public VfxStruct* StaticVfxCreate(string path)

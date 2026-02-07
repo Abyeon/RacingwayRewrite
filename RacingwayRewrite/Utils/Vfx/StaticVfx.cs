@@ -1,8 +1,7 @@
 ﻿using System;
 using FFXIVClientStructs.FFXIV.Common.Math;
-using RacingwayRewrite.Utils.Interop.Structs;
 
-namespace RacingwayRewrite.Utils.Interop;
+namespace RacingwayRewrite.Utils.Vfx;
 
 /// <summary>
 /// VFX that is not attached to an actor.

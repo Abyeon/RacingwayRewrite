@@ -5,6 +5,7 @@ using System.Diagnostics;
 using RacingwayRewrite.Race.Replay;
 using RacingwayRewrite.Utils;
 using RacingwayRewrite.Utils.Interop;
+using RacingwayRewrite.Utils.Vfx;
 
 namespace RacingwayRewrite.Race;
 

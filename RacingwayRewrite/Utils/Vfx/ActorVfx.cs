@@ -1,9 +1,8 @@
 ﻿using System;
 using Dalamud.Game.ClientState.Objects.Types;
-using FFXIVClientStructs.FFXIV.Common.Math;
-using RacingwayRewrite.Utils.Interop.Structs;
+using RacingwayRewrite.Utils.Interop;
 
-namespace RacingwayRewrite.Utils.Interop;
+namespace RacingwayRewrite.Utils.Vfx;
 
 /// <summary>
 /// Rewrite of Picto's GameObjectVFX class

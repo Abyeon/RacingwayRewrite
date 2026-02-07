@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Dalamud.NET.Sdk/14.0.1">
   <PropertyGroup>
-    <Version>0.0.0.8</Version>
+    <Version>0.0.0.9</Version>
     <Description>A rewrite of Racingway</Description>
     <PackageProjectUrl>https://github.com/Abyeon/RacingwayRewrite</PackageProjectUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
