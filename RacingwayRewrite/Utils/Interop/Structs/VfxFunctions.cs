@@ -9,7 +9,7 @@ using Object = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.Object;
 namespace RacingwayRewrite.Utils.Interop.Structs;
 
 // Mostly grabbed from Dalamud-VfxEditor, just restructured
-public unsafe class VfxFunctions
+public unsafe class VfxFunctions : IDisposable
 {
     // Delegates
     public delegate VfxStruct* StaticVfxCreateDelegate(string path, string pool);
@@ -110,5 +110,11 @@ public unsafe class VfxFunctions
             throw new InvalidOperationException($"ActorVfxRemove sig was not found!");
         
         ActorVfxRemoveInternal((IntPtr)self, (char)1);
+    }
+
+    public void Dispose()
+    {
+        StaticVfxRemoveHook.Dispose();
+        ActorVfxRemoveHook.Dispose();
     }
 }

@@ -1,20 +1,27 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
+using System.Text;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Interface.Colors;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
+using FFXIVClientStructs.FFXIV.Client.LayoutEngine.Group;
+using FFXIVClientStructs.FFXIV.Client.System.Memory;
 using FFXIVClientStructs.FFXIV.Common.Math;
+using Lumina.Extensions;
 using RacingwayRewrite.Race.Appearance;
 using RacingwayRewrite.Race.Replay;
 using RacingwayRewrite.Utils.Props;
+using RacingwayRewrite.Utils.Sgl;
 using RacingwayRewrite.Utils.Vfx;
 
 namespace RacingwayRewrite.Windows.Tabs;
 
-public class Debug(Plugin plugin) : ITab
+public unsafe class Debug(Plugin plugin) : ITab
 {
     public string Name => "Debug";
     
@@ -23,11 +30,28 @@ public class Debug(Plugin plugin) : ITab
     public void Dispose() { }
     public void OnClose() { }
 
-    private string path = "vfx/common/eff/itm_tape_01c.avfx";
+    private string path = "bgcommon/hou/outdoor/general/0332/asset/gar_b0_m0332.sgb";
     
-    public unsafe void Draw()
+    public void Draw()
     {
         ImGui.InputText("Path", ref path, 1024);
+
+        if (ImGui.Button("Print address to world"))
+        {
+            Plugin.Log.Debug(((IntPtr)LayoutWorld.Instance()->ActiveLayout).ToString("x8"));
+        }
+
+        if (ImGui.Button("Create sgb"))
+        {
+            Plugin.Framework.RunOnFrameworkThread(() =>
+            {
+                if (Plugin.ObjectTable.LocalPlayer != null)
+                {
+                    var player = Plugin.ObjectTable.LocalPlayer;
+                    Plugin.PrefabManager.AddPrefab(new Prefab(path, player.Position, Quaternion.CreateFromYawPitchRoll(player.Rotation, 0, 0)));
+                }
+            });
+        }
 
         if (ImGui.Button("Spawn BgObject at Player Feet"))
         {
@@ -55,6 +79,7 @@ public class Debug(Plugin plugin) : ITab
         if (ImGui.Button("Clear Props"))
         {
             Plugin.PropManager.ClearProps();
+            Plugin.PrefabManager.ClearPrefabs();
         }
         
         if (ImGui.Button("Spawn VFX at Player Feet"))
