@@ -21,7 +21,7 @@ public unsafe class Group : IDisposable
         Data = IMemorySpace.GetDefaultSpace()->Malloc<SharedGroupLayoutInstance>();
         Plugin.SharedGroupLayoutFunctions.Ctor(Data);
         
-        Plugin.Log.Verbose($"Attempting to create prefab {path} @ {((IntPtr)Data):x8}");
+        Plugin.Log.Verbose($"Attempting to create group {path} @ {((IntPtr)Data):x8}");
         Path = path;
         
         Position = position ?? Vector3.Zero;
@@ -33,15 +33,7 @@ public unsafe class Group : IDisposable
 
     private void SetModel()
     {
-        var creator = Plugin.SharedGroupLayoutFunctions.GetPreferredLayerManager(LayoutWorld.Instance()->GlobalLayout);
-        if (creator == null) return;
-        
-        var bytes = Encoding.UTF8.GetBytes(Path + "\0");
-        
-        fixed (byte* ptr = bytes)
-        {
-            Data->Init(&creator, ptr);
-        }
+        Plugin.SharedGroupLayoutFunctions.LoadSgb(Data, Path);
         
         var t = Data->GetTransformImpl();
         t->Translation = Position;
@@ -53,7 +45,7 @@ public unsafe class Group : IDisposable
 
         var first = Data->Instances.Instances.First;
         var last = Data->Instances.Instances.Last;
-
+        
         if (first != last)
         {
             Plugin.SharedGroupLayoutFunctions.FixGroupChildren(Data);
@@ -62,7 +54,7 @@ public unsafe class Group : IDisposable
     
     public void Dispose()
     {
-        Plugin.Log.Verbose($"Disposing prefab {Path}");
+        Plugin.Log.Verbose($"Disposing group {Path}");
         if (Data == null) return;
         
         Data->Deinit();

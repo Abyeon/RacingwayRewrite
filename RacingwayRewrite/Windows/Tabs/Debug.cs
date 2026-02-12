@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -55,14 +56,14 @@ public unsafe class Debug(Plugin plugin) : ITab
             {
                 if (Plugin.ObjectTable.LocalPlayer == null) return;
                 var player = Plugin.ObjectTable.LocalPlayer;
-
+        
                 for (var i = 0; i < 20; i++)
                 {
                     for (var j = 0; j < 20; j++)
                     {
-                        Vector3 pos = new Vector3(player.Position.X + (i * 5),
-                                                  player.Position.Y,
-                                                  player.Position.Z + (j * 5));
+                        var pos = new Vector3(player.Position.X + (i * 5),
+                                              player.Position.Y,
+                                              player.Position.Z + (j * 5));
                         
                         Plugin.ObjectManager.Add(path, pos, Quaternion.CreateFromYawPitchRoll(player.Rotation, 0, 0));
                     }

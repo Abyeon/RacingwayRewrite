@@ -18,8 +18,8 @@ public class ObjectManager : IDisposable
     public List<Group> Groups = [];
     public List<BaseVfx> Vfx = [];
     
-    private IClientState ClientState;
-    private IFramework Framework;
+    private readonly IClientState ClientState;
+    private readonly IFramework Framework;
 
     public ObjectManager(IClientState clientState, IFramework framework)
     {
@@ -53,9 +53,9 @@ public class ObjectManager : IDisposable
     /// Takes a path and determines what type of object to spawn.
     /// </summary>
     /// <param name="path">Game path to the file</param>
-    /// <param name="position"></param>
-    /// <param name="rotation"></param>
-    /// <param name="scale"></param>
+    /// <param name="position">Object position</param>
+    /// <param name="rotation">Object rotation</param>
+    /// <param name="scale">Object scale</param>
     public void Add(string path, Vector3? position = null, Quaternion? rotation = null, Vector3? scale = null)
     {
         var ext = Path.GetExtension(path);
@@ -80,46 +80,43 @@ public class ObjectManager : IDisposable
                 break;
         }
     }
-
-    /// <summary>
-    /// Take's .mdl files and spawns BgObjects
-    /// </summary>
-    /// <param name="model"></param>
+    
     public void Add(Model model)
     {
         Models.Add(model);
     }
-
-    /// <summary>
-    /// Takes .sgb files and spawns SharedLayoutGroups
-    /// </summary>
-    /// <param name="group"></param>
+    
     public void Add(Group group)
     {
         Groups.Add(group);
     }
-
-    /// <summary>
-    /// Takes .avfx files and spawns Vfx objects
-    /// </summary>
-    /// <param name="vfx"></param>
+    
     public void Add(BaseVfx vfx)
     {
         Vfx.Add(vfx);
     }
 
+    /// <summary>
+    /// Clears tracked BgObjects.
+    /// </summary>
     public void ClearModels()
     {
         foreach (var model in Models) model.Dispose();
         Models.Clear();
     }
 
+    /// <summary>
+    /// Clears tracked SharedGroupLayouts.
+    /// </summary>
     public void ClearGroups()
     {
         foreach (var group in Groups) group.Dispose();
         Groups.Clear();
     }
 
+    /// <summary>
+    /// Clears tracked Vfx objects.
+    /// </summary>
     public void ClearVfx()
     {
         foreach (var vfx in Vfx.ToList())
@@ -130,6 +127,9 @@ public class ObjectManager : IDisposable
         Vfx.Clear();
     }
 
+    /// <summary>
+    /// Clears all currently tracked objects.
+    /// </summary>
     public void Clear()
     {
         ClearModels();
@@ -157,8 +157,5 @@ public class ObjectManager : IDisposable
         }
     }
 
-    public void Dispose()
-    {
-        Clear();
-    }
+    public void Dispose() => Clear();
 }
