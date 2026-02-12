@@ -32,7 +32,7 @@ public class Fail : ITrigger
 
     public void OnEnter(Player player)
     {
-        Plugin.VfxManager.AddVfx(new ActorVfx("vfx/monster/gimmick2/eff/e3d2_b2_g05t0x.avfx", player.Character!, player.Character!, TimeSpan.FromSeconds(2)));
+        Plugin.ObjectManager.Add(new ActorVfx("vfx/monster/gimmick2/eff/e3d2_b2_g05t0x.avfx", player.Character!, player.Character!, TimeSpan.FromSeconds(2)));
 
         player.State.Fail();
         

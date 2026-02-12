@@ -3,9 +3,9 @@ using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using RacingwayRewrite.Utils.Interop.Structs;
 
-namespace RacingwayRewrite.Utils.Props;
+namespace RacingwayRewrite.Utils.Objects;
 
-public unsafe class Prop : IDisposable
+public unsafe class Model : IDisposable
 {
     public readonly BgObject* BgObject;
     public string Path { get; private set; }
@@ -28,7 +28,7 @@ public unsafe class Prop : IDisposable
         set => BgObject->Scale = value;
     }
 
-    public Prop(string path, Vector3? position = null, Quaternion? rotation = null, Vector3? scale = null)
+    public Model(string path, Vector3? position = null, Quaternion? rotation = null, Vector3? scale = null)
     {
         Plugin.Log.Verbose($"Creating BgObject {path}");
         if (Plugin.BgObjectFunctions == null) throw new NullReferenceException("BgObject functions are not initialized");

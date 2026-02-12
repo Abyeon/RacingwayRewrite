@@ -12,7 +12,7 @@ public unsafe class StaticVfx : BaseVfx
     public Vector3 Scale;
     public Quaternion Rotation;
 
-    public StaticVfx(string path, Vector3 position, Vector3 scale, float rotation, TimeSpan? expiration = null, bool loop = false)
+    public StaticVfx(string path, Vector3 position, Quaternion rotation, Vector3 scale, TimeSpan? expiration = null, bool loop = false)
     {
         Plugin.Log.Verbose($"Creating StaticVfx {path}");
         if (Plugin.VfxFunctions == null) throw new NullReferenceException("Vfx functions are not initialized");
@@ -20,7 +20,7 @@ public unsafe class StaticVfx : BaseVfx
         Path = path;
         Position = position;
         Scale = scale;
-        Rotation = Quaternion.CreateFromYawPitchRoll(0, 0, rotation);
+        Rotation = rotation;
         Loop = loop;
         Expires = expiration.HasValue ? DateTime.UtcNow + expiration.Value : DateTime.UtcNow + TimeSpan.FromSeconds(5);
         
@@ -42,6 +42,10 @@ public unsafe class StaticVfx : BaseVfx
             Plugin.Log.Error(e, "Failed to create Vfx");
         }
     }
+
+    public StaticVfx(string path, Vector3 position, Vector3 scale, float rotation, TimeSpan? expiration = null, bool loop = false)
+        : this(path, position, Quaternion.CreateFromYawPitchRoll(rotation, 0f, 0f), scale, expiration, loop)
+    { }
 
     public override void Refresh()
     {

@@ -9,11 +9,8 @@ using RacingwayRewrite.Race;
 using RacingwayRewrite.Race.Territory;
 using RacingwayRewrite.Storage;
 using RacingwayRewrite.Utils;
-using RacingwayRewrite.Utils.Interop;
 using RacingwayRewrite.Utils.Interop.Structs;
-using RacingwayRewrite.Utils.Props;
-using RacingwayRewrite.Utils.Sgl;
-using RacingwayRewrite.Utils.Vfx;
+using RacingwayRewrite.Utils.Objects;
 using RacingwayRewrite.Windows;
 
 namespace RacingwayRewrite;
@@ -38,10 +35,9 @@ public sealed class Plugin : IDalamudPlugin
     internal static RaceManager RaceManager { get; private set; } = null!;
     internal static SharedGroupLayoutFunctions SharedGroupLayoutFunctions { get; private set; } = null!;
     internal static BgObjectFunctions BgObjectFunctions { get; private set; } = null!;
-    internal static PropManager PropManager { get; private set; } = null!;
-    internal static PrefabManager PrefabManager { get; private set; } = null!;
     internal static VfxFunctions VfxFunctions { get; private set; } = null!;
-    internal static VfxManager VfxManager { get; private set; } = null!;
+
+    internal static ObjectManager ObjectManager { get; private set; } = null!;
     internal static FontManager FontManager { get; private set; } = null!;
     internal static Chat Chat { get; private set; } = null!;
     internal static LifestreamIpcHandler LifestreamIpcHandler { get; private set; } = null!;
@@ -76,10 +72,11 @@ public sealed class Plugin : IDalamudPlugin
 
         SharedGroupLayoutFunctions = new SharedGroupLayoutFunctions();
         BgObjectFunctions = new BgObjectFunctions();
-        PropManager = new PropManager(ClientState);
-        PrefabManager = new PrefabManager(ClientState);
+        // PropManager = new PropManager(ClientState);
+        // GroupManager = new GroupManager(ClientState);
         VfxFunctions = new VfxFunctions();
-        VfxManager = new VfxManager(ClientState, Framework);
+        ObjectManager = new ObjectManager(ClientState, Framework);
+        // VfxManager = new VfxManager(ClientState, Framework);
         FontManager = new FontManager();
         
         MainWindow = new MainWindow(this);
@@ -115,9 +112,8 @@ public sealed class Plugin : IDalamudPlugin
     {
         PictoService.Dispose();
         RaceManager.Dispose();
-        PropManager.Dispose();
-        PrefabManager.Dispose();
-        VfxManager.Dispose();
+        
+        ObjectManager.Dispose();
         VfxFunctions.Dispose();
         FontManager.Dispose();
         Chat.Dispose();

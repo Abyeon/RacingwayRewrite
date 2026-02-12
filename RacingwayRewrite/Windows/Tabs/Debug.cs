@@ -15,8 +15,6 @@ using FFXIVClientStructs.FFXIV.Common.Math;
 using Lumina.Extensions;
 using RacingwayRewrite.Race.Appearance;
 using RacingwayRewrite.Race.Replay;
-using RacingwayRewrite.Utils.Props;
-using RacingwayRewrite.Utils.Sgl;
 using RacingwayRewrite.Utils.Vfx;
 
 namespace RacingwayRewrite.Windows.Tabs;
@@ -41,99 +39,88 @@ public unsafe class Debug(Plugin plugin) : ITab
             Plugin.Log.Debug(((IntPtr)LayoutWorld.Instance()->ActiveLayout).ToString("x8"));
         }
 
-        if (ImGui.Button("Create sgb"))
+        if (ImGui.Button("Spawn From Path"))
         {
             Plugin.Framework.RunOnFrameworkThread(() =>
             {
-                if (Plugin.ObjectTable.LocalPlayer != null)
+                if (Plugin.ObjectTable.LocalPlayer == null) return;
+                var player = Plugin.ObjectTable.LocalPlayer;
+                Plugin.ObjectManager.Add(path, player.Position, Quaternion.CreateFromYawPitchRoll(player.Rotation, 0, 0));
+            });
+        }
+
+        if (ImGui.Button("Spawn a shitload"))
+        {
+            Plugin.Framework.RunOnFrameworkThread(() =>
+            {
+                if (Plugin.ObjectTable.LocalPlayer == null) return;
+                var player = Plugin.ObjectTable.LocalPlayer;
+
+                for (var i = 0; i < 20; i++)
                 {
-                    var player = Plugin.ObjectTable.LocalPlayer;
-                    Plugin.PrefabManager.AddPrefab(new Prefab(path, player.Position, Quaternion.CreateFromYawPitchRoll(player.Rotation, 0, 0)));
+                    for (var j = 0; j < 20; j++)
+                    {
+                        Vector3 pos = new Vector3(player.Position.X + (i * 5),
+                                                  player.Position.Y,
+                                                  player.Position.Z + (j * 5));
+                        
+                        Plugin.ObjectManager.Add(path, pos, Quaternion.CreateFromYawPitchRoll(player.Rotation, 0, 0));
+                    }
                 }
             });
         }
 
-        if (ImGui.Button("Spawn BgObject at Player Feet"))
-        {
-            Plugin.Framework.RunOnFrameworkThread(() =>
-            {
-                if (Plugin.ObjectTable.LocalPlayer != null)
-                {
-                    var player = Plugin.ObjectTable.LocalPlayer;
-                    Plugin.PropManager.AddProp(new Prop(path, player.Position));
-                }
-            });
-        }
+        // if (ImGui.Button("Create sgb"))
+        // {
+        //     Plugin.Framework.RunOnFrameworkThread(() =>
+        //     {
+        //         if (Plugin.ObjectTable.LocalPlayer == null) return;
+        //         var player = Plugin.ObjectTable.LocalPlayer;
+        //         Plugin.ObjectManager.AddGroup(new Group(path, player.Position, Quaternion.CreateFromYawPitchRoll(player.Rotation, 0, 0)));
+        //     });
+        // }
 
-        if (ImGui.Button("Update highlights lol"))
-        {
-            Plugin.Framework.RunOnFrameworkThread(() =>
-            {
-                foreach (var prop in Plugin.PropManager.Props)
-                {
-                    prop.SetAlpha(127);
-                }
-            });
-        }
+        // if (ImGui.Button("Update highlights lol"))
+        // {
+        //     Plugin.Framework.RunOnFrameworkThread(() =>
+        //     {
+        //         foreach (var prop in Plugin.PropManager.Props)
+        //         {
+        //             prop.SetAlpha(127);
+        //         }
+        //     });
+        // }
 
         if (ImGui.Button("Clear Props"))
         {
-            Plugin.PropManager.ClearProps();
-            Plugin.PrefabManager.ClearPrefabs();
+            Plugin.ObjectManager.Clear();
         }
         
         if (ImGui.Button("Spawn VFX at Player Feet"))
         {
-            if (Plugin.ObjectTable.LocalPlayer != null)
+            Plugin.Framework.RunOnFrameworkThread(() =>
             {
+                if (Plugin.ObjectTable.LocalPlayer == null) return;
                 var player = Plugin.ObjectTable.LocalPlayer;
-                Plugin.VfxManager.AddVfx(new StaticVfx(path, player.Position, Vector3.One, 0f, TimeSpan.FromSeconds(3), true));
-            }
+                Plugin.ObjectManager.Add(new StaticVfx(path, player.Position, Vector3.One, 0f, TimeSpan.FromSeconds(3), true));
+            });
         }
         
         if (ImGui.Button("Spawn VFX Attached to Target/Player"))
         {
-            if (Plugin.ObjectTable.LocalPlayer != null)
+            Plugin.Framework.RunOnFrameworkThread(() =>
             {
-                var player = Plugin.ObjectTable.LocalPlayer;
-                
-                Plugin.Framework.RunOnFrameworkThread(() =>
-                {
-                    var toAttach = (IGameObject)player;
-                    if (Plugin.TargetManager.Target is { } target)
-                    {
-                        toAttach = target;
-                    }
-                    
-                    Plugin.VfxManager.AddVfx(new ActorVfx(path, toAttach, toAttach, TimeSpan.FromSeconds(3), true));
-                });
-            }
-        }
-        
-        int id = 0;
-        foreach (var vfx in Plugin.VfxManager.TrackedVfx)
-        {
-            var vfxAddress = ((IntPtr)vfx.Vfx).ToString("X8");
-            ImGui.PushID(id);
-            ImGui.InputText(vfx.Path, ref vfxAddress, 1024, ImGuiInputTextFlags.ReadOnly);
-            
-            // ImGui.InputByte("Red",)
-            
-            id++;
+                if (Plugin.ObjectTable.LocalPlayer == null) return;
+                var player = (IGameObject)Plugin.ObjectTable.LocalPlayer;
+                Plugin.ObjectManager.Add(new ActorVfx(path, player, player, TimeSpan.FromSeconds(3), true));
+            });
         }
 
         if (ImGui.Button("Make player glooowwwww"))
         {
-            if (Plugin.ObjectTable.LocalPlayer != null)
-            {
-                var player = Plugin.ObjectTable.LocalPlayer;
-                Plugin.VfxManager.AddVfx(new ActorVfx("vfx/common/eff/wks_e008_c0c.avfx", player, player));
-            }
-        }
-
-        if (ImGui.Button("Clear VFX"))
-        {
-            Plugin.VfxManager.ClearVfx();
+            if (Plugin.ObjectTable.LocalPlayer == null) return;
+            var player = (IGameObject)Plugin.ObjectTable.LocalPlayer;
+            Plugin.ObjectManager.Add(new ActorVfx("vfx/common/eff/wks_e008_c0c.avfx", player, player));
         }
         
         if (ImGui.Button("Show Edit Window"))

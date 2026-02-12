@@ -62,13 +62,13 @@ public unsafe class VfxFunctions : IDisposable
 
     private VfxStruct* StaticVfxRemoveDetour(IntPtr vfx)
     {
-        Plugin.VfxManager.InteropRemoved(vfx);
+        Plugin.ObjectManager.InteropRemoved(vfx);
         return StaticVfxRemoveHook.Original(vfx);
     }
 
     private VfxStruct* ActorVfxRemoveDetour(IntPtr vfx, char a2)
     {
-        Plugin.VfxManager.InteropRemoved(vfx);
+        Plugin.ObjectManager.InteropRemoved(vfx);
         return ActorVfxRemoveHook.Original(vfx, a2);
     }
 
