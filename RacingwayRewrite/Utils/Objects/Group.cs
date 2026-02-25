@@ -41,7 +41,7 @@ public unsafe class Group : IDisposable
         t->Scale = Scale;
 
         Data->SetTransformImpl(t);
-        Data->SetColliderActive(false);
+        // Data->SetColliderActive(false);
 
         var first = Data->Instances.Instances.First;
         var last = Data->Instances.Instances.Last;
@@ -50,6 +50,16 @@ public unsafe class Group : IDisposable
         {
             Plugin.SharedGroupLayoutFunctions.FixGroupChildren(Data);
         }
+    }
+    
+    public void UpdateTransform()
+    {
+        var t = Data->GetTransformImpl();
+        t->Translation = Position;
+        t->Rotation = Rotation;
+        t->Scale = Scale;
+
+        Data->SetTransformImpl(t);
     }
     
     public void Dispose()
