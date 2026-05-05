@@ -1,4 +1,5 @@
 ﻿using System;
+using Dalamud.Game.Chat;
 using Dalamud.Game.Text;
 using Dalamud.Hooking;
 using FFXIVClientStructs.FFXIV.Client.System.String;
@@ -56,10 +57,10 @@ public unsafe class MessageHooks : IDisposable
         }
     }
 
-    private void ChatGuiOnChatMessageUnhandled(XivChatType type, int timestamp, SeString sender, SeString message)
+    private void ChatGuiOnChatMessageUnhandled(IChatMessage chatMessage)
     {
-        if (IsBattleType(type)) return; // Filter out any battle related chats
-        LastMessage = new LogMessage(message, timestamp);
+        if (IsBattleType(chatMessage.LogKind)) return; // Filter out any battle related chats
+        LastMessage = new LogMessage(chatMessage.Message, chatMessage.Timestamp);
     }
 
     public static void ReloadChat()

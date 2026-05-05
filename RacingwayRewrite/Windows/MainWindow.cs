@@ -59,14 +59,13 @@ public class MainWindow : CustomWindow, IDisposable
     
     // Thanks to Asriel:
     //https://github.com/WorkingRobot/Waitingway/blob/5b97266c2f68f8a6f38d19e1d9a0337973254264/Waitingway/Windows/Settings.cs#L75
-    private ImRaii.IEndObject TabItem(string label)
+    private ImRaii.TabItemDisposable TabItem(string label)
     {
         var isSelected = string.Equals(SelectedTab, label, StringComparison.Ordinal);
         if (isSelected)
         {
             SelectedTab = null;
-            var open = true;
-            return ImRaii.TabItem(label, ref open, ImGuiTabItemFlags.SetSelected);
+            return ImRaii.TabItem(label, ImGuiTabItemFlags.SetSelected);
         }
         return ImRaii.TabItem(label);
     }

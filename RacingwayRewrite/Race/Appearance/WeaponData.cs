@@ -74,7 +74,7 @@ public class WeaponData
     public unsafe void LoadToCharacter(BattleChara* character)
     {
         var slot = (DrawDataContainer.WeaponSlot)Slot;
-        character->DrawData.LoadWeapon(slot, GetWeapon(), 0, 0, 0, 0);
+        character->DrawData.LoadWeapon(slot, GetWeapon(), 0, 0, 0, 0, true);
         
         ref var data = ref character->DrawData.Weapon(slot);
         data.State = State;
