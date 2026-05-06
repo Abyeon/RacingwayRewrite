@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using LiteDB;
+using LiteDB.Engine;
 using MessagePack;
 using RacingwayRewrite.Race;
 using RacingwayRewrite.Race.Appearance;
@@ -21,9 +22,30 @@ public class LocalDatabase : IDisposable
     {
         Plugin = plugin;
         dbPath = path;
-        
-        db = new LiteDatabase($"filename={path};upgrade=true;Collation=en-US/IgnoreCase");
-        Plugin.Log.Debug(db.UserVersion.ToString());
+
+        var connectionString = $"filename={path};upgrade=true;Collation=en-US/IgnoreCase";
+
+        try
+        {
+            db = new LiteDatabase(connectionString);
+            _ = db.UserVersion;
+        }
+        catch (LiteException e) when (e.ErrorCode == 103) // dumb litedb doesnt want my foreign friends to jump
+        {
+            Plugin.Log.Warning("Database culture mismatch detected. Attempting rebuild with en-US/IgnoreCase..");
+            var repairConnectionString = $"filename={path};upgrade=true";
+
+            using (var repairDb = new LiteDatabase(repairConnectionString))
+            {
+                // Rebuild with the correct collation
+                repairDb.Rebuild(new RebuildOptions
+                {
+                    Collation = new Collation("en-US/IgnoreCase"),
+                });
+            }
+            
+            db = new LiteDatabase(connectionString);
+        }
         
         // Register Address serialization using MessagePack- LiteDB serializer doesnt like uints or sbytes.
         BsonMapper.Global.RegisterType(serialize: address => new BsonValue(MessagePackSerializer.Serialize(address)), 
