@@ -90,7 +90,16 @@ public class MainWindow : CustomWindow, IDisposable
             try
             {
                 if (Plugin.Storage == null) throw new NullReferenceException("Storage is null");
-                var packed = Convert.FromBase64String(string.Format(CultureInfo.InvariantCulture, ImGui.GetClipboardText()));
+                
+                var clipboardText = ImGui.GetClipboardText()?.TrimEnd('\0').Trim();
+        
+                if (string.IsNullOrWhiteSpace(clipboardText))
+                {
+                    Plugin.Chat.Error("Clipboard is empty.");
+                    return;
+                }
+                
+                var packed = Convert.FromBase64String(string.Format(CultureInfo.InvariantCulture, clipboardText));
                 var lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4Block);
                 var route = MessagePackSerializer.Deserialize<Route>(packed, lz4Options);
                 
