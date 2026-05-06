@@ -30,11 +30,11 @@ public class LocalDatabase : IDisposable
             db = new LiteDatabase(connectionString);
             _ = db.UserVersion;
         }
-        catch (LiteException e) when (e.ErrorCode == 103) // dumb litedb doesn't want my foreign friends to jump
+        catch (LiteException e) when (e.ErrorCode == 103 || (e.Message.Contains("collation") && e.Message.Contains("different from engine settings"))) // dumb litedb doesn't want my foreign friends to jump
         {
             Plugin.Log.Warning("Database culture mismatch detected. Attempting rebuild with en-US/IgnoreCase..");
             var repairConnectionString = $"filename={path};upgrade=true";
-
+        
             using (var repairDb = new LiteDatabase(repairConnectionString))
             {
                 // Rebuild with the correct collation
