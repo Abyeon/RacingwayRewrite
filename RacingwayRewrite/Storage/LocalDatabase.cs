@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using LiteDB;
@@ -20,7 +21,9 @@ public class LocalDatabase : IDisposable
     {
         Plugin = plugin;
         dbPath = path;
-        db = new LiteDatabase($"filename={path};upgrade=true");
+        
+        db = new LiteDatabase($"filename={path};upgrade=true;Collation=en-US/IgnoreCase");
+        Plugin.Log.Debug(db.UserVersion.ToString());
         
         // Register Address serialization using MessagePack- LiteDB serializer doesnt like uints or sbytes.
         BsonMapper.Global.RegisterType(serialize: address => new BsonValue(MessagePackSerializer.Serialize(address)), 
