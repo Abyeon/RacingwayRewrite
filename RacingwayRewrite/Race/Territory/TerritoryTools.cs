@@ -148,7 +148,7 @@ public class TerritoryTools
             if (character != null && manager->CurrentTerritory != null)
             {
                 var territoryType = manager->IndoorTerritory != null
-                                        ? ((HousingTerritory2*)manager->CurrentTerritory)->TerritoryTypeId
+                                        ? manager->IndoorTerritory->HouseId.TerritoryTypeId
                                         : Plugin.ClientState.TerritoryType;
 
                 return territoryType;

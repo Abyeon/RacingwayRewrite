@@ -3,7 +3,8 @@
   "Name": "RacingwayRewrite",
   "Punchline": "Track your times in jump puzzles!",
   "Description": "A description that shows up in /xlplugins. List any major slash-command(s).",
-  "ApplicableVersion": "any",
+  "ApplicableVersion": "any", 
+  "RepoUrl": "https://github.com/Abyeon/RacingwayRewrite",
   "Tags": [
     "sample",
     "plugin",
