@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
@@ -89,7 +90,7 @@ public class MainWindow : CustomWindow, IDisposable
             try
             {
                 if (Plugin.Storage == null) throw new NullReferenceException("Storage is null");
-                var packed = Convert.FromBase64String(ImGui.GetClipboardText());
+                var packed = Convert.FromBase64String(string.Format(CultureInfo.InvariantCulture, ImGui.GetClipboardText()));
                 var lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4Block);
                 var route = MessagePackSerializer.Deserialize<Route>(packed, lz4Options);
                 
